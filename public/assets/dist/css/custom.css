@@ -1,0 +1,11 @@
+.rotate-icon {
+    transition: transform 0.3s ease;
+}
+
+.brand-toggle[aria-expanded="true"] .rotate-icon {
+    transform: rotate(180deg);
+}
+
+.content-wrapper {
+    padding-bottom: 80px; /* space for footer */
+}
