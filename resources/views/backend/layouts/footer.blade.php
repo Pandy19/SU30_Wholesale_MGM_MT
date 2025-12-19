@@ -1,3 +1,47 @@
+<script>
+document.getElementById('confirmOrderBtn').addEventListener('click', function () {
+    $('#successModal').modal('show');
+});
+
+document.getElementById('continueBtn').addEventListener('click', function () {
+    window.location.href = "{{ route('purchase_orders.confirm_payment') }}";
+});
+</script>
+
+
+<script>
+document.addEventListener('input', function (e) {
+    if (!e.target.classList.contains('order-qty')) return;
+
+    const input = e.target;
+    let qty = parseInt(input.value);
+    const max = parseInt(input.dataset.available);
+    const price = parseFloat(input.dataset.price);
+
+    if (qty > max) {
+        alert('Cannot order more than available quantity (' + max + ')');
+        qty = max;
+        input.value = max;
+    }
+    if (qty < 1 || isNaN(qty)) {
+        qty = 1;
+        input.value = 1;
+    }
+
+    const row = input.closest('tr');
+    const subtotalCell = row.querySelector('.subtotal');
+    subtotalCell.innerText = '$' + (qty * price).toFixed(2);
+
+    // Recalculate total
+    let total = 0;
+    document.querySelectorAll('.subtotal').forEach(cell => {
+        total += parseFloat(cell.innerText.replace('$',''));
+    });
+
+    document.getElementById('po-total').innerText = '$' + total.toFixed(2);
+    document.getElementById('po-grand-total').innerText = '$' + total.toFixed(2);
+});
+</script>
 
 
 <script>

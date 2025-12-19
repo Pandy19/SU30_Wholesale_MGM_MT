@@ -132,281 +132,6 @@
                                 </td>
                             </tr>
                           
-
-                            <tr data-brand="apple" data-category="mobile phone">
-                                <td class="text-center">
-                                    <img src="https://assets.swappie.com/cdn-cgi/image/width=600,height=600,fit=contain,format=auto/swappie-iphone-15-pro-natural-titanium.png?v=cc5784d1"
-                                         class="img-fluid rounded">
-                                </td>
-                                <td>
-                                    <strong>iPhone 15 Pro 256GB</strong><br>
-                                    <small class="text-muted">SKU: IP15P-256</small>
-                                </td>
-                                <td>Apple</td>
-                                <td>Mobile Phone</td>
-                                <td>
-                                    <span class="badge badge-info">2 Suppliers</span>
-                                </td>
-                                <td>$950</td>
-                                <td>
-                                    <span class="badge badge-success">Available</span>
-                                </td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-success"
-                                            data-toggle="modal"
-                                            data-target="#supplierSelectModal">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <!-- ================= PRODUCT ROW ================= -->
-                            <tr data-brand="samsung" data-category="mobile phone">
-                                <td class="text-center">
-                                    <img src="https://www.myg.in/images/thumbnails/300/300/detailed/75/s24ultraviolet1-removebg-preview.png.png"
-                                         class="img-fluid rounded">
-                                </td>
-                                <td>
-                                    <strong>Samsung Galaxy S24</strong><br>
-                                    <small class="text-muted">SKU: SGS24</small>
-                                </td>
-                                <td>Samsung</td>
-                                <td>Mobile Phone</td>
-                                <td>
-                                    <span class="badge badge-info">1 Supplier</span>
-                                </td>
-                                <td>$720</td>
-                                <td>
-                                    <span class="badge badge-warning">Limited</span>
-                                </td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-success"
-                                            data-toggle="modal"
-                                            data-target="#supplierSelectModal">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <tr data-brand="apple" data-category="mobile phone">
-                                <td class="text-center">
-                                    <img src="https://assets.swappie.com/cdn-cgi/image/width=600,height=600,fit=contain,format=auto/swappie-iphone-15-pro-natural-titanium.png?v=cc5784d1"
-                                         class="img-fluid rounded">
-                                </td>
-                                <td>
-                                    <strong>iPhone 15 Pro 256GB</strong><br>
-                                    <small class="text-muted">SKU: IP15P-256</small>
-                                </td>
-                                <td>Apple</td>
-                                <td>Mobile Phone</td>
-                                <td>
-                                    <span class="badge badge-info">2 Suppliers</span>
-                                </td>
-                                <td>$950</td>
-                                <td>
-                                    <span class="badge badge-success">Available</span>
-                                </td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-success"
-                                            data-toggle="modal"
-                                            data-target="#supplierSelectModal">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <!-- ================= PRODUCT ROW ================= -->
-                            <tr data-brand="samsung" data-category="mobile phone">
-                                <td class="text-center">
-                                    <img src="https://www.myg.in/images/thumbnails/300/300/detailed/75/s24ultraviolet1-removebg-preview.png.png"
-                                         class="img-fluid rounded">
-                                </td>
-                                <td>
-                                    <strong>Samsung Galaxy S24</strong><br>
-                                    <small class="text-muted">SKU: SGS24</small>
-                                </td>
-                                <td>Samsung</td>
-                                <td>Mobile Phone</td>
-                                <td>
-                                    <span class="badge badge-info">1 Supplier</span>
-                                </td>
-                                <td>$720</td>
-                                <td>
-                                    <span class="badge badge-warning">Limited</span>
-                                </td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-success"
-                                            data-toggle="modal"
-                                            data-target="#supplierSelectModal">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <tr data-brand="apple" data-category="mobile phone">
-                                <td class="text-center">
-                                    <img src="https://assets.swappie.com/cdn-cgi/image/width=600,height=600,fit=contain,format=auto/swappie-iphone-15-pro-natural-titanium.png?v=cc5784d1"
-                                         class="img-fluid rounded">
-                                </td>
-                                <td>
-                                    <strong>iPhone 15 Pro 256GB</strong><br>
-                                    <small class="text-muted">SKU: IP15P-256</small>
-                                </td>
-                                <td>Apple</td>
-                                <td>Mobile Phone</td>
-                                <td>
-                                    <span class="badge badge-info">2 Suppliers</span>
-                                </td>
-                                <td>$950</td>
-                                <td>
-                                    <span class="badge badge-success">Available</span>
-                                </td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-success"
-                                            data-toggle="modal"
-                                            data-target="#supplierSelectModal">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <!-- ================= PRODUCT ROW ================= -->
-                            <tr data-brand="samsung" data-category="mobile phone">
-                                <td class="text-center">
-                                    <img src="https://www.myg.in/images/thumbnails/300/300/detailed/75/s24ultraviolet1-removebg-preview.png.png"
-                                         class="img-fluid rounded">
-                                </td>
-                                <td>
-                                    <strong>Samsung Galaxy S24</strong><br>
-                                    <small class="text-muted">SKU: SGS24</small>
-                                </td>
-                                <td>Samsung</td>
-                                <td>Mobile Phone</td>
-                                <td>
-                                    <span class="badge badge-info">1 Supplier</span>
-                                </td>
-                                <td>$720</td>
-                                <td>
-                                    <span class="badge badge-warning">Limited</span>
-                                </td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-success"
-                                            data-toggle="modal"
-                                            data-target="#supplierSelectModal">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <tr data-brand="apple" data-category="mobile phone">
-                                <td class="text-center">
-                                    <img src="https://assets.swappie.com/cdn-cgi/image/width=600,height=600,fit=contain,format=auto/swappie-iphone-15-pro-natural-titanium.png?v=cc5784d1"
-                                         class="img-fluid rounded">
-                                </td>
-                                <td>
-                                    <strong>iPhone 15 Pro 256GB</strong><br>
-                                    <small class="text-muted">SKU: IP15P-256</small>
-                                </td>
-                                <td>Apple</td>
-                                <td>Mobile Phone</td>
-                                <td>
-                                    <span class="badge badge-info">2 Suppliers</span>
-                                </td>
-                                <td>$950</td>
-                                <td>
-                                    <span class="badge badge-success">Available</span>
-                                </td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-success"
-                                            data-toggle="modal"
-                                            data-target="#supplierSelectModal">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <!-- ================= PRODUCT ROW ================= -->
-                            <tr data-brand="samsung" data-category="mobile phone">
-                                <td class="text-center">
-                                    <img src="https://www.myg.in/images/thumbnails/300/300/detailed/75/s24ultraviolet1-removebg-preview.png.png"
-                                         class="img-fluid rounded">
-                                </td>
-                                <td>
-                                    <strong>Samsung Galaxy S24</strong><br>
-                                    <small class="text-muted">SKU: SGS24</small>
-                                </td>
-                                <td>Samsung</td>
-                                <td>Mobile Phone</td>
-                                <td>
-                                    <span class="badge badge-info">1 Supplier</span>
-                                </td>
-                                <td>$720</td>
-                                <td>
-                                    <span class="badge badge-warning">Limited</span>
-                                </td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-success"
-                                            data-toggle="modal"
-                                            data-target="#supplierSelectModal">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <tr data-brand="apple" data-category="mobile phone">
-                                <td class="text-center">
-                                    <img src="https://assets.swappie.com/cdn-cgi/image/width=600,height=600,fit=contain,format=auto/swappie-iphone-15-pro-natural-titanium.png?v=cc5784d1"
-                                         class="img-fluid rounded">
-                                </td>
-                                <td>
-                                    <strong>iPhone 15 Pro 256GB</strong><br>
-                                    <small class="text-muted">SKU: IP15P-256</small>
-                                </td>
-                                <td>Apple</td>
-                                <td>Mobile Phone</td>
-                                <td>
-                                    <span class="badge badge-info">2 Suppliers</span>
-                                </td>
-                                <td>$950</td>
-                                <td>
-                                    <span class="badge badge-success">Available</span>
-                                </td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-success"
-                                            data-toggle="modal"
-                                            data-target="#supplierSelectModal">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
-
-                            <!-- ================= PRODUCT ROW ================= -->
-                            <tr data-brand="samsung" data-category="mobile phone">
-                                <td class="text-center">
-                                    <img src="https://www.myg.in/images/thumbnails/300/300/detailed/75/s24ultraviolet1-removebg-preview.png.png"
-                                         class="img-fluid rounded">
-                                </td>
-                                <td>
-                                    <strong>Samsung Galaxy S24</strong><br>
-                                    <small class="text-muted">SKU: SGS24</small>
-                                </td>
-                                <td>Samsung</td>
-                                <td>Mobile Phone</td>
-                                <td>
-                                    <span class="badge badge-info">1 Supplier</span>
-                                </td>
-                                <td>$720</td>
-                                <td>
-                                    <span class="badge badge-warning">Limited</span>
-                                </td>
-                                <td class="text-center">
-                                    <button class="btn btn-sm btn-success"
-                                            data-toggle="modal"
-                                            data-target="#supplierSelectModal">
-                                        <i class="fas fa-cart-plus"></i>
-                                    </button>
-                                </td>
-                            </tr>
                         </tbody>
                     </table>
 <!-- ================= PAGINATION (UI ONLY) ================= -->
@@ -490,7 +215,7 @@
                             <td>5 Days</td>
                             <td><span class="badge badge-success">Available</span></td>
                             <td class="text-center">
-                                <button class="btn btn-sm btn-primary">Choose</button>
+                                <a href="{{url('/purchase_orders')}}" class="btn btn-sm btn-primary">Choose</a>
                             </td>
                         </tr>
 
@@ -504,23 +229,18 @@
                             <td>3 Days</td>
                             <td><span class="badge badge-success">Available</span></td>
                             <td class="text-center">
-                                <button class="btn btn-sm btn-primary">Choose</button>
+                                <a href="{{url('/purchase_orders')}}" class="btn btn-sm btn-primary">Choose</a>
                             </td>
                         </tr>
 
                     </tbody>
                 </table>
-
-
-                
             </div>
-
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-dismiss="modal">
                     Cancel
                 </button>
             </div>
-
         </div>
     </div>
 </div>
