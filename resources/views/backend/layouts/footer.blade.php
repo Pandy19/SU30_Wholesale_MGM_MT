@@ -1,4 +1,34 @@
 <script>
+function printWithStatus(status) {
+    const stamp = document.getElementById('approval-stamp');
+
+    if (!stamp) {
+        window.print();
+        return;
+    }
+
+    // Reset classes
+    stamp.classList.remove('approved', 'rejected', 'd-none');
+
+    if (status === 'approved') {
+        stamp.textContent = 'APPROVED';
+        stamp.classList.add('approved');
+    } else if (status === 'rejected') {
+        stamp.textContent = 'REJECTED';
+        stamp.classList.add('rejected');
+    }
+
+    window.print();
+
+    // Hide stamp after printing
+    setTimeout(() => {
+        stamp.classList.add('d-none');
+    }, 1000);
+}
+</script>
+
+
+<script>
 document.getElementById('confirmOrderBtn').addEventListener('click', function () {
     $('#successModal').modal('show');
 });

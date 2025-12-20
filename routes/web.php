@@ -6,7 +6,7 @@ use App\Http\Controllers\backend\product_managementController;
 use App\Http\Controllers\backend\SupplierController;
 use App\Http\Controllers\backend\purchase_ordersController;
 use App\Http\Controllers\backend\supplier_ordersController;
-
+use App\Http\Controllers\backend\goods_receivingController;
 Route::controller(DashboardController::class)->group(function () {
     Route::get('/', 'index')->name('dashboard.index');
 });
@@ -30,4 +30,8 @@ Route::get('/purchase_orders/confirm_payment', function () {
 
 Route::controller(supplier_ordersController::class)->group(function () {
     Route::get('/supplier_orders', 'index')->name('supplier_orders.index');
+});
+
+Route::controller(goods_receivingController::class)->group(function () {
+    Route::get('/goods_receiving', 'index')->name('goods_receiving.index');
 });

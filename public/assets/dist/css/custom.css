@@ -9,3 +9,39 @@
 .content-wrapper {
     padding-bottom: 80px; /* space for footer */
 }
+
+/* ================= APPROVAL / REJECTION STAMP ================= */
+
+.approval-stamp {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-20deg);
+    font-size: 80px;
+    font-weight: 900;
+    opacity: 0.15;
+    z-index: 9999;
+    pointer-events: none;
+    text-transform: uppercase;
+}
+
+/* Approved */
+.approval-stamp.approved {
+    color: #28a745; /* green */
+    border: 6px solid #28a745;
+    padding: 20px 40px;
+}
+
+/* Rejected */
+.approval-stamp.rejected {
+    color: #dc3545; /* red */
+    border: 6px solid #dc3545;
+    padding: 20px 40px;
+}
+
+/* Show ONLY on print */
+@media print {
+    .approval-stamp {
+        display: block !important;
+    }
+}

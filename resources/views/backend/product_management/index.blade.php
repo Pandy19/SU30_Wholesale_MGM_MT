@@ -232,10 +232,50 @@
                                 <a href="{{url('/purchase_orders')}}" class="btn btn-sm btn-primary">Choose</a>
                             </td>
                         </tr>
-
+                        
                     </tbody>
                 </table>
             </div>
+            <!-- ===================================================== -->
+<!-- SUPPLIER PRICE HISTORY (READ ONLY) -->
+<!-- ===================================================== -->
+<div class="mt-3">
+    <h6 class="mb-2">
+        <i class="fas fa-history"></i> Supplier Price History
+    </h6>
+
+    <table class="table table-sm table-bordered mb-0">
+        <thead class="thead-light">
+            <tr>
+                <th>Supplier</th>
+                <th>Purchase Price</th>
+                <th>Purchase Date</th>
+                <th>Last Updated</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>Global Tech Supply</td>
+                <td>$920</td>
+                <td>2024-11-15</td>
+                <td>2024-11-15</td>
+            </tr>
+            <tr>
+                <td>Global Tech Supply</td>
+                <td>$950</td>
+                <td>2025-01-10</td>
+                <td>2025-01-10</td>
+            </tr>
+            <tr>
+                <td>Asia Mobile Distribution</td>
+                <td>$980</td>
+                <td>2025-01-12</td>
+                <td>2025-01-12</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+
             <div class="modal-footer">
                 <button class="btn btn-secondary" data-dismiss="modal">
                     Cancel
@@ -243,5 +283,6 @@
             </div>
         </div>
     </div>
+    
 </div>
 @endsection

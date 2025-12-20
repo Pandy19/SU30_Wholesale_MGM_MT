@@ -63,6 +63,12 @@
               <p>Supplier Order History</p>
             </a>
           </li>
+          <li class="nav-item">
+            <a href="{{url('/goods_receiving')}}" class="nav-link">
+              <i class="fas fa-circle nav-icon"></i>
+              <p>Goods Receiving</p>
+            </a>
+          </li>
 
           <li class="nav-item">
             <a href="#" class="nav-link">

@@ -4,11 +4,17 @@
 <div class="content-wrapper">
 <section class="content p-4">
 
+<div class="col-sm-6">
+    <h1 class="m-0">Suppliers – Invoice Product Preview</h1>
+    <p class="text-muted mb-0">
+        Click a brand row to view suppliers for each electronic brand.
+    </p>
+</div>
+
 <!-- ===================================================== -->
 <!-- SUMMARY CARDS -->
 <!-- ===================================================== -->
 <div class="row mb-4">
-
     <div class="col-md-3">
         <div class="info-box">
             <span class="info-box-icon bg-info">
@@ -56,16 +62,20 @@
             </div>
         </div>
     </div>
-
 </div>
 
 <!-- ===================================================== -->
-<!-- FILTERS (UI ONLY) -->
+<!-- FILTERS -->
 <!-- ===================================================== -->
 <div class="card mb-3">
 <div class="card-body">
-
 <div class="row">
+
+    <div class="col-md-3">
+        <input type="text" class="form-control"
+               placeholder="Search PO No (e.g. PO-0001)">
+    </div>
+
     <div class="col-md-3">
         <select class="form-control">
             <option>All Suppliers</option>
@@ -86,11 +96,7 @@
         <input type="date" class="form-control">
     </div>
 
-    <div class="col-md-3">
-        <input type="date" class="form-control">
-    </div>
 </div>
-
 </div>
 </div>
 
@@ -106,10 +112,15 @@
     <th>PO No</th>
     <th>Supplier</th>
     <th>Order Date</th>
+    <th>Invoice Date</th>
     <th>Total</th>
     <th>Payment</th>
-    <th>GRN Status</th>
-    <th>Order Type</th>
+    <th>Created By</th>
+
+    <!-- NEW -->
+    <th>Receiving Status</th>
+    <th>Stock Status</th>
+
     <th class="text-center">Action</th>
 </tr>
 </thead>
@@ -118,11 +129,16 @@
 <tr>
     <td>PO-0001</td>
     <td>Global Tech Supply</td>
+    <td>2025-01-09</td>
     <td>2025-01-10</td>
     <td>$1,650.00</td>
     <td><span class="badge badge-success">Paid</span></td>
-    <td><span class="badge badge-warning">Not Received</span></td>
-    <td>Regular</td>
+    <td>Admin</td>
+
+    <!-- NEW -->
+    <td><span class="badge badge-info">Pending</span></td>
+    <td><span class="badge badge-warning">Not Added</span></td>
+
     <td class="text-center">
         <a href="{{ route('purchase_orders.confirm_payment') }}"
            class="btn btn-sm btn-primary">
@@ -138,11 +154,16 @@
 <tr>
     <td>PO-0002</td>
     <td>Asia Mobile Distribution</td>
+    <td>2025-01-11</td>
     <td>2025-01-12</td>
     <td>$980.00</td>
     <td><span class="badge badge-warning">Unpaid</span></td>
-    <td><span class="badge badge-success">Received</span></td>
-    <td>Urgent</td>
+    <td>Staff</td>
+
+    <!-- NEW -->
+    <td><span class="badge badge-success">Accepted</span></td>
+    <td><span class="badge badge-success">Added to Stock</span></td>
+
     <td class="text-center">
         <a href="{{ route('purchase_orders.confirm_payment') }}"
            class="btn btn-sm btn-primary">
@@ -151,10 +172,52 @@
     </td>
 </tr>
 
+<tr>
+    <td>PO-0003</td>
+    <td>Global Tech Supply</td>
+    <td>2025-01-08</td>
+    <td>2025-01-08</td>
+    <td>$1,200.00</td>
+    <td><span class="badge badge-secondary">N/A</span></td>
+    <td>Admin</td>
+
+    <!-- NEW -->
+    <td><span class="badge badge-danger">Rejected</span></td>
+    <td><span class="badge badge-secondary">Not Added</span></td>
+
+    <td class="text-center text-muted">
+        —
+    </td>
+</tr>
+
 </tbody>
 </table>
 
 </div>
+
+<!-- ===================================================== -->
+<!-- PAGINATION -->
+<!-- ===================================================== -->
+<div class="card-footer clearfix">
+<ul class="pagination pagination-sm m-0 float-right">
+    <li class="page-item disabled">
+        <a class="page-link" href="#">«</a>
+    </li>
+    <li class="page-item active">
+        <a class="page-link" href="#">1</a>
+    </li>
+    <li class="page-item">
+        <a class="page-link" href="#">2</a>
+    </li>
+    <li class="page-item">
+        <a class="page-link" href="#">3</a>
+    </li>
+    <li class="page-item">
+        <a class="page-link" href="#">»</a>
+    </li>
+</ul>
+</div>
+
 </div>
 
 </section>
