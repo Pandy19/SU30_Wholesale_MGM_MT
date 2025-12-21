@@ -1,4 +1,19 @@
 <script>
+function confirmAddToStock(product, qty) {
+    if (confirm(`Add ${qty} units of ${product} into stock?`)) {
+        alert('Stock updated successfully (UI only)');
+    }
+}
+</script>
+
+
+<script>
+$(function () {
+    $('[title]').tooltip();
+});
+</script>
+
+<script>
 function printWithStatus(status) {
     const stamp = document.getElementById('approval-stamp');
 

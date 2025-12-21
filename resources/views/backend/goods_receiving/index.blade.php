@@ -77,6 +77,8 @@
     <th>Supplier</th>
     <th>Ordered Qty</th>
     <th>Received Qty</th>
+    <th>Accept Qty</th>
+    <th>Reject Qty</th>
     <th>Unit Cost</th>
     <th>Total Price</th>
     <th>Status</th>
@@ -87,7 +89,7 @@
 </thead>
 <tbody>
 
-<!-- ================= PENDING ================= -->
+<!-- ================= PENDING (INSPECTION) ================= -->
 <tr>
     <td class="text-center">
         <img src="https://www.myg.in/images/thumbnails/300/300/detailed/75/s24ultraviolet1-removebg-preview.png.png"
@@ -98,20 +100,46 @@
     <td>Samsung</td>
     <td>Global Tech Supply</td>
     <td>10</td>
-    <td>10</td>
+    <td><strong>10</strong></td>
+
+    <!-- ACCEPT QTY -->
+    <td>
+        <input type="number"
+               class="form-control form-control-sm"
+               value="7"
+               min="0"
+               max="10">
+    </td>
+
+    <!-- REJECT QTY -->
+    <td>
+        <input type="number"
+               class="form-control form-control-sm"
+               value="3"
+               min="0"
+               max="10">
+    </td>
+
     <td>$950</td>
     <td>$9,500</td>
+
     <td><span class="badge badge-info">Pending</span></td>
     <td class="text-muted">—</td>
     <td class="text-muted">—</td>
+
     <td class="text-center">
-        <button class="btn btn-sm btn-success">Approve</button>
+        <button class="btn btn-sm btn-success">
+            Approve
+        </button>
+
         <button class="btn btn-sm btn-danger ml-1"
                 data-toggle="modal"
                 data-target="#rejectReasonModal">
             Reject
         </button>
+
         <br>
+
         <button class="btn btn-sm btn-outline-secondary mt-1" disabled>
             <i class="fas fa-print"></i> Print
         </button>
@@ -130,6 +158,8 @@
     <td>Global Tech Supply</td>
     <td>5</td>
     <td>5</td>
+    <td class="text-muted text-center">5</td>
+    <td class="text-muted text-center">0</td>
     <td>$700</td>
     <td>$3,500</td>
     <td><span class="badge badge-success">Accepted</span></td>
@@ -155,6 +185,8 @@
     <td>Asia Mobile Distribution</td>
     <td>8</td>
     <td>6</td>
+    <td class="text-muted text-center">0</td>
+    <td class="text-muted text-center">6</td>
     <td>$980</td>
     <td>$5,880</td>
     <td><span class="badge badge-danger">Rejected</span></td>
@@ -190,7 +222,7 @@
 </div>
 
 <!-- ===================================================== -->
-<!-- REJECT REASON MODAL (UI ONLY) -->
+<!-- REJECT REASON MODAL -->
 <!-- ===================================================== -->
 <div class="modal fade" id="rejectReasonModal" tabindex="-1">
 <div class="modal-dialog">
@@ -220,16 +252,6 @@
 
 </div>
 </div>
-</div>
-
-<!-- APPROVAL STAMP -->
-<div id="approval-stamp" class="approval-stamp d-none">
-    <div id="stamp-title">APPROVED</div>
-    <div class="stamp-meta">
-        <span id="stamp-by"></span><br>
-        <span id="stamp-date"></span><br>
-        <span id="stamp-reason" class="text-danger"></span>
-    </div>
 </div>
 
 @endsection
