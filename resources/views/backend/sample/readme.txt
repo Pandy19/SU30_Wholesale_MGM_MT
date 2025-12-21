@@ -26,80 +26,25 @@
 
 
 
+Approved Goods
+→ Add to Stock
+→ Product Stock List
+→ Stock Ledger (Audit)
 
 
-1️⃣ Goods → Stock Approval ⭐ (MOST IMPORTANT)
+page for customer category
+Customers (b2b and b2c )
+Sales Order
+Sales Invoice
+Sales Order History
+Customer Payments
 
-Why
+B2B
+Has Credit Limit
+Has Outstanding Balance
+Payment terms allowed
 
-This is the bridge from supplier to stock
-
-Prevents wrong stock entry
-
-Does
-
-Shows accepted goods
-
-Admin clicks “Add to Stock”
-
-✔ MUST HAVE
-
-2️⃣ Stock by Category ⭐
-
-Why
-
-Matches your category structure
-
-Easy warehouse overview
-
-Does
-
-Category → total qty → status
-
-✔ MUST HAVE
-
-3️⃣ Product Stock List (Inside Category)
-
-Why
-
-Actual inventory numbers
-
-Admin daily view
-
-Does
-
-Product qty
-
-Low / Out status
-
-✔ MUST HAVE
-
-4️⃣ Stock Ledger (Audit) ⭐
-
-Why
-
-Protects you from mistakes
-
-Required for real systems
-
-Does
-
-Logs all stock in/out
-
-✔ MUST HAVE
-
-⚠️ OPTIONAL (ADD LATER)
-
-⏳ Stock dashboard summary
-⏳ Stock reports
-⏳ Supplier reorder suggestion
-
-Not required now.
-
-🧠 FINAL ANSWER (VERY SHORT)
-
-✔ Yes, stock perfectly matches your supplier/category flow
-✔ Some pages are not important now — skip them
-✔ Add only:
-
-Goods → Stock → Category View → Product View → Ledger
+B2C
+❌ No credit
+✅ Full payment only
+Credit columns show —

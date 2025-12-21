@@ -1,4 +1,17 @@
 <script>
+function confirmSale() {
+    // show success popup
+    $('#saleSuccessModal').modal('show');
+
+    // redirect after 1.5 seconds
+    setTimeout(function () {
+        window.location.href = "{{ route('sales_order.confirm_sale') }}";
+    }, 1500);
+}
+</script>
+
+
+<script>
 function confirmAddToStock(product, qty) {
     if (confirm(`Add ${qty} units of ${product} into stock?`)) {
         alert('Stock updated successfully (UI only)');
