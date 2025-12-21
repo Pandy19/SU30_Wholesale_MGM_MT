@@ -1,4 +1,5 @@
 @extends('backend.layouts.master')
+@section('title', 'Customer Lists | Wholesale MGM')
 @section('main-content')
 
 <div class="content-wrapper">
@@ -185,96 +186,185 @@
 <!-- ===================================================== -->
 <!-- ADD CUSTOMER MODAL -->
 <!-- ===================================================== -->
-<div class="modal fade" id="addCustomerModal">
+<div class="modal fade" id="addCustomerModal" tabindex="-1">
 <div class="modal-dialog modal-lg">
 <div class="modal-content">
 
-<div class="modal-header">
-    <h5 class="modal-title">Add Customer</h5>
-    <button class="close" data-dismiss="modal">&times;</button>
+<!-- HEADER -->
+<div class="modal-header bg-info text-white">
+    <h5 class="modal-title">
+        <i class="fas fa-user-plus mr-1"></i> Add Customer
+    </h5>
+    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
 </div>
 
+<!-- BODY -->
 <div class="modal-body">
 
-<div class="form-group">
-    <label>Customer Type</label>
-    <select class="form-control">
-        <option>B2B (Wholesale)</option>
-        <option>B2C (Retail - Full Payment Only)</option>
-    </select>
-    <small class="text-muted">
-        B2C customers are not allowed credit.
-    </small>
+<form>
+
+    <!-- CUSTOMER TYPE -->
+    <div class="form-group">
+        <label>Customer Type</label>
+        <select class="form-control">
+            <option>B2B (Wholesale)</option>
+            <option>B2C (Retail - Full Payment Only)</option>
+        </select>
+
+        <!-- PAYMENT RULE (RESTORED) -->
+        <div class="alert alert-warning mt-2 mb-0 p-2">
+            <i class="fas fa-exclamation-circle mr-1"></i>
+            <strong>Payment Rule:</strong>
+            B2C customers are <u>not allowed credit</u>. Full payment is required.
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- BASIC INFO -->
+    <div class="form-group">
+        <label>Customer / Company Name</label>
+        <input class="form-control" placeholder="Customer or company name">
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Phone</label>
+                <input class="form-control" placeholder="Phone number">
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Email</label>
+                <input class="form-control" placeholder="Email address">
+            </div>
+        </div>
+    </div>
+
+    <!-- CREDIT LIMIT -->
+    <div class="form-group">
+        <label>Credit Limit (B2B Only)</label>
+        <input class="form-control" placeholder="Disabled for B2C">
+    </div>
+
+    <!-- STATUS -->
+    <div class="form-group">
+        <label>Status</label>
+        <select class="form-control">
+            <option>Active</option>
+            <option>On Hold</option>
+        </select>
+    </div>
+
+</form>
+
 </div>
 
-<div class="form-group">
-    <label>Customer / Company Name</label>
-    <input class="form-control">
-</div>
-
-<div class="form-group">
-    <label>Phone</label>
-    <input class="form-control">
-</div>
-
-<div class="form-group">
-    <label>Email</label>
-    <input class="form-control">
-</div>
-
-<div class="form-group">
-    <label>Credit Limit (B2B Only)</label>
-    <input class="form-control" placeholder="Disabled for B2C">
-</div>
-
-<div class="form-group">
-    <label>Status</label>
-    <select class="form-control">
-        <option>Active</option>
-        <option>On Hold</option>
-    </select>
-</div>
-
-</div>
-
+<!-- FOOTER -->
 <div class="modal-footer">
     <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-    <button class="btn btn-success">Save</button>
+    <button class="btn btn-info">
+        <i class="fas fa-save mr-1"></i> Save Customer
+    </button>
 </div>
 
 </div>
 </div>
 </div>
+
 
 <!-- ===================================================== -->
 <!-- VIEW CUSTOMER MODAL -->
 <!-- ===================================================== -->
-<div class="modal fade" id="viewCustomerModal">
+<div class="modal fade" id="viewCustomerModal" tabindex="-1">
 <div class="modal-dialog modal-lg">
 <div class="modal-content">
 
-<div class="modal-header">
-    <h5 class="modal-title">Customer Details</h5>
-    <button class="close" data-dismiss="modal">&times;</button>
+<!-- HEADER -->
+<div class="modal-header bg-primary text-white">
+    <h5 class="modal-title">
+        <i class="fas fa-user mr-1"></i> Customer Details
+    </h5>
+    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
 </div>
 
+<!-- BODY -->
 <div class="modal-body">
 
-<table class="table table-sm table-bordered">
-<tr><th width="35%">Customer Type</th><td>B2B</td></tr>
-<tr><th>Name</th><td>Phnom Penh Mobile Shop</td></tr>
-<tr><th>Phone</th><td>012 888 999</td></tr>
-<tr><th>Credit Limit</th><td>$20,000</td></tr>
-<tr><th>Outstanding</th><td>$3,200</td></tr>
-<tr>
-    <th>Payment Rule</th>
-    <td><span class="badge badge-warning">Credit Allowed</span></td>
-</tr>
-<tr><th>Status</th><td><span class="badge badge-success">Active</span></td></tr>
-</table>
+<div class="row">
+
+    <!-- LEFT : CUSTOMER INFO -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+
+                <h5 class="mb-3">
+                    Phnom Penh Mobile Shop
+                </h5>
+
+                <p class="mb-2">
+                    <i class="fas fa-building text-muted mr-1"></i>
+                    <strong>Customer Type:</strong>
+                    <span class="badge badge-info ml-1">B2B</span>
+                </p>
+
+                <p class="mb-2">
+                    <i class="fas fa-phone text-muted mr-1"></i>
+                    <strong>Phone:</strong> 012 888 999
+                </p>
+
+                <p class="mb-2">
+                    <i class="fas fa-envelope text-muted mr-1"></i>
+                    <strong>Email:</strong> —
+                </p>
+
+                <p class="mb-0">
+                    <i class="fas fa-toggle-on text-muted mr-1"></i>
+                    <strong>Status:</strong>
+                    <span class="badge badge-success ml-1">Active</span>
+                </p>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- RIGHT : FINANCIAL INFO -->
+    <div class="col-md-6">
+        <div class="card h-100">
+            <div class="card-body">
+
+                <h6 class="mb-3">
+                    <i class="fas fa-wallet mr-1"></i> Financial Summary
+                </h6>
+
+                <div class="mb-3">
+                    <small class="text-muted">Credit Limit</small>
+                    <h4 class="text-info">$20,000</h4>
+                </div>
+
+                <div class="mb-3">
+                    <small class="text-muted">Outstanding Balance</small>
+                    <h4 class="text-danger">$3,200</h4>
+                </div>
+
+                <!-- PAYMENT RULE -->
+                <div class="alert alert-warning p-2 mb-0">
+                    <i class="fas fa-exclamation-circle mr-1"></i>
+                    <strong>Payment Rule:</strong>
+                    Credit Allowed
+                </div>
+
+            </div>
+        </div>
+    </div>
 
 </div>
 
+</div>
+
+<!-- FOOTER -->
 <div class="modal-footer">
     <button class="btn btn-secondary" data-dismiss="modal">Close</button>
 </div>
@@ -282,5 +372,6 @@
 </div>
 </div>
 </div>
+
 
 @endsection

@@ -1,3 +1,113 @@
+<!-- ===================================================== -->
+<!-- CHART JS -->
+<!-- ===================================================== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+/* PROFIT MARGIN – CLEAN VERSION */
+new Chart(document.getElementById('profitMarginChart'), {
+    type: 'bar',
+    data: {
+        labels: ['Galaxy S24','iPhone 15','Dell XPS'],
+        datasets: [{
+            label: 'Profit Margin %',
+            data: [25,21,22],
+            backgroundColor: '#17a2b8',
+            borderRadius: 6,
+            barThickness: 22
+        }]
+    },
+    options: {
+        indexAxis: 'y',
+        plugins: {
+            legend: { display: false },
+            tooltip: {
+                callbacks: {
+                    label: ctx => ctx.raw + '%'
+                }
+            }
+        },
+        scales: {
+            x: {
+                grid: { display: false },
+                ticks: {
+                    callback: value => value + '%'
+                }
+            },
+            y: {
+                grid: { display: false }
+            }
+        }
+    }
+});
+
+/* PROFIT PER MONTH */
+new Chart(document.getElementById('profitMonthChart'), {
+    type: 'line',
+    data: {
+        labels: ['Jan','Feb','Mar','Apr','May'],
+        datasets: [{
+            label: 'Monthly Profit',
+            data: [5200,6800,4300,7200,9350],
+            borderColor: '#28a745',
+            backgroundColor: 'rgba(40,167,69,0.15)',
+            fill: true,
+            tension: 0.4
+        }]
+    },
+    options: {
+        plugins: {
+            legend: { display: false }
+        }
+    }
+});
+</script>
+
+
+<!-- ===================================================== -->
+<!-- CHART.JS SCRIPTS -->
+<!-- ===================================================== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+
+    new Chart(document.getElementById('salesTrendChart'), {
+        type: 'line',
+        data: {
+            labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+            datasets: [
+                { label:'B2B', data:[12000,18000,15000,22000,26000,30000], borderColor:'#007bff', fill:false },
+                { label:'B2C', data:[8000,10000,9500,12000,14000,16000], borderColor:'#28a745', fill:false }
+            ]
+        }
+    });
+
+    new Chart(document.getElementById('profitCostChart'), {
+        type: 'bar',
+        data: {
+            labels:['Jan','Feb','Mar','Apr','May','Jun'],
+            datasets:[
+                { label:'Cost', data:[14000,16000,15000,18000,20000,23000], backgroundColor:'#dc3545' },
+                { label:'Profit', data:[6000,9000,8000,11000,12000,14000], backgroundColor:'#28a745' }
+            ]
+        }
+    });
+
+    new Chart(document.getElementById('topProductsChart'), {
+        type:'bar',
+        data:{
+            labels:['iPhone 15 Pro','Galaxy S24','Smart TV 55"','AirPods Pro'],
+            datasets:[{
+                label:'Units Sold',
+                data:[120,95,60,40],
+                backgroundColor:'#17a2b8'
+            }]
+        }
+    });
+
+});
+</script>
+
 <script>
 function confirmSale() {
     // show success popup
@@ -150,7 +260,38 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+<!-- ===================================================== -->
+<!-- CHART SCRIPT -->
+<!-- ===================================================== -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
+<script>
+new Chart(document.getElementById('dashboardSalesChart'), {
+    type: 'line',
+    data: {
+        labels: ['Mon','Tue','Wed','Thu','Fri','Sat'],
+        datasets: [
+            {
+                label: 'Sales',
+                data: [4200, 3800, 5200, 6100, 4500, 7200],
+                borderColor: '#007bff',
+                tension: 0.4
+            },
+            {
+                label: 'Profit',
+                data: [1200, 900, 1600, 1900, 1300, 2400],
+                borderColor: '#28a745',
+                tension: 0.4
+            }
+        ]
+    },
+    options: {
+        plugins: {
+            legend: { position: 'bottom' }
+        }
+    }
+});
+</script>
 
 
 <script>

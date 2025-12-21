@@ -1,4 +1,5 @@
 @extends('backend.layouts.master')
+@section('title', 'Product Management | Wholesale MGM')
 @section('main-content')
 
 <div class="content-wrapper">
@@ -180,127 +181,155 @@
 
 <!-- ================= SUPPLIER SELECTION MODAL ================= -->
 <div class="modal fade" id="supplierSelectModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
+<div class="modal-dialog modal-xl modal-dialog-scrollable">
+<div class="modal-content">
 
-            <div class="modal-header">
-                <h5 class="modal-title">Choose Supplier</h5>
-                <button type="button" class="close" data-dismiss="modal">&times;</button>
-            </div>
-
-            <div class="modal-body">
-
-                <!-- PRODUCT INFO -->
-                <div class="row mb-3 align-items-center">
-                    <div class="col-md-2 text-center">
-                        <img src="https://assets.swappie.com/cdn-cgi/image/width=600,height=600,fit=contain,format=auto/swappie-iphone-15-pro-natural-titanium.png?v=cc5784d1"
-                             class="img-fluid rounded">
-                    </div>
-                    <div class="col-md-10">
-                        <h5 class="mb-1">iPhone 15 Pro 256GB</h5>
-                        <small class="text-muted">
-                            Brand: Apple | SKU: IP15P-256
-                        </small>
-                    </div>
-                </div>
-
-                <!-- SUPPLIER OFFER TABLE -->
-                <table class="table table-bordered table-hover">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Supplier</th>
-                            <th>Supplier Code</th>
-                            <th>Phone</th>
-                            <th>Email</th>
-                            <th>Cost Price</th>
-                            <th>Available Qty</th>
-                            <th>Lead Time</th>
-                            <th>Status</th>
-                            <th width="110">Select</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-
-                        <tr>
-                            <td>Global Tech Supply</td>
-                            <td>SUP-001</td>
-                            <td>012 345 678</td>
-                            <td>info@globaltech.com</td>
-                            <td>$950</td>
-                            <td><span class="badge badge-success">120</span></td>
-                            <td>5 Days</td>
-                            <td><span class="badge badge-success">Available</span></td>
-                            <td class="text-center">
-                                <a href="{{url('/purchase_orders')}}" class="btn btn-sm btn-primary">Choose</a>
-                            </td>
-                        </tr>
-
-                        <tr>
-                            <td>Asia Mobile Distribution</td>
-                            <td>SUP-002</td>
-                            <td>098 765 432</td>
-                            <td>sales@asiamobile.com</td>
-                            <td>$980</td>
-                            <td><span class="badge badge-warning">40</span></td>
-                            <td>3 Days</td>
-                            <td><span class="badge badge-success">Available</span></td>
-                            <td class="text-center">
-                                <a href="{{url('/purchase_orders')}}" class="btn btn-sm btn-primary">Choose</a>
-                            </td>
-                        </tr>
-                        
-                    </tbody>
-                </table>
-                            <!-- ===================================================== -->
-<!-- SUPPLIER PRICE HISTORY (READ ONLY) -->
-<!-- ===================================================== -->
-<div class="mt-3">
-    <h6 class="mb-2">
-        <i class="fas fa-history"></i> Supplier Price History
-    </h6>
-
-    <table class="table table-sm table-bordered mb-0">
-        <thead class="thead-light">
-            <tr>
-                <th>Supplier</th>
-                <th>Purchase Price</th>
-                <th>Purchase Date</th>
-                <th>Last Updated</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <td>Global Tech Supply</td>
-                <td>$920</td>
-                <td>2024-11-15</td>
-                <td>2024-11-15</td>
-            </tr>
-            <tr>
-                <td>Global Tech Supply</td>
-                <td>$950</td>
-                <td>2025-01-10</td>
-                <td>2025-01-10</td>
-            </tr>
-            <tr>
-                <td>Asia Mobile Distribution</td>
-                <td>$980</td>
-                <td>2025-01-12</td>
-                <td>2025-01-12</td>
-            </tr>
-        </tbody>
-    </table>
+<!-- HEADER -->
+<div class="modal-header bg-primary text-white">
+    <h5 class="modal-title">
+        <i class="fas fa-truck mr-1"></i> Choose Supplier
+    </h5>
+    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
 </div>
-<!-- ===================================================== -->
-<!-- FULL PRODUCT DESCRIPTION / SPECIFICATIONS (RAW TEXT) -->
-<!-- ===================================================== -->
-<hr>
-<h6 class="mb-2">
-    <i class="fas fa-align-left"></i> Product Specifications (Full Text)
-</h6>
 
-<pre class="border rounded p-3 bg-light"
-     style="max-height: 400px; overflow-y: auto; font-size: 13px;">
+<div class="modal-body">
 
+<!-- ===================================================== -->
+<!-- PRODUCT INFO -->
+<!-- ===================================================== -->
+<div class="card mb-3">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-md-2 text-center">
+                <img src="https://assets.swappie.com/cdn-cgi/image/width=600,height=600,fit=contain,format=auto/swappie-iphone-15-pro-natural-titanium.png?v=cc5784d1"
+                     class="img-fluid rounded">
+            </div>
+            <div class="col-md-10">
+                <h5 class="mb-1">iPhone 15 Pro 256GB</h5>
+                <small class="text-muted">
+                    Brand: Apple | SKU: IP15P-256
+                </small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- SUPPLIER OFFER TABLE -->
+<!-- ===================================================== -->
+<div class="card mb-3">
+    <div class="card-header">
+        <strong>Available Suppliers</strong>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-bordered table-hover mb-0">
+            <thead class="thead-light">
+                <tr>
+                    <th>Supplier</th>
+                    <th>Supplier Code</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Cost Price</th>
+                    <th>Available Qty</th>
+                    <th>Lead Time</th>
+                    <th>Status</th>
+                    <th width="110">Select</th>
+                </tr>
+            </thead>
+            <tbody>
+
+                <tr>
+                    <td>Global Tech Supply</td>
+                    <td>SUP-001</td>
+                    <td>012 345 678</td>
+                    <td>info@globaltech.com</td>
+                    <td class="font-weight-bold">$950</td>
+                    <td><span class="badge badge-success">120</span></td>
+                    <td>5 Days</td>
+                    <td><span class="badge badge-success">Available</span></td>
+                    <td class="text-center">
+                        <a href="{{url('/purchase_orders')}}" class="btn btn-sm btn-primary">
+                            Choose
+                        </a>
+                    </td>
+                </tr>
+
+                <tr>
+                    <td>Asia Mobile Distribution</td>
+                    <td>SUP-002</td>
+                    <td>098 765 432</td>
+                    <td>sales@asiamobile.com</td>
+                    <td class="font-weight-bold">$980</td>
+                    <td><span class="badge badge-warning">40</span></td>
+                    <td>3 Days</td>
+                    <td><span class="badge badge-success">Available</span></td>
+                    <td class="text-center">
+                        <a href="{{url('/purchase_orders')}}" class="btn btn-sm btn-primary">
+                            Choose
+                        </a>
+                    </td>
+                </tr>
+
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- SUPPLIER PRICE HISTORY -->
+<!-- ===================================================== -->
+<div class="card mb-3">
+    <div class="card-header">
+        <strong>
+            <i class="fas fa-history mr-1"></i> Supplier Price History
+        </strong>
+    </div>
+    <div class="card-body p-0">
+        <table class="table table-sm table-bordered mb-0">
+            <thead class="thead-light">
+                <tr>
+                    <th>Supplier</th>
+                    <th>Purchase Price</th>
+                    <th>Purchase Date</th>
+                    <th>Last Updated</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Global Tech Supply</td>
+                    <td>$920</td>
+                    <td>2024-11-15</td>
+                    <td>2024-11-15</td>
+                </tr>
+                <tr>
+                    <td>Global Tech Supply</td>
+                    <td>$950</td>
+                    <td>2025-01-10</td>
+                    <td>2025-01-10</td>
+                </tr>
+                <tr>
+                    <td>Asia Mobile Distribution</td>
+                    <td>$980</td>
+                    <td>2025-01-12</td>
+                    <td>2025-01-12</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- ===================================================== -->
+<!-- PRODUCT SPECIFICATIONS -->
+<!-- ===================================================== -->
+<div class="card">
+    <div class="card-header">
+        <strong>
+            <i class="fas fa-align-left mr-1"></i> Product Specifications
+        </strong>
+    </div>
+    <div class="card-body p-0">
+        <pre class="border-0 rounded-0 p-3 bg-light mb-0"
+             style="max-height: 400px; overflow-y: auto; font-size: 13px;">
 Network    Technology
 GSM / CDMA / HSPA / EVDO / LTE / 5G
 
@@ -359,21 +388,21 @@ Face ID
 Ultra Wideband (UWB)
 Emergency SOS via satellite
 Apple Pay supported
-
-</pre>
-
-
-
-            </div>
-
-
-            <div class="modal-footer">
-                <button class="btn btn-secondary" data-dismiss="modal">
-                    Cancel
-                </button>
-            </div>
-        </div>
+        </pre>
     </div>
-    
 </div>
+
+</div>
+
+<!-- FOOTER -->
+<div class="modal-footer">
+    <button class="btn btn-secondary" data-dismiss="modal">
+        Close
+    </button>
+</div>
+
+</div>
+</div>
+</div>
+
 @endsection

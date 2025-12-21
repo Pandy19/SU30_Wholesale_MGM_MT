@@ -18,7 +18,7 @@ use App\Http\Controllers\backend\sales_invoiceController;
 use App\Http\Controllers\backend\sales_order_historyController;
 use App\Http\Controllers\backend\customer_paymentsController;
 use App\Http\Controllers\backend\sale_reportController;
-
+use App\Http\Controllers\backend\profit_reportController;
 
 
 //dashboard
@@ -74,6 +74,7 @@ Route::controller(stock_ledgerController::class)->group(function () {
     Route::get('/stock_ledger', 'index')->name('stock_ledger.index');
 });
 
+//Customers category 
 Route::controller(customersController::class)->group(function () {
     Route::get('/customers', 'index')->name('customers.index');
 });
@@ -98,4 +99,8 @@ Route::controller(customer_paymentsController::class)->group(function () {
 //reports category
 Route::controller(sale_reportController::class)->group(function () {
     Route::get('/sale_report', 'index')->name('sale_report.index');
+});
+
+Route::controller(profit_reportController::class)->group(function () {
+    Route::get('/profit_report', 'index')->name('profit_report.index');
 });

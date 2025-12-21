@@ -1,4 +1,5 @@
 @extends('backend.layouts.master')
+@section('title', 'Supplier Order Historys | Wholesale MGM')
 @section('main-content')
 
 <div class="content-wrapper">

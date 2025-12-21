@@ -1,12 +1,15 @@
 @extends('backend.layouts.master')
+@section('title', 'Good Receiving | Wholesale MGM')
 @section('main-content')
 
 <div class="content-wrapper">
 <section class="content p-4">
 
+<!-- ===================================================== -->
 <!-- PAGE TITLE -->
-<div class="mb-3">
-    <h3>Goods Receiving & Approval</h3>
+<!-- ===================================================== -->
+<div class="mb-4">
+    <h3 class="mb-1">Goods Receiving & Approval</h3>
     <p class="text-muted mb-0">
         Verify purchased products before adding them to stock
     </p>
@@ -15,16 +18,16 @@
 <!-- ===================================================== -->
 <!-- FILTERS -->
 <!-- ===================================================== -->
-<div class="card mb-3">
+<div class="card mb-4">
 <div class="card-body">
 <div class="row">
 
-    <div class="col-md-3">
+    <div class="col-md-3 mb-2">
         <input type="text" class="form-control"
                placeholder="Search Product / SKU / PO No">
     </div>
 
-    <div class="col-md-2">
+    <div class="col-md-2 mb-2">
         <select class="form-control">
             <option>All Brands</option>
             <option>Samsung</option>
@@ -32,7 +35,7 @@
         </select>
     </div>
 
-    <div class="col-md-2">
+    <div class="col-md-2 mb-2">
         <select class="form-control">
             <option>All Categories</option>
             <option>Mobile Phone</option>
@@ -40,7 +43,7 @@
         </select>
     </div>
 
-    <div class="col-md-2">
+    <div class="col-md-2 mb-2">
         <select class="form-control">
             <option>All Suppliers</option>
             <option>Global Tech Supply</option>
@@ -48,7 +51,7 @@
         </select>
     </div>
 
-    <div class="col-md-3">
+    <div class="col-md-3 mb-2">
         <select class="form-control">
             <option>All Status</option>
             <option>Pending</option>
@@ -67,82 +70,79 @@
 <div class="card">
 <div class="card-body p-0">
 
-<table class="table table-bordered table-hover mb-0">
+<table class="table table-bordered table-hover mb-0 align-middle">
 <thead class="thead-light">
 <tr>
-    <th>Image</th>
+    <th class="text-center">Image</th>
     <th>Product</th>
     <th>SKU</th>
     <th>Brand</th>
     <th>Supplier</th>
-    <th>Ordered Qty</th>
-    <th>Received Qty</th>
-    <th>Accept Qty</th>
-    <th>Reject Qty</th>
-    <th>Unit Cost</th>
-    <th>Total Price</th>
+    <th class="text-center">Ordered</th>
+    <th class="text-center">Received</th>
+    <th class="text-center">Accept</th>
+    <th class="text-center">Reject</th>
+    <th class="text-right">Unit Cost</th>
+    <th class="text-right">Total</th>
     <th>Status</th>
     <th>Approved By</th>
-    <th>Decision Date</th>
+    <th>Date</th>
     <th class="text-center">Action</th>
 </tr>
 </thead>
 <tbody>
 
-<!-- ================= PENDING (INSPECTION) ================= -->
+<!-- ================= PENDING ================= -->
 <tr>
     <td class="text-center">
         <img src="https://www.myg.in/images/thumbnails/300/300/detailed/75/s24ultraviolet1-removebg-preview.png.png"
-             width="50">
+             class="img-thumbnail"
+             width="55">
     </td>
-    <td>Samsung Galaxy S24</td>
+    <td>
+        <strong>Samsung Galaxy S24</strong>
+    </td>
     <td>SGS24</td>
     <td>Samsung</td>
     <td>Global Tech Supply</td>
-    <td>10</td>
-    <td><strong>10</strong></td>
+    <td class="text-center">10</td>
+    <td class="text-center"><strong>10</strong></td>
 
-    <!-- ACCEPT QTY -->
-    <td>
+    <td class="text-center">
         <input type="number"
-               class="form-control form-control-sm"
-               value="7"
-               min="0"
-               max="10">
+               class="form-control form-control-sm text-center"
+               value="7" min="0" max="10">
     </td>
 
-    <!-- REJECT QTY -->
-    <td>
+    <td class="text-center">
         <input type="number"
-               class="form-control form-control-sm"
-               value="3"
-               min="0"
-               max="10">
+               class="form-control form-control-sm text-center"
+               value="3" min="0" max="10">
     </td>
 
-    <td>$950</td>
-    <td>$9,500</td>
+    <td class="text-right">$950</td>
+    <td class="text-right">$9,500</td>
 
-    <td><span class="badge badge-info">Pending</span></td>
+    <td>
+        <span class="badge badge-info">Pending</span>
+    </td>
     <td class="text-muted">—</td>
     <td class="text-muted">—</td>
 
     <td class="text-center">
-        <button class="btn btn-sm btn-success">
-            Approve
-        </button>
-
-        <button class="btn btn-sm btn-danger ml-1"
-                data-toggle="modal"
-                data-target="#rejectReasonModal">
-            Reject
-        </button>
-
-        <br>
-
-        <button class="btn btn-sm btn-outline-secondary mt-1" disabled>
-            <i class="fas fa-print"></i> Print
-        </button>
+        <div class="btn-group-vertical">
+            <button class="btn btn-sm btn-success mb-1">
+                Approve
+            </button>
+            <button class="btn btn-sm btn-danger mb-1"
+                    data-toggle="modal"
+                    data-target="#rejectReasonModal">
+                Reject
+            </button>
+            <button class="btn btn-sm btn-outline-secondary" disabled>
+                <i class="fas fa-print"></i> Print
+            </button>
+        </div>
     </td>
 </tr>
 
@@ -150,18 +150,19 @@
 <tr>
     <td class="text-center">
         <img src="https://images-cdn.ubuy.co.in/668e509932f72820f85b4e0f-samsung-55-class-4k-uhdtv-2160p-hdr.jpg"
-             width="50">
+             class="img-thumbnail"
+             width="55">
     </td>
-    <td>Samsung Smart TV 55"</td>
+    <td><strong>Samsung Smart TV 55"</strong></td>
     <td>SS-TV55</td>
     <td>Samsung</td>
     <td>Global Tech Supply</td>
-    <td>5</td>
-    <td>5</td>
-    <td class="text-muted text-center">5</td>
-    <td class="text-muted text-center">0</td>
-    <td>$700</td>
-    <td>$3,500</td>
+    <td class="text-center">5</td>
+    <td class="text-center">5</td>
+    <td class="text-center text-muted">5</td>
+    <td class="text-center text-muted">0</td>
+    <td class="text-right">$700</td>
+    <td class="text-right">$3,500</td>
     <td><span class="badge badge-success">Accepted</span></td>
     <td>Admin</td>
     <td>2025-01-15</td>
@@ -177,18 +178,19 @@
 <tr>
     <td class="text-center">
         <img src="https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-15-pro-blue-titanium-select?wid=470&hei=556"
-             width="50">
+             class="img-thumbnail"
+             width="55">
     </td>
-    <td>iPhone 15</td>
+    <td><strong>iPhone 15</strong></td>
     <td>IP15</td>
     <td>Apple</td>
     <td>Asia Mobile Distribution</td>
-    <td>8</td>
-    <td>6</td>
-    <td class="text-muted text-center">0</td>
-    <td class="text-muted text-center">6</td>
-    <td>$980</td>
-    <td>$5,880</td>
+    <td class="text-center">8</td>
+    <td class="text-center">6</td>
+    <td class="text-center text-muted">0</td>
+    <td class="text-center text-muted">6</td>
+    <td class="text-right">$980</td>
+    <td class="text-right">$5,880</td>
     <td><span class="badge badge-danger">Rejected</span></td>
     <td>Staff</td>
     <td>2025-01-14</td>
@@ -228,9 +230,11 @@
 <div class="modal-dialog">
 <div class="modal-content">
 
-<div class="modal-header">
-    <h5 class="modal-title">Reject Product</h5>
-    <button type="button" class="close" data-dismiss="modal">&times;</button>
+<div class="modal-header bg-danger text-white">
+    <h5 class="modal-title">
+        <i class="fas fa-times-circle mr-1"></i> Reject Product
+    </h5>
+    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
 </div>
 
 <div class="modal-body">

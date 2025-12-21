@@ -1,4 +1,5 @@
 @extends('backend.layouts.master')
+@section('title', 'Confirm Payment | Wholesale MGM')
 @section('main-content')
 
 <div class="content-wrapper">

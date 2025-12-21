@@ -1,207 +1,190 @@
-@extends('backend.layouts.master')
-@section('main-content')
+<!-- Main Sidebar Container -->
+<aside class="main-sidebar sidebar-dark-primary elevation-4">
+  <!-- Brand Logo -->
+  <a href="{{ url('/') }}" class="brand-link">
+    <img src="{{asset('assets/dist/img/AdminLTELogo.png')}}"
+         alt="AdminLTE Logo"
+         class="brand-image img-circle elevation-3"
+         style="opacity: .8">
+    <span class="brand-text font-weight-light">Wholesale MGM</span>
+  </a>
 
-<div class="content-wrapper">
-<section class="content p-4">
+  <div class="sidebar">
 
-<!-- ===================================================== -->
-<!-- PAGE TITLE -->
-<!-- ===================================================== -->
-<div class="mb-3">
-    <h3>Sales Report</h3>
-    <p class="text-muted mb-0">
-        Sales performance overview (B2B & B2C)
-    </p>
-</div>
+    <!-- Sidebar user panel -->
+    <div class="user-panel mt-3 pb-3 mb-3 d-flex">
+      <div class="image">
+        <img src="{{asset('assets/dist/img/user2-160x160.jpg')}}"
+             class="img-circle elevation-2"
+             alt="User Image">
+      </div>
+      <div class="info">
+        <a href="#" class="d-block">Admin</a>
+      </div>
+    </div>
 
-<!-- ===================================================== -->
-<!-- SUMMARY CARDS -->
-<!-- ===================================================== -->
-<div class="row mb-4">
-
-    <div class="col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-success">
-                <i class="fas fa-dollar-sign"></i>
-            </span>
-            <div class="info-box-content">
-                <span class="info-box-text">Total Sales</span>
-                <span class="info-box-number">$128,450</span>
-            </div>
+    <!-- Sidebar Search -->
+    <div class="form-inline">
+      <div class="input-group" data-widget="sidebar-search">
+        <input class="form-control form-control-sidebar" type="search" placeholder="Search">
+        <div class="input-group-append">
+          <button class="btn btn-sidebar">
+            <i class="fas fa-search fa-fw"></i>
+          </button>
         </div>
+      </div>
     </div>
 
-    <div class="col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-info">
-                <i class="fas fa-shopping-cart"></i>
-            </span>
-            <div class="info-box-content">
-                <span class="info-box-text">Total Orders</span>
-                <span class="info-box-number">214</span>
-            </div>
-        </div>
-    </div>
+    <!-- Sidebar Menu -->
+    <nav class="mt-2">
+      <ul class="nav nav-pills nav-sidebar flex-column"
+          data-widget="treeview"
+          role="menu"
+          data-accordion="false">
 
-    <div class="col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-primary">
-                <i class="fas fa-users"></i>
-            </span>
-            <div class="info-box-content">
-                <span class="info-box-text">B2B Revenue</span>
-                <span class="info-box-number">$82,300</span>
-            </div>
-        </div>
-    </div>
+        <!-- DASHBOARD -->
+        <li class="nav-item">
+          <a href="{{ url('/') }}"
+             class="nav-link {{ request()->is('/') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-tachometer-alt"></i>
+            <p>Dashboard</p>
+          </a>
+        </li>
 
-    <div class="col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-warning">
-                <i class="fas fa-user"></i>
-            </span>
-            <div class="info-box-content">
-                <span class="info-box-text">B2C Revenue</span>
-                <span class="info-box-number">$46,150</span>
-            </div>
-        </div>
-    </div>
+        <!-- SUPPLIERS -->
+        <li class="nav-header">SUPPLIERS</li>
 
-</div>
+        <li class="nav-item">
+          <a href="{{ url('/suppliers') }}"
+             class="nav-link {{ request()->is('suppliers*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-industry"></i>
+            <p>Brand Suppliers</p>
+          </a>
+        </li>
 
-<!-- ===================================================== -->
-<!-- FILTERS -->
-<!-- ===================================================== -->
-<div class="card mb-4">
-<div class="card-body">
-<div class="row">
+        <li class="nav-item">
+          <a href="{{ url('/product_management') }}"
+             class="nav-link {{ request()->is('product_management*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-boxes"></i>
+            <p>Product Management</p>
+          </a>
+        </li>
 
-    <div class="col-md-3">
-        <input type="date" class="form-control">
-    </div>
+        <li class="nav-item">
+          <a href="{{ url('/supplier_orders') }}"
+             class="nav-link {{ request()->is('supplier_orders*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-file-invoice"></i>
+            <p>Supplier Order History</p>
+          </a>
+        </li>
 
-    <div class="col-md-3">
-        <input type="date" class="form-control">
-    </div>
+        <li class="nav-item">
+          <a href="{{ url('/goods_receiving') }}"
+             class="nav-link {{ request()->is('goods_receiving*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-truck-loading"></i>
+            <p>Goods Receiving</p>
+          </a>
+        </li>
 
-    <div class="col-md-3">
-        <select class="form-control">
-            <option>All Customer Types</option>
-            <option>B2B</option>
-            <option>B2C</option>
-        </select>
-    </div>
+        <li class="nav-item">
+          <a href="{{ url('/supplier_returns') }}"
+             class="nav-link {{ request()->is('supplier_returns*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-undo-alt"></i>
+            <p>Goods Return</p>
+          </a>
+        </li>
 
-    <div class="col-md-3 text-right">
-        <button class="btn btn-primary">Apply</button>
-        <button class="btn btn-outline-secondary ml-1">Reset</button>
-    </div>
+        <!-- STOCKS -->
+        <li class="nav-header">STOCKS</li>
 
-</div>
-</div>
-</div>
+        <li class="nav-item">
+          <a href="{{ url('/approved_good_stock') }}"
+             class="nav-link {{ request()->is('approved_good_stock*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-check-circle"></i>
+            <p>Approved Goods</p>
+          </a>
+        </li>
 
-<!-- ===================================================== -->
-<!-- CHART PLACEHOLDER -->
-<!-- ===================================================== -->
-<div class="card mb-4">
-<div class="card-header">
-    <strong>Monthly Sales Trend</strong>
-</div>
-<div class="card-body text-center text-muted">
-    Chart will display here (Chart.js integration later)
-    <div style="height:260px;border:1px dashed #ccc;"></div>
-</div>
-</div>
+        <li class="nav-item">
+          <a href="{{ url('/stock_categorys') }}"
+             class="nav-link {{ request()->is('stock_categorys*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-tags"></i>
+            <p>Stock Categories</p>
+          </a>
+        </li>
 
-<!-- ===================================================== -->
-<!-- SALES DETAILS TABLE -->
-<!-- ===================================================== -->
-<div class="card">
-<div class="card-header d-flex justify-content-between">
-    <strong>Sales Details</strong>
-    <div>
-        <button class="btn btn-sm btn-outline-primary">Export PDF</button>
-        <button class="btn btn-sm btn-outline-success ml-1">Export Excel</button>
-    </div>
-</div>
+        <li class="nav-item">
+          <a href="{{ url('/product_stock_list') }}"
+             class="nav-link {{ request()->is('product_stock_list*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-warehouse"></i>
+            <p>Stock Lists</p>
+          </a>
+        </li>
 
-<div class="card-body p-0">
-<table class="table table-bordered table-hover mb-0">
-<thead class="thead-light">
-<tr>
-    <th>Invoice No</th>
-    <th>Date</th>
-    <th>Customer</th>
-    <th>Type</th>
-    <th>Payment</th>
-    <th>Status</th>
-    <th>Total</th>
-    <th class="text-center">Action</th>
-</tr>
-</thead>
-<tbody>
+        <li class="nav-item">
+          <a href="{{ url('/stock_ledger') }}"
+             class="nav-link {{ request()->is('stock_ledger*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-book"></i>
+            <p>Stock Ledgers</p>
+          </a>
+        </li>
 
-<tr>
-    <td>SI-00021</td>
-    <td>2025-01-18</td>
-    <td>ABC Mobile Shop</td>
-    <td><span class="badge badge-primary">B2B</span></td>
-    <td>Bank Transfer</td>
-    <td><span class="badge badge-success">Paid</span></td>
-    <td>$12,800</td>
-    <td class="text-center">
-        <button class="btn btn-sm btn-outline-primary">View</button>
-        <button class="btn btn-sm btn-outline-secondary ml-1">Print</button>
-    </td>
-</tr>
+        <!-- CUSTOMERS -->
+        <li class="nav-header">CUSTOMERS</li>
 
-<tr>
-    <td>SI-00022</td>
-    <td>2025-01-19</td>
-    <td>Walk-in Customer</td>
-    <td><span class="badge badge-warning">B2C</span></td>
-    <td>Cash</td>
-    <td><span class="badge badge-success">Paid</span></td>
-    <td>$1,800</td>
-    <td class="text-center">
-        <button class="btn btn-sm btn-outline-primary">View</button>
-        <button class="btn btn-sm btn-outline-secondary ml-1">Print</button>
-    </td>
-</tr>
+        <li class="nav-item">
+          <a href="{{ url('/customers') }}"
+             class="nav-link {{ request()->is('customers*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-users"></i>
+            <p>Customer List</p>
+          </a>
+        </li>
 
-<tr>
-    <td>SI-00023</td>
-    <td>2025-01-20</td>
-    <td>Tech Partner Co.</td>
-    <td><span class="badge badge-primary">B2B</span></td>
-    <td>Net 7 Days</td>
-    <td><span class="badge badge-warning">Partial</span></td>
-    <td>$9,400</td>
-    <td class="text-center">
-        <button class="btn btn-sm btn-outline-primary">View</button>
-        <button class="btn btn-sm btn-outline-secondary ml-1">Print</button>
-    </td>
-</tr>
+        <li class="nav-item">
+          <a href="{{ url('/sales_order') }}"
+             class="nav-link {{ request()->is('sales_order*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-shopping-cart"></i>
+            <p>Sale Orders</p>
+          </a>
+        </li>
 
-</tbody>
-</table>
-</div>
+        <li class="nav-item">
+          <a href="{{ url('/sales_order_history') }}"
+             class="nav-link {{ request()->is('sales_order_history*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-history"></i>
+            <p>Sale Order Historys</p>
+          </a>
+        </li>
 
-<!-- PAGINATION -->
-<div class="card-footer clearfix">
-<ul class="pagination pagination-sm m-0 float-right">
-    <li class="page-item disabled"><a class="page-link">«</a></li>
-    <li class="page-item active"><a class="page-link">1</a></li>
-    <li class="page-item"><a class="page-link">2</a></li>
-    <li class="page-item"><a class="page-link">3</a></li>
-    <li class="page-item"><a class="page-link">»</a></li>
-</ul>
-</div>
+        <li class="nav-item">
+          <a href="{{ url('/customer_payments') }}"
+             class="nav-link {{ request()->is('customer_payments*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-money-bill-wave"></i>
+            <p>Customer Payments</p>
+          </a>
+        </li>
 
-</div>
+        <!-- REPORTS -->
+        <li class="nav-header">REPORTS</li>
 
-</section>
-</div>
+        <li class="nav-item">
+          <a href="{{ url('/sale_report') }}"
+             class="nav-link {{ request()->is('sale_report*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-chart-bar"></i>
+            <p>Sale Reports</p>
+          </a>
+        </li>
 
-@endsection
+        <li class="nav-item">
+          <a href="{{ url('/profit_report') }}"
+             class="nav-link {{ request()->is('profit_report*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-chart-line"></i>
+            <p>Profit Reports</p>
+          </a>
+        </li>
+
+      </ul>
+    </nav>
+
+  </div>
+</aside>
