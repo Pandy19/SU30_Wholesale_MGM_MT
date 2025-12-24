@@ -90,35 +90,6 @@
             </div>
         </div>
 
-        <!-- STOCK STATUS SUMMARY -->
-        <div class="card">
-            <div class="card-header">
-                <strong>Stock Status</strong>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-
-                    <div class="col-md-4">
-                        <i class="fas fa-check-circle text-success fa-2x mb-2"></i>
-                        <h5>In Stock</h5>
-                        <p class="mb-0"><strong>190</strong> Products</p>
-                    </div>
-
-                    <div class="col-md-4">
-                        <i class="fas fa-exclamation-circle text-warning fa-2x mb-2"></i>
-                        <h5>Low Stock</h5>
-                        <p class="mb-0"><strong>18</strong> Products</p>
-                    </div>
-
-                    <div class="col-md-4">
-                        <i class="fas fa-times-circle text-danger fa-2x mb-2"></i>
-                        <h5>Out of Stock</h5>
-                        <p class="mb-0"><strong>6</strong> Products</p>
-                    </div>
-
-                </div>
-            </div>
-        </div>
 
     </div>
 

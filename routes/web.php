@@ -19,6 +19,7 @@ use App\Http\Controllers\backend\sales_order_historyController;
 use App\Http\Controllers\backend\customer_paymentsController;
 use App\Http\Controllers\backend\sale_reportController;
 use App\Http\Controllers\backend\profit_reportController;
+use App\Http\Controllers\backend\admin_loginController;
 
 
 //dashboard
@@ -104,3 +105,22 @@ Route::controller(sale_reportController::class)->group(function () {
 Route::controller(profit_reportController::class)->group(function () {
     Route::get('/profit_report', 'index')->name('profit_report.index');
 });
+
+
+//backend login
+Route::controller(admin_loginController::class)->group(function () {
+
+    // show login page
+    Route::get('/admin_login', 'index')->name('admin_login.index');
+
+    // handle login submit (THIS WAS MISSING)
+    Route::post('/admin_login', 'login')->name('admin_login.submit');
+
+    // logout
+    Route::get('/logout', 'logout')->name('logout');
+
+});
+
+Route::get('/admin_register', function () {
+    return view('backend.admin_register.index');
+})->name('admin_register.index');
