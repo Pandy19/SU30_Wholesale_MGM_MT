@@ -13,12 +13,6 @@
             Click a brand row to view suppliers for each electronic brand.
         </p>
           </div><!-- /.col -->
-          <div class="col-sm-6">
-            <ol class="breadcrumb float-sm-right">
-              <li class="breadcrumb-item"><a href="#">Home</a></li>
-              <li class="breadcrumb-item active">Sample</li>
-            </ol>
-          </div><!-- /.col -->
         </div><!-- /.row -->
       </div><!-- /.container-fluid -->
     </div>
