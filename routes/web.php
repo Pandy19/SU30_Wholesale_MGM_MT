@@ -20,7 +20,7 @@ use App\Http\Controllers\backend\customer_paymentsController;
 use App\Http\Controllers\backend\sale_reportController;
 use App\Http\Controllers\backend\profit_reportController;
 use App\Http\Controllers\backend\admin_loginController;
-use App\Http\Controllers\SupplierProductDemoController;
+use App\Http\Controllers\backend\supplier_dashboardController;
 
 
 //dashboard
@@ -126,9 +126,8 @@ Route::get('/admin_register', function () {
     return view('backend.admin_register.index');
 })->name('admin_register.index');
 
-
-Route::get('/supplier_products', function () {
-    return view('backend.supplier_products.demo');
+Route::controller(supplier_dashboardController::class)->group(function () {
+    Route::get('/Supplier_Dashboard', 'index')->name('Supplier_Dashboard.index');
 });
 
 

@@ -183,6 +183,15 @@
           </a>
         </li>
 
+        <!-- REPORTS -->
+        <li class="nav-header">SUPPLIER DASHBOARD</li>
+        <li class="nav-item">
+          <a href="{{ url('/Supplier_Dashboard') }}"
+             class="nav-link {{ request()->is('Supplier_Dashboard') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-chart-line"></i>
+            <p>Supplier Dashboard</p>
+          </a>
+        </li>
       </ul>
     </nav>
 
