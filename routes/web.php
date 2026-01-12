@@ -127,8 +127,3 @@ Route::get('/admin_register', function () {
 })->name('admin_register.index');
 
 
-Route::get('/supplier_products', function () {
-    return view('backend.supplier_products.demo');
-});
-
-

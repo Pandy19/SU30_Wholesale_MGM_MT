@@ -8,12 +8,26 @@
 <!-- ===================================================== -->
 <!-- PAGE TITLE -->
 <!-- ===================================================== -->
-<div class="mb-4">
-    <h3 class="mb-1">Stock by Category</h3>
-    <p class="text-muted mb-0">
-        Warehouse stock grouped by category and brand
-    </p>
-</div>
+
+ <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h3 class="m-0">Stock by Category</h3>
+                    <p class="text-muted mb-0">
+                        Warehouse stock grouped by category and brand
+                    </p>
+                </div>
+                
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Stock</a></li>
+                        <li class="breadcrumb-item active">Stock Categories</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <!-- ===================================================== -->
 <!-- SUMMARY CARDS -->

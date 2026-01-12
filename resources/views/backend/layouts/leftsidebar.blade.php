@@ -70,15 +70,6 @@
           </a>
         </li>
         <li class="nav-item">
-          <a href="{{ url('/supplier_products') }}"
-            class="nav-link {{ request()->is('supplier_products') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-box-open"></i>
-            <p>Supplier Products</p>
-          </a>
-        </li>
-
-
-        <li class="nav-item">
           <a href="{{ url('/supplier_orders') }}"
              class="nav-link {{ request()->is('supplier_orders') ? 'active' : '' }}">
             <i class="nav-icon fas fa-file-invoice"></i>
