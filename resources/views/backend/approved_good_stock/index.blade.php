@@ -6,12 +6,26 @@
 <section class="content p-4">
 
 <!-- PAGE TITLE -->
-<div class="mb-3">
-    <h3>Approved Goods → Stock Approval</h3>
-    <p class="text-muted mb-0">
-        Add approved goods into stock (single warehouse)
-    </p>
-</div>
+
+ <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h3 class="m-0">Approved Goods → Stock Approval</h3>
+                    <p class="text-muted mb-0">
+                        Add approved goods into stock (single warehouse)
+                    </p>
+                </div>
+                
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Stock</a></li>
+                        <li class="breadcrumb-item active">Approve Good</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <!-- ===================================================== -->
 <!-- SUMMARY CARDS -->

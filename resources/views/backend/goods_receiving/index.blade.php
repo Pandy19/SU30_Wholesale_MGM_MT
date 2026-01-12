@@ -8,12 +8,26 @@
 <!-- ===================================================== -->
 <!-- PAGE TITLE -->
 <!-- ===================================================== -->
-<div class="mb-4">
-    <h3 class="mb-1">Goods Receiving & Approval</h3>
-    <p class="text-muted mb-0">
-        Verify purchased products before adding them to stock
-    </p>
-</div>
+
+     <div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h3 class="m-0">Goods Receiving & Approval</h3>
+                    <p class="text-muted mb-0">
+                    Verify purchased products before adding them to stock
+                    </p>
+                </div>
+                
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Supliers</a></li>
+                        <li class="breadcrumb-item active">Good Receiving</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <!-- ===================================================== -->
 <!-- FILTERS -->

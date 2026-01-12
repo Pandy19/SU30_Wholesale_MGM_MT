@@ -15,6 +15,7 @@
             Complete history of stock movements for audit and verification
         </p>
     </div>
+    
 
     <div class="btn-group">
         <button class="btn btn-outline-secondary"

@@ -7,12 +7,18 @@
     <div class="content-header">
       <div class="container-fluid">
         <div class="row mb-2">
-          <div class="col-sm-6">
-            <h1 class="m-0">Electronics – Brand & Supplier Overview</h1>
-            <p class="text-muted mb-0">
-            Click a brand row to view suppliers for each electronic brand.
-        </p>
-          </div><!-- /.col -->
+            <div class="col-sm-6">
+                <h1 class="m-0">Electronics – Brand & Supplier Overview</h1>
+                <p class="text-muted mb-0">
+                Click a brand row to view suppliers for each electronic brand.
+                </p>
+            </div><!-- /.col -->
+            <div class="col-sm-6">
+                <ol class="breadcrumb float-sm-right">
+                    <li class="breadcrumb-item"><a href="#">Supliers</a></li>
+                    <li class="breadcrumb-item active">Brand Supplier</li>
+                </ol>
+            </div>
         </div><!-- /.row -->
       </div><!-- /.container-fluid -->
     </div>
