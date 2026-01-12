@@ -45,3 +45,26 @@
         display: block !important;
     }
 }
+
+    .modal-xl {
+        max-width: 1000px;
+    }
+
+    .card-header {
+        border-bottom: 1px solid #eee;
+    }
+
+    #imgBox {
+        transition: 0.2s ease-in-out;
+    }
+    #imgBox:hover {
+        background: #eef2f6;
+    }
+    .modal-dialog-scrollable .modal-body{
+        max-height: calc(100vh - 200px);
+        overflow-y: auto;
+    }
+    .modal-xl{ max-width: 1100px; }
+  .card{ border-radius: 12px; }
+  .modal-header{ border-bottom: 1px solid #eee; }
+  .modal-footer{ border-top: 1px solid #eee; }

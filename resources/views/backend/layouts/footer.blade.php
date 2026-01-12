@@ -331,6 +331,108 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 </script>
+<script>
+    function previewImage(e) {
+        const img = document.getElementById('previewImg');
+        const txt = document.getElementById('imgBoxText');
+        img.src = URL.createObjectURL(e.target.files[0]);
+        img.style.display = 'block';
+        txt.style.display = 'none';
+    }
+
+    function uploadSuccess() {
+        $('#uploadModal').modal('hide');
+        $('#successModal').modal('show');
+        setTimeout(() => $('#successModal').modal('hide'), 1200);
+    }
+
+    function openCreateModal(){
+        document.getElementById('uploadModalTitle').innerText = "Upload Product";
+        document.getElementById('submitBtn').innerText = "Submit Product";
+
+        // clear inputs
+        document.getElementById('form_title').value = "";
+        document.getElementById('form_desc').value = "";
+        document.getElementById('form_brand').value = "Apple";
+        document.getElementById('form_category').value = "Mobile Phone";
+        document.getElementById('form_status').value = "Available";
+        document.getElementById('form_cost').value = "";
+        document.getElementById('form_qty').value = "";
+
+        // reset preview
+        document.getElementById('previewImg').style.display = "none";
+        document.getElementById('imgBoxText').style.display = "block";
+    }
+
+    function openEditModal(btn){
+        $('#uploadModal').modal('show');
+
+        document.getElementById('uploadModalTitle').innerText = "Edit Product";
+        document.getElementById('submitBtn').innerText = "Update Product";
+
+        document.getElementById('form_title').value = btn.dataset.title;
+        document.getElementById('form_desc').value = btn.dataset.desc || "";
+        document.getElementById('form_brand').value = btn.dataset.brand;
+        document.getElementById('form_category').value = btn.dataset.category;
+        document.getElementById('form_status').value = btn.dataset.status;
+        document.getElementById('form_cost').value = btn.dataset.cost;
+        document.getElementById('form_qty').value = btn.dataset.qty;
+
+        // show preview square
+        const img = document.getElementById('previewImg');
+        const txt = document.getElementById('imgBoxText');
+        img.src = btn.dataset.image;
+        img.style.display = "block";
+        txt.style.display = "none";
+    }
+
+    function openDeleteModal(productName){
+        document.getElementById('deleteText').innerHTML =
+            `Are you sure you want to delete <strong>${productName}</strong>?`;
+        $('#deleteModal').modal('show');
+    }
+
+    function openDetailModal(card){
+    const img = card.dataset.image;
+    const title = card.dataset.title;
+    const brand = card.dataset.brand;
+    const category = card.dataset.category;
+    const status = card.dataset.status;
+    const supplier = card.dataset.supplier;
+    const cost = Number(card.dataset.cost || 0);
+    const qty = card.dataset.qty || 0;
+
+    document.getElementById('detailImg').src = img;
+    document.getElementById('detailTitle').innerText = title;
+    document.getElementById('detailName').innerText = title;
+
+    document.getElementById('detailBrandCat').innerText = `${brand} · ${category}`;
+    document.getElementById('detailBrandText').innerText = brand;
+    document.getElementById('detailCategoryText').innerText = category;
+
+    document.getElementById('detailSupplier').innerText = supplier;
+    document.getElementById('detailCost').innerText = cost.toLocaleString();
+    document.getElementById('detailCostBig').innerText = cost.toLocaleString();
+    document.getElementById('detailQty').innerText = qty;
+
+    // Optional: short description from card if you add data-desc on clickable area
+    const desc = card.dataset.desc || "No description provided.";
+    document.getElementById('detailShortDesc').innerText = desc;
+
+    // Status badge style
+    const badge = document.getElementById('detailStatus');
+    badge.innerText = status;
+    badge.className = "badge badge-pill px-3 py-2 mr-3";
+
+    if(status.toLowerCase() === "available"){
+        badge.classList.add("badge-success");
+    }else{
+        badge.classList.add("badge-secondary");
+    }
+
+    $('#detailModal').modal('show');
+    }
+</script>
 
   <!-- Control Sidebar -->
   <aside class="control-sidebar control-sidebar-dark">
