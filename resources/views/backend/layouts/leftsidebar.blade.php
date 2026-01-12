@@ -52,13 +52,13 @@
         </li>
 
         <!-- SUPPLIERS -->
-        <li class="nav-header">SUPPLIERS</li>
+        <li class="nav-header">PROCUREMENT</li>
 
         <li class="nav-item">
           <a href="{{ url('/suppliers') }}"
              class="nav-link {{ request()->is('suppliers') ? 'active' : '' }}">
             <i class="nav-icon fas fa-industry"></i>
-            <p>Brand Suppliers</p>
+            <p>Supplier Brands</p>
           </a>
         </li>
 
@@ -66,23 +66,15 @@
           <a href="{{ url('/product_management') }}"
              class="nav-link {{ request()->is('product_management') ? 'active' : '' }}">
             <i class="nav-icon fas fa-boxes"></i>
-            <p>Product Management</p>
-          </a>
-        </li>
-        <li class="nav-item">
-          <a href="{{ url('/supplier_products') }}"
-            class="nav-link {{ request()->is('supplier_products') ? 'active' : '' }}">
-            <i class="nav-icon fas fa-box-open"></i>
             <p>Supplier Products</p>
           </a>
         </li>
-
 
         <li class="nav-item">
           <a href="{{ url('/supplier_orders') }}"
              class="nav-link {{ request()->is('supplier_orders') ? 'active' : '' }}">
             <i class="nav-icon fas fa-file-invoice"></i>
-            <p>Supplier Order History</p>
+            <p>Purchase Orders</p>
           </a>
         </li>
 
@@ -98,18 +90,18 @@
           <a href="{{ url('/supplier_returns') }}"
              class="nav-link {{ request()->is('supplier_returns') ? 'active' : '' }}">
             <i class="nav-icon fas fa-undo-alt"></i>
-            <p>Goods Return</p>
+            <p>Supplier Returns</p>
           </a>
         </li>
 
         <!-- STOCKS -->
-        <li class="nav-header">STOCKS</li>
+        <li class="nav-header">INVENTORY</li>
 
         <li class="nav-item">
           <a href="{{ url('/approved_good_stock') }}"
              class="nav-link {{ request()->is('approved_good_stock') ? 'active' : '' }}">
             <i class="nav-icon fas fa-check-circle"></i>
-            <p>Approved Goods</p>
+            <p>Stock Approval</p>
           </a>
         </li>
 
@@ -117,7 +109,7 @@
           <a href="{{ url('/stock_categorys') }}"
              class="nav-link {{ request()->is('stock_categorys') ? 'active' : '' }}">
             <i class="nav-icon fas fa-tags"></i>
-            <p>Stock Categories</p>
+            <p>Inventory Categories</p>
           </a>
         </li>
 
@@ -125,7 +117,7 @@
           <a href="{{ url('/product_stock_list') }}"
              class="nav-link {{ request()->is('product_stock_list') ? 'active' : '' }}">
             <i class="nav-icon fas fa-warehouse"></i>
-            <p>Stock Lists</p>
+            <p>Inventory Items</p>
           </a>
         </li>
 
@@ -133,18 +125,18 @@
           <a href="{{ url('/stock_ledger') }}"
              class="nav-link {{ request()->is('stock_ledger') ? 'active' : '' }}">
             <i class="nav-icon fas fa-book"></i>
-            <p>Stock Ledgers</p>
+            <p>Inventory Ledger</p>
           </a>
         </li>
 
         <!-- CUSTOMERS -->
-        <li class="nav-header">CUSTOMERS</li>
+        <li class="nav-header">SALES</li>
 
         <li class="nav-item">
           <a href="{{ url('/customers') }}"
              class="nav-link {{ request()->is('customers') ? 'active' : '' }}">
             <i class="nav-icon fas fa-users"></i>
-            <p>Customer List</p>
+            <p>Customers</p>
           </a>
         </li>
 
@@ -152,7 +144,7 @@
           <a href="{{ url('/sales_order') }}"
              class="nav-link {{ request()->path() === 'sales_order' ? 'active' : '' }}">
             <i class="nav-icon fas fa-shopping-cart"></i>
-            <p>Sale Orders</p>
+            <p>Sales Orders</p>
           </a>
         </li>
 
@@ -160,7 +152,7 @@
           <a href="{{ url('/sales_order_history') }}"
              class="nav-link {{ request()->path() === 'sales_order_history' ? 'active' : '' }}">
             <i class="nav-icon fas fa-history"></i>
-            <p>Sale Order Historys</p>
+            <p>Sales Invoices</p>
           </a>
         </li>
 
