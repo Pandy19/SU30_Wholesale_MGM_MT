@@ -126,131 +126,143 @@
 </div>
 
 
-<!-- ADD SUPPLIER MODAL -->
 <div class="modal fade" id="addSupplierModal" tabindex="-1">
-<div class="modal-dialog modal-xl">
-<div class="modal-content">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
 
-<!-- HEADER -->
-<div class="modal-header bg-success text-white">
-    <h5 class="modal-title">
-        <i class="fas fa-user-plus mr-1"></i> Add New Supplier
-    </h5>
-    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
-</div>
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">
+                    <i class="fas fa-user-plus mr-1"></i> Add New Supplier
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
 
-<!-- BODY -->
-<div class="modal-body">
-<form>
+            <div class="modal-body">
+                <form>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-primary">Select Category</label>
+                                <select class="form-control border-primary" name="category_id">
+                                    <option value="">-- Choose Category --</option>
+                                    <option value="mobile-phone">Mobile Phone</option>
+                                    <option value="smart-tv">Smart TV</option>
+                                    <option value="washing-machine">Washing Machine</option>
+                                    <option value="air-conditioner">Air Conditioner</option>
+                                    <option value="refrigerator">Refrigerator</option>
+                                    <option value="audio-devices">Audio Devices</option>
+                                </select>
+                            </div>
+                        </div>
 
-<div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-primary">Select Brand</label>
+                                <select class="form-control border-primary" name="brand_id">
+                                    <option value="">-- Choose Brand --</option>
+                                    <option value="apple">Apple</option>
+                                    <option value="samsung">Samsung</option>
+                                    <option value="lg">LG</option>
+                                    <option value="daikin">Daikin</option>
+                                    <option value="sony">Sony</option>
+                                    <option value="panasonic">Panasonic</option>
+                                </select>
+                                <small class="text-muted">Links this supplier to the specific Brand row on your overview page.</small>
+                            </div>
+                        </div>
 
-    <!-- SUPPLIER CODE -->
-    <div class="col-md-4">
-        <div class="form-group">
-            <label>Supplier Code</label>
-            <input type="text" class="form-control" placeholder="Auto or manual (ex: SUP-012)">
+                        <div class="col-md-12"><hr></div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Supplier Code</label>
+                                <input type="text" class="form-control" placeholder="Ex: SUP-012">
+                            </div>
+                        </div>
+
+                        <div class="col-md-8">
+                            <div class="form-group">
+                                <label>Company Name</label>
+                                <input type="text" class="form-control" placeholder="Supplier company name">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Contact Person</label>
+                                <input type="text" class="form-control" placeholder="Contact person name">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Phone Number</label>
+                                <input type="text" class="form-control" placeholder="Phone number">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" class="form-control" placeholder="Email address">
+                            </div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Address</label>
+                                <input type="text" class="form-control" placeholder="City / Address">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Payment Term</label>
+                                <select class="form-control">
+                                    <option>Cash</option>
+                                    <option>Net 7</option>
+                                    <option>Net 15</option>
+                                    <option>Net 30</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Lead Time (Days)</label>
+                                <input type="number" class="form-control" placeholder="Ex: 5">
+                            </div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Status</label>
+                                <select class="form-control">
+                                    <option value="active" selected>Active</option>
+                                    <option value="inactive">Inactive</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Upload Work ID Card / Business License</label>
+                                <input type="file" class="form-control">
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button class="btn btn-success">
+                    <i class="fas fa-save mr-1"></i> Save Supplier
+                </button>
+            </div>
+
         </div>
     </div>
-
-    <!-- COMPANY -->
-    <div class="col-md-8">
-        <div class="form-group">
-            <label>Company Name</label>
-            <input type="text" class="form-control" placeholder="Supplier company name">
-        </div>
-    </div>
-
-    <!-- CONTACT PERSON -->
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Contact Person</label>
-            <input type="text" class="form-control" placeholder="Contact person name">
-        </div>
-    </div>
-
-    <!-- PHONE -->
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Phone Number</label>
-            <input type="text" class="form-control" placeholder="Phone number">
-        </div>
-    </div>
-
-    <!-- EMAIL -->
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Email Address</label>
-            <input type="email" class="form-control" placeholder="Email address">
-        </div>
-    </div>
-
-    <!-- ADDRESS -->
-    <div class="col-md-6">
-        <div class="form-group">
-            <label>Address</label>
-            <input type="text" class="form-control" placeholder="City / Address">
-        </div>
-    </div>
-
-    <!-- PAYMENT TERM -->
-    <div class="col-md-4">
-        <div class="form-group">
-            <label>Payment Term</label>
-            <select class="form-control">
-                <option>Cash</option>
-                <option>Net 7</option>
-                <option>Net 15</option>
-                <option>Net 30</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- LEAD TIME -->
-    <div class="col-md-4">
-        <div class="form-group">
-            <label>Lead Time (Days)</label>
-            <input type="number" class="form-control" placeholder="Ex: 5">
-        </div>
-    </div>
-
-    <!-- STATUS -->
-    <div class="col-md-4">
-        <div class="form-group">
-            <label>Status</label>
-            <select class="form-control">
-                <option value="active" selected>Active</option>
-                <option value="inactive">Inactive</option>
-            </select>
-        </div>
-    </div>
-
-    <!-- WORK ID CARD -->
-    <div class="col-md-12">
-        <div class="form-group">
-            <label>Upload Work ID Card</label>
-            <input type="file" class="form-control">
-            <small class="text-muted">
-                For internal verification (optional)
-            </small>
-        </div>
-    </div>
-
-</div>
-
-</form>
-</div>
-
-<!-- FOOTER -->
-<div class="modal-footer">
-    <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-    <button class="btn btn-success">
-        Save Supplier
-    </button>
-</div>
-
-</div>
-</div>
 </div>
 
 <!-- ADD CATEGORY MODAL -->
