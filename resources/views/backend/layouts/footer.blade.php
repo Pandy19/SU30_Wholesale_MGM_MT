@@ -530,6 +530,153 @@ function openCartAfterAdded(){
     $('#addToCartModal').modal('hide');
 }
 
+  let currentItem = null;
+
+  function money(n) {
+    const val = Number(n || 0);
+    return '$' + val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+  }
+
+  function syncTotals() {
+    if (!currentItem) return;
+
+    const qty = Number(document.getElementById('m_qty').value || 0);
+    const unit = Number(currentItem.unitCost || 0);
+    document.getElementById('m_total').textContent = money(qty * unit);
+  }
+
+  function clampQty() {
+    if (!currentItem) return;
+
+    const max = Number(currentItem.approvedQty || 1);
+    const input = document.getElementById('m_qty');
+    let qty = Number(input.value || 1);
+
+    if (qty < 1) qty = 1;
+    if (qty > max) qty = max;
+
+    input.value = qty;
+    syncTotals();
+  }
+
+  function openAddToStockModal(item) {
+    currentItem = item;
+
+    // Fill UI
+    document.getElementById('m_image').src = item.image || '';
+    document.getElementById('m_name').textContent = item.name || '—';
+    document.getElementById('m_sku').textContent = item.sku || '—';
+    document.getElementById('m_po').textContent = item.po || '—';
+    document.getElementById('m_brand').textContent = item.brand || '—';
+    document.getElementById('m_supplier').textContent = item.supplier || '—';
+
+    document.getElementById('m_approvedQty').textContent = item.approvedQty ?? 0;
+    document.getElementById('m_qtyMax').textContent = item.approvedQty ?? 0;
+
+    document.getElementById('m_unitCost').textContent = money(item.unitCost || 0);
+
+    // Defaults
+    document.getElementById('m_qty').value = item.approvedQty || 1;
+    document.getElementById('m_location').value = '';
+    document.getElementById('m_notes').value = '';
+    document.getElementById('m_warn').classList.add('d-none');
+
+    clampQty();
+
+    $('#addToStockModal').modal('show');
+  }
+
+  // Stepper buttons
+  document.addEventListener('DOMContentLoaded', function() {
+    const qtyInput = document.getElementById('m_qty');
+    const minus = document.getElementById('qtyMinus');
+    const plus = document.getElementById('qtyPlus');
+    const confirmBtn = document.getElementById('m_confirmBtn');
+
+    minus.addEventListener('click', () => {
+      qtyInput.value = (Number(qtyInput.value || 1) - 1);
+      clampQty();
+    });
+
+    plus.addEventListener('click', () => {
+      qtyInput.value = (Number(qtyInput.value || 1) + 1);
+      clampQty();
+    });
+
+    qtyInput.addEventListener('input', clampQty);
+
+    confirmBtn.addEventListener('click', async () => {
+      const warn = document.getElementById('m_warn');
+      const spinner = document.getElementById('m_spinner');
+
+      const qty = Number(document.getElementById('m_qty').value || 0);
+      const location = document.getElementById('m_location').value;
+      const notes = document.getElementById('m_notes').value || '';
+
+      const max = Number(currentItem?.approvedQty || 0);
+      const valid = location && qty >= 1 && qty <= max;
+
+      if (!valid) {
+        warn.classList.remove('d-none');
+        return;
+      }
+      warn.classList.add('d-none');
+
+      // Build payload (send to backend)
+      const payload = {
+        sku: currentItem.sku,
+        po: currentItem.po,
+        qty: qty,
+        location: location,
+        notes: notes
+      };
+
+      // Loading state
+      spinner.classList.remove('d-none');
+      confirmBtn.disabled = true;
+
+      try {
+        // TODO: replace with your real endpoint + CSRF
+        // Example with fetch:
+        // await fetch("{{ route('stock.addApproved') }}", {
+        //   method: "POST",
+        //   headers: {
+        //     "Content-Type": "application/json",
+        //     "X-CSRF-TOKEN": "{{ csrf_token() }}"
+        //   },
+        //   body: JSON.stringify(payload)
+        // });
+
+        console.log('Submitting payload:', payload);
+
+        $('#addToStockModal').modal('hide');
+
+        // Optionally show toast / reload / update row status
+        // location.reload();
+
+      } catch (e) {
+        warn.textContent = "Something went wrong. Please try again.";
+        warn.classList.remove('d-none');
+      } finally {
+        spinner.classList.add('d-none');
+        confirmBtn.disabled = false;
+      }
+    });
+  });
+document.querySelectorAll('.payment-card').forEach(card => {
+    card.addEventListener('click', function () {
+
+        document.querySelectorAll('.payment-card')
+            .forEach(c => c.classList.remove('active'));
+
+        this.classList.add('active');
+
+        document.getElementById('payment_method').value =
+            this.getAttribute('data-value');
+    });
+});
+
+
 
 
 </script>

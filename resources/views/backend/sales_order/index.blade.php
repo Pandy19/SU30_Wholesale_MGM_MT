@@ -223,37 +223,81 @@
 
 <div class="col-md-6">
     <div class="card">
-    <div class="card-header">
-        <strong>Payment</strong>
+  <div class="card-header">
+    <strong>Payment Information</strong>
+  </div>
+
+  <div class="card-body">
+
+    <!-- Payment Icons Row -->
+    <div class="mb-3">
+        <img src="{{ asset('assets/dist/img/credit/visa.png') }}">
+        <img src="{{ asset('assets/dist/img/credit/mastercard.png') }}">
+        <img src="{{ asset('assets/dist/img/credit/paypal2.png') }}">
+        <img src="{{ asset('assets/dist/img/credit/american-express.png') }}">
     </div>
-    <div class="card-body">
 
-        <div class="form-group">
-            <label>Payment Method</label>
-            <select class="form-control">
-                <option>Cash</option>
-                <option>Bank Transfer</option>
-                <option>Digital Wallet</option>
-            </select>
+    <!-- Payment Method -->
+    <div class="form-group">
+      <label class="mb-1"><strong>Payment Method</strong></label>
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <span class="input-group-text"><i class="fas fa-credit-card"></i></span>
         </div>
-
-        <div class="form-group">
-            <label>Payment Terms</label>
-            <select class="form-control">
-                <option>B2C: Full Payment</option>
-                <option>B2B: Net 7 Days</option>
-                <option>B2B: Net 15 Days</option>
-            </select>
-        </div>
-
-        <div class="form-group">
-            <label>Note</label>
-            <textarea class="form-control" rows="2"
-                      placeholder="Optional note"></textarea>
-        </div>
-
+        <select class="form-control" name="payment_method" id="payment_method">
+          <option value="Cash">Cash</option>
+          <option value="Bank Transfer">Bank Transfer</option>
+          <option value="Card">Card</option>
+          <option value="Digital Wallet">Digital Wallet</option>
+        </select>
+      </div>
     </div>
+
+    <!-- Payment Terms -->
+    <div class="form-group">
+      <label class="mb-1"><strong>Payment Terms</strong></label>
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <span class="input-group-text"><i class="fas fa-calendar-check"></i></span>
+        </div>
+        <select class="form-control" name="payment_terms" id="payment_terms">
+          <option value="Immediate">Immediate</option>
+          <option value="Net 7 Days">Net 7 Days</option>
+          <option value="Net 15 Days">Net 15 Days</option>
+        </select>
+      </div>
     </div>
+
+    <!-- Payment Status -->
+    <div class="form-group">
+      <label class="mb-1"><strong>Payment Status</strong></label>
+      <div class="input-group">
+        <div class="input-group-prepend">
+          <span class="input-group-text"><i class="fas fa-info-circle"></i></span>
+        </div>
+        <select class="form-control" name="payment_status" id="payment_status">
+          <option value="Unpaid">Unpaid</option>
+          <option value="Paid">Paid</option>
+          <option value="Partial">Partial</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Payment Reference / Note -->
+    <div class="form-group">
+      <label class="mb-1"><strong>Payment Reference / Note</strong></label>
+      <textarea class="form-control" name="payment_note" rows="3"
+        placeholder="Transaction ID, cheque no, or internal note"></textarea>
+    </div>
+
+    <!-- Actions -->
+    <button type="button" class="btn btn-outline-secondary btn-sm" onclick="window.print()">
+      <i class="fas fa-print mr-1"></i> Print
+    </button>
+
+  </div>
+</div>
+
 </div>
 
 <div class="col-md-6">

@@ -21,6 +21,7 @@ use App\Http\Controllers\backend\sale_reportController;
 use App\Http\Controllers\backend\profit_reportController;
 use App\Http\Controllers\backend\admin_loginController;
 use App\Http\Controllers\backend\supplier_dashboardController;
+use App\Http\Controllers\StockController;
 
 
 //dashboard
@@ -131,5 +132,9 @@ Route::get('/admin_register', function () {
 Route::controller(supplier_dashboardController::class)->group(function () {
     Route::get('/Supplier_Dashboard', 'index')->name('Supplier_Dashboard.index');
 });
+
+
+Route::post('/stock/add-approved', [StockController::class, 'addApproved'])
+    ->name('stock.addApproved');
 
 

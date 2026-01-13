@@ -87,3 +87,42 @@ body.modal-open{
   .content-wrapper .content { padding-bottom: 28px !important; }
   .invoice { margin-bottom: 15px !important; }
 
+.payment-card {
+    border: 2px solid #dee2e6;
+    border-radius: 10px;
+    padding: 18px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all .2s ease;
+    background: #fff;
+}
+
+.payment-card i {
+    font-size: 28px;
+    margin-bottom: 6px;
+    color: #6c757d;
+}
+
+.payment-card:hover {
+    border-color: #007bff;
+    transform: translateY(-2px);
+}
+
+.payment-card.active {
+    border-color: #28a745;
+    background: #f4fff7;
+}
+
+.payment-card.active i {
+    color: #28a745;
+}
+
+.payment-card div {
+    font-weight: 600;
+}
+ .input-group-text {
+    background: #fff;
+  }
+  .card-body label {
+    font-size: 14px;
+  }
