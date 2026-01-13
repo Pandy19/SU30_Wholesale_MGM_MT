@@ -91,6 +91,13 @@
                 <strong>Samsung Galaxy S24</strong><br>
                 <small class="text-muted">SKU: SGS24</small>
             </td>
+            <td>
+                <span class="text-truncate d-inline-block"
+                      style="max-width: 220px;"
+                      title="6.2” AMOLED display, 256GB storage, Snapdragon processor, 5G enabled, AI camera features, Gorilla Glass, Android latest version">
+                    6.2” AMOLED display, 256GB storage, Snapdragon processor, 5G enabled, AI camera features, Gorilla Glass, Android latest version
+                </span>
+            </td>
             <td>Samsung</td>
             <td>Mobile Phone</td>
             <td>
@@ -337,8 +344,6 @@ Apple Pay supported
     </div>
 </div>
 
-
-
 <div class="modal fade" id="cartModal" tabindex="-1" role="dialog" aria-labelledby="cartModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-xl" role="document">
         <div class="modal-content">
@@ -458,5 +463,42 @@ Apple Pay supported
 </div>
 
 @endsection
+
 @section('scripts')
+<script>
+    // Simple Script to Handle Cart Calculations inside the Modal
+    $(document).ready(function() {
+        
+        function updateCartTotals() {
+            let totalQty = 0;
+            let grandTotal = 0;
+
+            $('.cart-item').each(function() {
+                // Get Price
+                let price = parseFloat($(this).find('.item-price').text().replace(',', ''));
+                // Get Qty
+                let qty = parseInt($(this).find('.item-qty').val());
+                if(qty < 1 || isNaN(qty)) qty = 1;
+
+                // Update Row Subtotal
+                let subtotal = price * qty;
+                $(this).find('.item-subtotal').text(subtotal.toFixed(2));
+
+                // Add to Grand Totals
+                totalQty += qty;
+                grandTotal += subtotal;
+            });
+
+            // Update UI Totals
+            $('#total-qty').text(totalQty);
+            $('#grand-total').text('$' + grandTotal.toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+        }
+
+        // Trigger update when any quantity input changes
+        $(document).on('change keyup', '.item-qty', function() {
+            updateCartTotals();
+        });
+
+    });
+</script>
 @endsection

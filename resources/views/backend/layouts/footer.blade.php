@@ -1,3 +1,72 @@
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    $(document).ready(function() {
+        
+        // 1. Function for Green Tick Popup & Badge Update
+        // Link this to your button using: onclick="addToCart()"
+        window.addToCart = function() {
+            Swal.fire({
+                icon: 'success',
+                title: 'Item Added!',
+                text: 'The product has been added to your draft.',
+                showConfirmButton: false,
+                timer: 1500,
+                iconColor: '#28a745'
+            });
+
+            // Update the shopping cart badge count (+1)
+            let badge = $('.navbar-badge');
+            let currentCount = parseInt(badge.text()) || 0;
+            badge.text(currentCount + 1);
+        };
+
+        // 2. Calculation Logic for the Cart Modal
+        function updateCartTotals() {
+            let totalQty = 0;
+            let grandTotal = 0;
+
+            $('.cart-item').each(function() {
+                // Get Price (removes $ and commas)
+                let priceText = $(this).find('.unit-price, .item-price').text();
+                let price = parseFloat(priceText.replace(/[^0-9.-]+/g, ""));
+                
+                // Get Quantity
+                let qty = parseInt($(this).find('.item-qty').val());
+                if (qty < 1 || isNaN(qty)) {
+                    qty = 1;
+                    $(this).find('.item-qty').val(1);
+                }
+
+                // Update Row Subtotal
+                let subtotal = price * qty;
+                $(this).find('.subtotal, .item-subtotal').text(subtotal.toLocaleString('en-US', {
+                    minimumFractionDigits: 2, 
+                    maximumFractionDigits: 2
+                }));
+
+                totalQty += qty;
+                grandTotal += subtotal;
+            });
+
+            // Update UI Totals in Modal
+            $('#total-qty').text(totalQty);
+            $('#grand-total').text('$' + grandTotal.toLocaleString('en-US', {
+                minimumFractionDigits: 2, 
+                maximumFractionDigits: 2
+            }));
+        }
+
+        // Event: Update totals when quantity changes
+        $(document).on('change keyup', '.item-qty', function() {
+            updateCartTotals();
+        });
+
+        // Run calculation once on page load
+        updateCartTotals();
+    });
+</script>
+
 
 <!-- ===================================================== -->
 <!-- CHART JS -->
