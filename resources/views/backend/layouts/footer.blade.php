@@ -501,6 +501,37 @@ document.addEventListener('DOMContentLoaded', function () {
 
     $('#detailModal').modal('show');
     }
+   function addToCartSuccess(btn){
+    // close supplier modal first
+    $('#supplierSelectModal').modal('hide');
+
+    // fill success modal content
+    document.getElementById('cartModalProduct').innerText = btn.dataset.product || '—';
+    document.getElementById('cartModalSKU').innerText = btn.dataset.sku || '—';
+    document.getElementById('cartModalSupplier').innerText = btn.dataset.supplier || '—';
+    document.getElementById('cartModalPrice').innerText = Number(btn.dataset.price || 0).toLocaleString();
+
+    // show success modal
+    $('#addToCartModal').modal('show');
+}
+
+function openCartAfterAdded(){
+    // When success modal is fully closed -> open cart modal (prevents scroll bug)
+    $('#addToCartModal').one('hidden.bs.modal', function () {
+        $('#cartModal').modal('show');
+
+        // reset cart scroll to top
+        setTimeout(() => {
+            $('#cartModal .modal-body').scrollTop(0);
+        }, 50);
+    });
+
+    // close success modal now
+    $('#addToCartModal').modal('hide');
+}
+
+
+
 </script>
 
   <!-- Control Sidebar -->

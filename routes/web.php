@@ -46,6 +46,8 @@ Route::get('/purchase_orders/confirm_payment', function () {
     return view('backend.purchase_orders.confirm_payment');
 })->name('purchase_orders.confirm_payment');
 
+
+
 Route::controller(supplier_ordersController::class)->group(function () {
     Route::get('/supplier_orders', 'index')->name('supplier_orders.index');
 });

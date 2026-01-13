@@ -54,91 +54,183 @@
 <!-- ===================================================== -->
 <!-- PURCHASE ORDER (INVOICE STYLE) -->
 <!-- ===================================================== -->
-<div class="invoice p-3 mb-3">
+{{-- ===================== SUPPLIER INVOICE: GLOBAL TECH SUPPLY ===================== --}}
+<div class="invoice p-3 mb-4 border rounded bg-white">
 
-<div class="row">
-    <div class="col-12">
-        <h4>
-            <i class="fas fa-globe"></i> Your Wholesale Co.
-            <small class="float-right">Date: {{ date('d/m/Y') }}</small>
-        </h4>
+    {{-- HEADER --}}
+    <div class="row">
+        <div class="col-12">
+            <h4 class="mb-0">
+                <i class="fas fa-globe"></i> Your Wholesale Co.
+                <small class="float-right">Date: {{ date('d/m/Y') }}</small>
+            </h4>
+            <hr>
+        </div>
+    </div>
+
+    {{-- FROM / TO / INFO --}}
+    <div class="row invoice-info">
+        <div class="col-sm-4 invoice-col">
+            <strong>From</strong>
+            <address class="mb-0">
+                <strong>Your Wholesale Co.</strong><br>
+                Phnom Penh<br>
+                Phone: 012 345 678<br>
+                Email: purchase@yourcompany.com
+            </address>
+        </div>
+
+        <div class="col-sm-4 invoice-col">
+            <strong>To</strong>
+            <address class="mb-0">
+                <strong>Global Tech Supply</strong><br>
+                Phnom Penh<br>
+                Phone: 012 888 999<br>
+                Email: info@globaltech.com
+            </address>
+        </div>
+
+        <div class="col-sm-4 invoice-col">
+            <b>Purchase Order #PO-0001</b><br>
+            <b>Account:</b> SUP-001<br>
+            <b>Payment Due:</b> {{ date('d/m/Y', strtotime('+7 days')) }}<br>
+            <b>Payment Term:</b> Net 30<br>
+            <b>Lead Time:</b> 5 Days
+        </div>
+    </div>
+
+    {{-- ITEMS TABLE --}}
+    <div class="row mt-3">
+        <div class="col-12 table-responsive">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Description</th>
+                    <th style="width:140px">Qty</th>
+                    <th class="text-right">Subtotal</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Samsung Galaxy S24</td>
+                    <td>SGS24</td>
+                    <td>Mobile Phone – 256GB, Factory Unlocked</td>
+                    <td>
+                        <input type="number" class="form-control" value="1" min="1" max="40">
+                        <small class="text-muted">Available: 40</small>
+                    </td>
+                    <td class="text-right font-weight-bold">$950.00</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {{-- TOTALS --}}
+    <div class="row mt-3">
+        <div class="col-6"></div>
+        <div class="col-6">
+            <table class="table">
+                <tr><th>Subtotal</th><td class="text-right">$950.00</td></tr>
+                <tr><th>Tax</th><td class="text-right">$0.00</td></tr>
+                <tr><th>Total</th><td class="text-right"><strong>$950.00</strong></td></tr>
+            </table>
+        </div>
     </div>
 </div>
 
-<div class="row invoice-info mt-4">
-    <div class="col-sm-4 invoice-col">
-        From
-        <address>
-            <strong>Your Wholesale Co.</strong><br>
-            Phnom Penh<br>
-            Phone: 012 345 678<br>
-            Email: purchase@yourcompany.com
-        </address>
+
+{{-- ===================== SUPPLIER INVOICE: ASIA MOBILE DISTRIBUTION ===================== --}}
+<div class="invoice p-3 mb-4 border rounded bg-white">
+
+    {{-- HEADER --}}
+    <div class="row">
+        <div class="col-12">
+            <h4 class="mb-0">
+                <i class="fas fa-globe"></i> Your Wholesale Co.
+                <small class="float-right">Date: {{ date('d/m/Y') }}</small>
+            </h4>
+            <hr>
+        </div>
     </div>
 
-    <div class="col-sm-4 invoice-col">
-        To
-        <address>
-            <strong>Global Tech Supply</strong><br>
-            Phnom Penh<br>
-            Phone: 012 888 999<br>
-            Email: info@globaltech.com
-        </address>
+    {{-- FROM / TO / INFO --}}
+    <div class="row invoice-info">
+        <div class="col-sm-4 invoice-col">
+            <strong>From</strong>
+            <address class="mb-0">
+                <strong>Your Wholesale Co.</strong><br>
+                Phnom Penh<br>
+                Phone: 012 345 678<br>
+                Email: purchase@yourcompany.com
+            </address>
+        </div>
+
+        <div class="col-sm-4 invoice-col">
+            <strong>To</strong>
+            <address class="mb-0">
+                <strong>Asia Mobile Distribution</strong><br>
+                Phnom Penh<br>
+                Phone: 098 765 432<br>
+                Email: sales@asiamobile.com
+            </address>
+        </div>
+
+        <div class="col-sm-4 invoice-col">
+            <b>Purchase Order #PO-0002</b><br>
+            <b>Account:</b> SUP-002<br>
+            <b>Payment Due:</b> {{ date('d/m/Y', strtotime('+7 days')) }}<br>
+            <b>Payment Term:</b> Cash<br>
+            <b>Lead Time:</b> 3 Days
+        </div>
     </div>
 
-    <div class="col-sm-4 invoice-col">
-        <b>Purchase Order #PO-0001</b><br><br>
-        <b>Account:</b> SUP-001<br>
-        <b>Payment Due:</b> {{ date('d/m/Y', strtotime('+7 days')) }}
+    {{-- ITEMS TABLE --}}
+    <div class="row mt-3">
+        <div class="col-12 table-responsive">
+            <table class="table table-striped">
+                <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Product</th>
+                    <th>SKU</th>
+                    <th>Description</th>
+                    <th style="width:140px">Qty</th>
+                    <th class="text-right">Subtotal</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Samsung Smart TV 55"</td>
+                    <td>SS-TV55</td>
+                    <td>4K UHD Smart TV, HDR, Wi-Fi Enabled</td>
+                    <td>
+                        <input type="number" class="form-control" value="1" min="1" max="20">
+                        <small class="text-muted">Available: 20</small>
+                    </td>
+                    <td class="text-right font-weight-bold">$700.00</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-</div>
 
-<div class="row mt-4">
-<div class="col-12 table-responsive">
-<table class="table table-striped">
-<thead>
-<tr>
-    <th>#</th>
-    <th>Product</th>
-    <th>SKU</th>
-    <th>Description</th>
-    <th style="width:140px">Qty</th>
-    <th class="text-right">Subtotal</th>
-</tr>
-</thead>
-<tbody>
-
-<tr>
-    <td>1</td>
-    <td>Samsung Galaxy S24</td>
-    <td>SGS24</td>
-    <td>Mobile Phone – 256GB, Factory Unlocked</td>
-    <td>
-        <input type="number" class="form-control order-qty"
-               value="1" min="1" max="40"
-               data-price="950" data-available="40">
-        <small class="text-muted">Available: 40</small>
-    </td>
-    <td class="text-right subtotal">$950.00</td>
-</tr>
-
-<tr>
-    <td>2</td>
-    <td>Samsung Smart TV 55"</td>
-    <td>SS-TV55</td>
-    <td>4K UHD Smart TV, HDR, Wi-Fi Enabled</td>
-    <td>
-        <input type="number" class="form-control order-qty"
-               value="1" min="1" max="20"
-               data-price="700" data-available="20">
-        <small class="text-muted">Available: 20</small>
-    </td>
-    <td class="text-right subtotal">$700.00</td>
-</tr>
-
-</tbody>
-</table>
-</div>
+    {{-- TOTALS --}}
+    <div class="row mt-3">
+        <div class="col-6"></div>
+        <div class="col-6">
+            <table class="table">
+                <tr><th>Subtotal</th><td class="text-right">$700.00</td></tr>
+                <tr><th>Tax</th><td class="text-right">$0.00</td></tr>
+                <tr><th>Total</th><td class="text-right"><strong>$700.00</strong></td></tr>
+            </table>
+        </div>
+    </div>
 </div>
 
 <div class="row mt-4">

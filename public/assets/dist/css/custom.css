@@ -64,7 +64,26 @@
         max-height: calc(100vh - 200px);
         overflow-y: auto;
     }
-    .modal-xl{ max-width: 1100px; }
-  .card{ border-radius: 12px; }
-  .modal-header{ border-bottom: 1px solid #eee; }
-  .modal-footer{ border-top: 1px solid #eee; }
+.modal-xl{ max-width: 1100px; }
+.card{ border-radius: 12px; }
+.modal-header{ border-bottom: 1px solid #eee; }
+.modal-footer{ border-top: 1px solid #eee; }
+
+#addToCartModal .modal-content{
+border-radius: 14px;
+}
+/* Allow modal to scroll inside, not the page */
+.modal-dialog-scrollable .modal-body{
+  max-height: calc(100vh - 180px); /* header + footer space */
+  overflow-y: auto;
+}
+
+/* If AdminLTE blocks scroll, force modal scroll to work */
+body.modal-open{
+  overflow: hidden !important;
+}
+  /* reduce extra whitespace under content */
+  .content-wrapper { min-height: auto !important; }
+  .content-wrapper .content { padding-bottom: 28px !important; }
+  .invoice { margin-bottom: 15px !important; }
+

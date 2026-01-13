@@ -189,9 +189,16 @@
                                     <td>5 Days</td>
                                     <td><span class="badge badge-success">Available</span></td>
                                     <td class="text-center">
-                                        <button class="btn btn-sm btn-warning font-weight-bold" onclick="alert('Item added to Cart!')">
+                                       <button class="btn btn-sm btn-warning font-weight-bold"
+                                                onclick="addToCartSuccess(this)"
+                                                data-product="iPhone 15 Pro 256GB"
+                                                data-supplier="Global Tech Supply"
+                                                data-price="950"
+                                                data-sku="IP15P-256">
                                             <i class="fas fa-cart-plus mr-1"></i> Add to Cart
                                         </button>
+
+
                                     </td>
                                 </tr>
                                 <tr>
@@ -204,9 +211,16 @@
                                     <td>3 Days</td>
                                     <td><span class="badge badge-success">Available</span></td>
                                     <td class="text-center">
-                                        <button class="btn btn-sm btn-warning font-weight-bold" onclick="alert('Item added to Cart!')">
+                                        <button class="btn btn-sm btn-warning font-weight-bold"
+                                                onclick="addToCartSuccess(this)"
+                                                data-product="iPhone 15 Pro 256GB"
+                                                data-supplier="Asia Mobile Distribution"
+                                                data-price="980"
+                                                data-sku="IP15P-256">
                                             <i class="fas fa-cart-plus mr-1"></i> Add to Cart
                                         </button>
+
+
                                     </td>
                                 </tr>
                             </tbody>
@@ -352,110 +366,240 @@ Apple Pay supported
                 </button>
             </div>
 
-            <div class="modal-body p-0">
-                
-                <div class="table-responsive">
-                    <table class="table table-striped mb-0" id="cartTable">
-                        <thead class="bg-light">
+           <div class="modal-body p-0">
+
+                <div class="table-responsive p-3">
+
+                    <!-- ================= SUPPLIER GROUP 1 ================= -->
+                    <div class="card mb-3 shadow-sm">
+                    <div class="card-header bg-light d-flex align-items-center justify-content-between">
+                        <div>
+                        <strong><i class="fas fa-truck mr-1 text-primary"></i> Global Tech Supply</strong>
+                        <span class="badge badge-primary ml-2">SUP-001</span>
+                        </div>
+                        <small class="text-muted">Payment: Net 30 • Lead Time: 5 Days</small>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <table class="table table-striped mb-0">
+                        <thead class="bg-white">
                             <tr>
-                                <th style="width: 50px;">#</th>
-                                <th style="width: 250px;">Product</th>
-                                <th>SKU</th>
-                                <th>Description</th>
-                                <th>Supplier</th> <th style="width: 150px;">Cost</th>
-                                <th style="width: 120px;">Qty</th>
-                                <th style="width: 150px;">Subtotal</th>
-                                <th style="width: 50px;"></th>
+                            <th style="width:50px;">#</th>
+                            <th style="width:260px;">Product</th>
+                            <th>SKU</th>
+                            <th>Description</th>
+                            <th style="width:120px;">Cost</th>
+                            <th style="width:130px;">Qty</th>
+                            <th style="width:140px;">Subtotal</th>
+                            <th style="width:50px;"></th>
                             </tr>
                         </thead>
                         <tbody>
-                            <tr class="cart-item">
-                                <td class="align-middle">1</td>
-                                <td class="align-middle">
-                                    <div class="d-flex align-items-center">
-                                        <img src="https://assets.swappie.com/cdn-cgi/image/width=600,height=600,fit=contain,format=auto/swappie-iphone-15-pro-natural-titanium.png?v=cc5784d1" class="img-fluid rounded mr-2" style="width: 40px;">
-                                        <strong>iPhone 15 Pro</strong>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-muted">IP15P-256</td>
-                                <td class="align-middle small">Mobile Phone - 256GB, Factory Unlocked, Titanium</td>
-                                <td class="align-middle">
-                                    <span class="badge badge-outline-primary">Global Tech Supply</span>
-                                </td>
-                                <td class="align-middle">
-                                    $<span class="item-price">950.00</span>
-                                </td>
-                                <td class="align-middle">
-                                    <input type="number" class="form-control form-control-sm item-qty" value="1" min="1">
-                                    <small class="text-muted">Avail: 120</small>
-                                </td>
-                                <td class="align-middle font-weight-bold">
-                                    $<span class="item-subtotal">950.00</span>
-                                </td>
-                                <td class="align-middle">
-                                    <a href="#" class="text-danger"><i class="fas fa-trash"></i></a>
-                                </td>
-                            </tr>
 
                             <tr class="cart-item">
-                                <td class="align-middle">2</td>
-                                <td class="align-middle">
-                                    <div class="d-flex align-items-center">
-                                        <img src="https://www.myg.in/images/thumbnails/300/300/detailed/75/s24ultraviolet1-removebg-preview.png.png" class="img-fluid rounded mr-2" style="width: 40px;">
-                                        <strong>Samsung S24</strong>
-                                    </div>
-                                </td>
-                                <td class="align-middle text-muted">SGS24</td>
-                                <td class="align-middle small">6.2” AMOLED, 256GB, 5G Enabled</td>
-                                <td class="align-middle">
-                                    <span class="badge badge-outline-secondary">Asia Mobile Dist.</span>
-                                </td>
-                                <td class="align-middle">
-                                    $<span class="item-price">720.00</span>
-                                </td>
-                                <td class="align-middle">
-                                    <input type="number" class="form-control form-control-sm item-qty" value="2" min="1">
-                                    <small class="text-muted">Avail: 40</small>
-                                </td>
-                                <td class="align-middle font-weight-bold">
-                                    $<span class="item-subtotal">1440.00</span>
-                                </td>
-                                <td class="align-middle">
-                                    <a href="#" class="text-danger"><i class="fas fa-trash"></i></a>
-                                </td>
+                            <td class="align-middle">1</td>
+                            <td class="align-middle">
+                                <div class="d-flex align-items-center">
+                                <img src="https://assets.swappie.com/cdn-cgi/image/width=600,height=600,fit=contain,format=auto/swappie-iphone-15-pro-natural-titanium.png?v=cc5784d1"
+                                    class="img-fluid rounded mr-2" style="width:40px;">
+                                <div>
+                                    <strong>iPhone 15 Pro</strong><br>
+                                    <small class="text-muted">Supplier: Global Tech Supply</small>
+                                </div>
+                                </div>
+                            </td>
+                            <td class="align-middle text-muted">IP15P-256</td>
+                            <td class="align-middle small">Mobile Phone - 256GB, Factory Unlocked, Titanium</td>
+                            <td class="align-middle">
+                                $<span class="item-price">950.00</span>
+                            </td>
+                            <td class="align-middle">
+                                <input type="number" class="form-control form-control-sm item-qty" value="1" min="1">
+                                <small class="text-muted">Avail: 120</small>
+                            </td>
+                            <td class="align-middle font-weight-bold">
+                                $<span class="item-subtotal">950.00</span>
+                            </td>
+                            <td class="align-middle text-center">
+                                <a href="#" class="text-danger"><i class="fas fa-trash"></i></a>
+                            </td>
                             </tr>
+
                         </tbody>
-                    </table>
-                    <div class="row p-3 bg-white border-top">
+                        </table>
+                    </div>
+
+                    <div class="card-footer bg-white">
+                        <div class="d-flex justify-content-end">
+                        <div class="text-right">
+                            <small class="text-muted">Supplier Subtotal</small><br>
+                            <span class="h6 text-primary mb-0">$950.00</span>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+
+
+                    <!-- ================= SUPPLIER GROUP 2 ================= -->
+                    <div class="card mb-3 shadow-sm">
+                    <div class="card-header bg-light d-flex align-items-center justify-content-between">
+                        <div>
+                        <strong><i class="fas fa-truck mr-1 text-secondary"></i> Asia Mobile Dist.</strong>
+                        <span class="badge badge-secondary ml-2">SUP-002</span>
+                        </div>
+                        <small class="text-muted">Payment: Cash • Lead Time: 3 Days</small>
+                    </div>
+
+                    <div class="card-body p-0">
+                        <table class="table table-striped mb-0">
+                        <thead class="bg-white">
+                            <tr>
+                            <th style="width:50px;">#</th>
+                            <th style="width:260px;">Product</th>
+                            <th>SKU</th>
+                            <th>Description</th>
+                            <th style="width:120px;">Cost</th>
+                            <th style="width:130px;">Qty</th>
+                            <th style="width:140px;">Subtotal</th>
+                            <th style="width:50px;"></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            <tr class="cart-item">
+                            <td class="align-middle">1</td>
+                            <td class="align-middle">
+                                <div class="d-flex align-items-center">
+                                <img src="https://www.myg.in/images/thumbnails/300/300/detailed/75/s24ultraviolet1-removebg-preview.png.png"
+                                    class="img-fluid rounded mr-2" style="width:40px;">
+                                <div>
+                                    <strong>Samsung S24</strong><br>
+                                    <small class="text-muted">Supplier: Asia Mobile Dist.</small>
+                                </div>
+                                </div>
+                            </td>
+                            <td class="align-middle text-muted">SGS24</td>
+                            <td class="align-middle small">6.2” AMOLED, 256GB, 5G Enabled</td>
+                            <td class="align-middle">
+                                $<span class="item-price">720.00</span>
+                            </td>
+                            <td class="align-middle">
+                                <input type="number" class="form-control form-control-sm item-qty" value="2" min="1">
+                                <small class="text-muted">Avail: 40</small>
+                            </td>
+                            <td class="align-middle font-weight-bold">
+                                $<span class="item-subtotal">1440.00</span>
+                            </td>
+                            <td class="align-middle text-center">
+                                <a href="#" class="text-danger"><i class="fas fa-trash"></i></a>
+                            </td>
+                            </tr>
+
+                        </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card-footer bg-white">
+                        <div class="d-flex justify-content-end">
+                        <div class="text-right">
+                            <small class="text-muted">Supplier Subtotal</small><br>
+                            <span class="h6 text-primary mb-0">$1,440.00</span>
+                        </div>
+                        </div>
+                    </div>
+                    </div>
+
+
+                    <!-- ================= FOOTER TOTALS ================= -->
+                    <div class="row p-3 bg-white border-top m-0">
                     <div class="col-md-8">
                         <p class="text-muted small mb-0">
-                            * Items from different suppliers will result in separate Purchase Orders being generated upon confirmation.
+                        * Items from different suppliers will result in separate Purchase Orders being generated upon confirmation.
                         </p>
                     </div>
+
                     <div class="col-md-4">
                         <div class="d-flex justify-content-between mb-2">
-                            <span>Total Qty:</span>
-                            <span id="total-qty" class="font-weight-bold">3</span>
+                        <span>Total Qty:</span>
+                        <span id="total-qty" class="font-weight-bold">3</span>
                         </div>
                         <div class="d-flex justify-content-between border-top pt-2">
-                            <span class="h5">Est. Total:</span>
-                            <span class="h5 text-primary" id="grand-total">$2,390.00</span>
+                        <span class="h5">Est. Total:</span>
+                        <span class="h5 text-primary" id="grand-total">$2,390.00</span>
                         </div>
                     </div>
-                </div>
-                </div>
+                    </div>
 
+                </div>
             </div>
+
 
             <div class="modal-footer bg-light">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Continue Shopping</button>
-                <a href="{{url('/purchase_confirmation')}}" class="btn btn-primary">
-                    <i class="fas fa-check-circle mr-1"></i> Proceed to Confirmation
+               <a href="{{ route('purchase_orders.index') }}" class="btn btn-primary">
+                    <i class="fas fa-check-circle mr-1"></i> Proceed to Purchase Orders
                 </a>
             </div>
         </div>
     </div>
 </div>
+{{-- ================= ADD TO CART SUCCESS MODAL ================= --}}
+<div class="modal fade" id="addToCartModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-md modal-dialog-centered">
+    <div class="modal-content">
+
+      <div class="modal-body text-center p-4">
+
+        <div class="mb-3">
+          <div class="d-inline-flex align-items-center justify-content-center rounded-circle"
+               style="width:72px;height:72px;background:#e9f7ef;">
+            <i class="fas fa-check text-success" style="font-size:34px;"></i>
+          </div>
+        </div>
+
+        <h4 class="font-weight-bold mb-1">Added to Cart</h4>
+        <p class="text-muted mb-3">Item has been added successfully.</p>
+
+        <div class="border rounded p-3 text-left bg-light">
+          <div class="d-flex justify-content-between">
+            <span class="text-muted">Product</span>
+            <span class="font-weight-bold" id="cartModalProduct">—</span>
+          </div>
+
+          <div class="d-flex justify-content-between mt-2">
+            <span class="text-muted">SKU</span>
+            <span id="cartModalSKU">—</span>
+          </div>
+
+          <div class="d-flex justify-content-between mt-2">
+            <span class="text-muted">Supplier</span>
+            <span id="cartModalSupplier">—</span>
+          </div>
+
+          <div class="d-flex justify-content-between mt-2">
+            <span class="text-muted">Cost</span>
+            <span class="font-weight-bold text-primary">
+              $<span id="cartModalPrice">0</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="mt-4 d-flex justify-content-center">
+          <button class="btn btn-outline-secondary mr-2" data-dismiss="modal">
+            Continue Shopping
+          </button>
+          <button type="button" class="btn btn-primary" onclick="openCartAfterAdded()">
+            <i class="fas fa-shopping-cart mr-1"></i> View Cart
+        </button>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
 
 @endsection
 @section('scripts')
