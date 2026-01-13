@@ -3,15 +3,28 @@
 @section('main-content')
 
 <div class="content-wrapper">
-<section class="content p-4">
+<section class="content">
 
 <!-- PAGE TITLE -->
-<div class="mb-3">
-    <h3>Customers</h3>
-    <p class="text-muted mb-0">
-        Manage B2B (Wholesale) and B2C (Retail) customers
-    </p>
-</div>
+<div class="content-header">
+        <div class="container-fluid">
+            <div class="row mb-2">
+                <div class="col-sm-6">
+                    <h3 class="m-0">Customers</h3>
+                    <p class="text-muted mb-0">
+                        Manage B2B (Wholesale) and B2C (Retail) customers
+                    </p>
+                </div>
+                
+                <div class="col-sm-6">
+                    <ol class="breadcrumb float-sm-right">
+                        <li class="breadcrumb-item"><a href="#">Sale</a></li>
+                        <li class="breadcrumb-item active">Customer</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <!-- ===================================================== -->
 <!-- SUMMARY CARDS -->

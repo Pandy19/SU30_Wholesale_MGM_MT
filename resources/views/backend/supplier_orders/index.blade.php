@@ -3,7 +3,7 @@
 @section('main-content')
 
 <div class="content-wrapper">
-<section class="content p-4">
+<section class="content">
 
 
   <div class="content-header">
