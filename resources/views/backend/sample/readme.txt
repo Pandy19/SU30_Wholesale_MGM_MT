@@ -55,3 +55,6 @@ B2C
 ❌ No credit
 ✅ Full payment only
 Credit columns show —
+
+create database .env -> config\database.php -> 
+php artisan migrate

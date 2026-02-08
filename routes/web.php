@@ -21,7 +21,7 @@ use App\Http\Controllers\backend\sale_reportController;
 use App\Http\Controllers\backend\profit_reportController;
 use App\Http\Controllers\backend\admin_loginController;
 use App\Http\Controllers\backend\supplier_dashboardController;
-use App\Http\Controllers\StockController;
+use App\Http\Controllers\backend\StockController;
 
 
 //dashboard
@@ -32,11 +32,29 @@ Route::controller(DashboardController::class)->group(function () {
 
 //suppliers category
 Route::controller(SupplierController::class)->group(function () {
+
+    // PAGE
     Route::get('/suppliers', 'index')->name('suppliers.index');
+
+    // BRAND
+    Route::post('/suppliers/brand/store', 'storeBrand')->name('suppliers.brand.store');
+
+    // CATEGORY
+    Route::post('/suppliers/category/store', 'storeCategory')->name('suppliers.category.store');
+
+    // SUPPLIER
+    Route::post('/suppliers/supplier/store', 'storeSupplier')->name('suppliers.supplier.store');
+
+    Route::put('/suppliers/supplier/{supplier}/update', 'updateSupplier')
+        ->name('suppliers.supplier.update');
+
+    Route::delete('/suppliers/supplier/{supplier}', 'deleteSupplier')
+        ->name('suppliers.supplier.delete');
 });
 
 Route::controller(product_managementController::class)->group(function () {
     Route::get('/product_management', 'index')->name('product_management.index');
+    Route::get('/product_management/{product_id}/details', 'details')->name('product_management.details');
 });
 
 Route::controller(purchase_ordersController::class)->group(function () {

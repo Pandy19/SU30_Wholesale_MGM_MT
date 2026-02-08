@@ -1,0 +1,73 @@
+🧩 CORE RELATIONSHIPS OVERVIEW
+
+ADMIN USERS ───< USER ROLES >─── ADMIN ROLES
+     │
+     ├───< LOGIN LOGS
+     │
+     └───< SUPPLIER PROFILES ───< SUPPLIER APPROVAL LOGS
+
+
+🏷 PROCUREMENT STRUCTURE
+
+PROCUREMENT CATEGORIES ───< PROCUREMENT SUPPLIERS >─── PROCUREMENT BRANDS
+                                      │
+                                      └───< PURCHASE ORDERS
+One Category has many Suppliers
+One Brand has many Suppliers
+One Supplier can have many Purchase Orders
+
+🛒 PURCHASE ORDER FLOW
+
+PROCUREMENT PURCHASE ORDERS
+        │
+        ├───< PURCHASE ORDER ITEMS >─── INVENTORY PRODUCTS
+        │
+        ├───< PURCHASE PAYMENTS
+        │
+        └───< SUPPLIER SWITCH LOGS
+One PO → many items
+One PO → many payments
+Supplier switching is audited, not overwritten
+
+📦 INVENTORY FLOW
+
+INVENTORY PRODUCTS
+        │
+        ├───< GOODS RECEIVING
+        │         │
+        │         └───< GOODS RECEIVING ITEMS
+        │
+        ├───< INVENTORY STOCK >─── INVENTORY STOCK LOCATIONS
+        │
+        └───< INVENTORY STOCK LEDGER
+Stock is never edited directly
+All changes go through ledger (audit trail)
+
+🧾 SALES FLOW
+
+SALES CUSTOMERS
+        │
+        └───< SALES ORDERS
+                   │
+                   ├───< SALES ORDER ITEMS >─── INVENTORY PRODUCTS
+                   │
+                   ├───< SALES INVOICES
+                   │         │
+                   │         └───< CUSTOMER PAYMENTS
+                   │
+                   └───(reduces) INVENTORY STOCK
+
+💰 PROFIT & COST TRACKING (ADVANCED)
+
+INVENTORY PRODUCTS
+        │
+        └───< PROFIT STOCK BATCHES
+                   │
+                   └───< SALES STOCK MAP
+Ensures real profit, not estimated
+Supports FIFO / Average Cost
+
+📊 REPORTING (READ-ONLY)
+
+SALES INVOICES ───> SALES DAILY SUMMARY
+SALES STOCK MAP ──> PROFIT PRODUCT SUMMARY

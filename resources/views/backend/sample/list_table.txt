@@ -1,0 +1,165 @@
+📦 ADMIN / AUTH MODULE
+
+admin_users
+id, name, email, password, phone, avatar_path, status, email_verified_at, last_login_at, remember_token, created_at, updated_at
+admin_roles
+id, name, label, description, status, created_at, updated_at
+admin_user_roles
+id, user_id, role_id, assigned_by, assigned_at
+admin_login_logs
+id, user_id, role_attempt, email_attempt, ip_address, user_agent, success, fail_reason, created_at
+supplier_profiles
+supplier_profile_id, user_id, company_name, company_license, license_file, verification_status, verified_by, verified_at, note, created_at, updated_at
+supplier_approval_logs
+id, supplier_profile_id, action, action_by, remark, created_at
+
+📦 ADMIN / AUTH MODULE
+
+admin_users
+id, name, email, password, phone, avatar_path, status, email_verified_at, last_login_at, remember_token, created_at, updated_at
+admin_roles
+id, name, label, description, status, created_at, updated_at
+admin_user_roles
+id, user_id, role_id, assigned_by, assigned_at
+admin_login_logs
+id, user_id, role_attempt, email_attempt, ip_address, user_agent, success, fail_reason, created_at
+supplier_profiles
+supplier_profile_id, user_id, company_name, company_license, license_file, verification_status, verified_by, verified_at, note, created_at, updated_at
+supplier_approval_logs
+id, supplier_profile_id, action, action_by, remark, created_at
+
+🏷 PROCUREMENT (SUPPLIER & PRODUCT SETUP)
+
+procurement_categories
+category_id, category_code, category_name, category_slug, description, status, created_at, updated_at
+procurement_brands
+brand_id, brand_name, brand_slug, logo_path, status, created_at, updated_at
+procurement_suppliers
+supplier_id, brand_id, category_id, supplier_code, company_name, contact_person, phone, email, address, payment_term, lead_time_days, document_path, status, created_at, updated_at
+
+🛒 PURCHASE ORDERS (PROCUREMENT FLOW)
+
+procurement_purchase_orders
+po_id, po_number, supplier_id, order_date, invoice_date, subtotal_amount, tax_amount, total_amount, payment_status, created_by, receiving_status, stock_status, created_at, updated_at
+procurement_purchase_order_items
+po_item_id, po_id, product_id, supplier_id, sku_snapshot, product_name_snapshot, unit_cost, quantity, line_total, created_at, updated_at
+procurement_purchase_payments
+payment_id, po_id, payment_date, payment_method, paid_amount, payment_status, created_at, updated_at
+procurement_purchase_order_supplier_switch_logs
+id, po_id, product_id, old_supplier_id, new_supplier_id, old_unit_cost, new_unit_cost, switched_by, switched_at
+
+🧾 SALES MODULE
+
+sales_customers
+customer_id, customer_code, name, customer_type, phone, email, credit_limit, outstanding_balance, payment_rule, status, created_at, updated_at
+sales_orders
+sales_order_id, sales_order_code, customer_id, customer_type, payment_method, payment_terms, payment_status, subtotal_amount, tax_amount, total_amount, payment_note, created_by, sale_date, created_at, updated_at
+sales_order_items
+sales_order_item_id, sales_order_id, product_id, sku_snapshot, product_name_snapshot, description_snapshot, qty, unit_price, subtotal, created_at, updated_at
+sales_invoices
+sales_invoice_id, sales_invoice_code, sales_order_id, customer_id, customer_type, invoice_date, due_date, subtotal_amount, tax_amount, total_amount, paid_amount, balance_amount, payment_status, created_by, created_at, updated_at
+sales_customer_payments
+customer_payment_id, payment_code, sales_invoice_id, customer_id, payment_amount, payment_method, payment_date, reference_note, received_by, created_at, updated_at
+
+📊 REPORTING
+
+reports_sales_daily_summary
+report_date, total_sales, total_orders, b2b_sales, b2c_sales, total_profit, created_at
+reports_profit_product_summary
+report_date, category_id, brand_id, product_id, total_qty_sold, total_cost, total_revenue, total_profit, profit_margin, created_at
+
+📊 REPORTING
+
+reports_sales_daily_summary
+report_date, total_sales, total_orders, b2b_sales, b2c_sales, total_profit, created_at
+reports_profit_product_summary
+report_date, category_id, brand_id, product_id, total_qty_sold, total_cost, total_revenue, total_profit, profit_margin, created_at
+
+⚙ SYSTEM / LARAVEL DEFAULT
+
+users
+id, name, email, email_verified_at, password, remember_token, created_at, updated_at
+cache
+key, value, expiration
+jobs
+id, queue, payload, attempts, reserved_at, available_at, created_at
+migrations
+id, migration, batch
+
+🔄 DATABASE TRIGGERS
+
+updated_at triggers
+auto-update updated_at on UPDATE
+inventory_stock last_updated trigger
+auto-update last_updated on stock change
+
+
+==========================================================================
+
+
+🕒 UPDATED_AT AUTO-UPDATE TRIGGERS
+
+Purpose:
+Automatically update updated_at to SYSDATE() whenever a record is modified.
+
+Applied to these tables:
+
+admin_users
+trg_admin_users_bu
+
+admin_roles
+trg_admin_roles_bu
+
+supplier_profiles
+trg_supplier_profiles_bu
+
+procurement_categories
+trg_procurement_categories_bu
+
+procurement_brands
+trg_procurement_brands_bu
+
+procurement_suppliers
+trg_procurement_suppliers_bu
+
+inventory_products
+trg_inventory_products_bu
+
+inventory_stock_locations
+trg_inventory_stock_locations_bu
+
+inventory_goods_receiving
+trg_inventory_goods_receiving_bu
+
+inventory_goods_receiving_items
+trg_inventory_goods_receiving_items_bu
+
+inventory_stock_ledger
+trg_inventory_stock_ledger_bu
+
+procurement_purchase_orders
+trg_procurement_purchase_orders_bu
+
+procurement_purchase_order_items
+trg_procurement_purchase_order_items_bu
+
+procurement_purchase_payments
+trg_procurement_purchase_payments_bu
+
+procurement_supplier_disputes
+trg_procurement_supplier_disputes_bu
+
+sales_customers
+trg_sales_customers_bu
+
+sales_orders
+trg_sales_orders_bu
+
+sales_order_items
+trg_sales_order_items_bu
+
+sales_invoices
+trg_sales_invoices_bu
+
+sales_customer_payments
+trg_sales_customer_payments_bu

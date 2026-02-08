@@ -1,0 +1,63 @@
+🌱 SEEDER DATA EXPLANATION (COMPACT LIST FORMAT)
+🧑‍💼 ADMIN SEEDER
+
+Tables seeded
+admin_users, admin_roles, admin_user_roles
+Example seeded data
+Admin User, Staff User, Supplier User, Roles (Admin, Staff, Supplier, Accountant)
+Purpose
+Initial system access, role-based access control (RBAC), admin login ready
+
+🏷 PROCUREMENT SEEDER
+
+Tables seeded
+procurement_categories, procurement_brands, procurement_suppliers
+Example seeded data
+Categories (Mobile, Laptop, TV), Brands (Apple, Samsung), Suppliers linked to brand & categor
+Purpose
+Enable supplier setup, enforce category–brand–supplier relationship
+
+📦 INVENTORY SEEDER
+
+Tables seeded
+inventory_products, inventory_stock_locations, inventory_stock
+Example seeded data
+Products with SKU, Locations (A1, B2, T1), Initial stock quantities
+Purpose
+Allow immediate purchasing & selling, demonstrate stock control
+
+🛒 PURCHASE ORDER SEEDER
+
+Tables seeded
+procurement_purchase_orders, procurement_purchase_order_items, procurement_purchase_payments
+Example seeded data
+PO-0001, Ordered products with cost & quantity, Supplier payment record
+Purpose
+Demonstrate full procurement workflow (supplier → purchase → payment)
+
+🧾 SALES SEEDER
+
+Tables seeded
+sales_customers, sales_orders, sales_order_items, sales_invoices, sales_customer_payments
+Example seeded data
+B2B & B2C customers, Sales orders, Invoices, Partial & full payments
+Purpose
+Demonstrate real sales lifecycle and revenue flow
+
+💰 PROFIT SEEDER
+
+Tables seeded
+profit_stock_batches, profit_sales_stock_map
+Example seeded data
+Cost batches from purchase orders, Sales mapped to cost batches
+Purpose
+Accurate profit calculation using FIFO / average cost
+
+📊 REPORT SEEDER (OPTIONAL)
+
+Tables seeded
+reports_sales_daily_summary, reports_profit_product_summary
+Example seeded data
+Daily sales totals, Profit per product
+Purpose
+Fast dashboard reporting without heavy queries

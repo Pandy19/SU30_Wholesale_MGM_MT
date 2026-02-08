@@ -1,0 +1,240 @@
+📦 ADMIN / AUTH MODULE
+admin_users
+
+UNIQUE: email
+FK: (none)
+
+admin_roles
+
+UNIQUE: name
+FK: (none)
+
+admin_user_roles
+
+UNIQUE: (user_id, role_id)
+FK:
+
+user_id → admin_users.id
+
+role_id → admin_roles.id
+
+assigned_by → admin_users.id
+
+admin_login_logs
+
+UNIQUE: (none)
+FK:
+
+user_id → admin_users.id (nullable)
+
+supplier_profiles
+
+UNIQUE: user_id (recommended / should be unique)
+FK:
+
+user_id → admin_users.id
+
+verified_by → admin_users.id (nullable)
+
+supplier_approval_logs
+
+UNIQUE: (none)
+FK:
+
+supplier_profile_id → supplier_profiles.supplier_profile_id
+
+action_by → admin_users.id
+
+🏷 PROCUREMENT (SUPPLIER & PRODUCT SETUP)
+procurement_categories
+
+UNIQUE: category_code, category_slug
+FK: (none)
+
+procurement_brands
+
+UNIQUE: brand_slug
+FK: (none)
+
+procurement_suppliers
+
+UNIQUE: supplier_code
+FK:
+
+brand_id → procurement_brands.brand_id
+
+category_id → procurement_categories.category_id
+
+🛒 PURCHASE ORDERS (PROCUREMENT FLOW)
+procurement_purchase_orders
+
+UNIQUE: po_number
+FK:
+
+supplier_id → procurement_suppliers.supplier_id
+
+procurement_purchase_order_items
+
+UNIQUE: (none)
+FK:
+
+po_id → procurement_purchase_orders.po_id
+
+product_id → inventory_products.product_id
+
+supplier_id → procurement_suppliers.supplier_id (nullable)
+
+procurement_purchase_payments
+
+UNIQUE: (none)
+FK:
+
+po_id → procurement_purchase_orders.po_id
+
+procurement_purchase_order_supplier_switch_logs
+
+UNIQUE: (none)
+FK:
+
+po_id → procurement_purchase_orders.po_id
+
+product_id → inventory_products.product_id
+
+old_supplier_id → procurement_suppliers.supplier_id
+
+new_supplier_id → procurement_suppliers.supplier_id
+
+switched_by → admin_users.id (nullable)
+
+📦 INVENTORY / WAREHOUSE
+inventory_products
+
+UNIQUE: sku (recommended / should be unique if SKU is used as identifier)
+FK:
+
+brand_id → procurement_brands.brand_id
+
+category_id → procurement_categories.category_id
+
+inventory_stock_locations
+
+UNIQUE: (none) (optional: location_code could be unique)
+FK:
+
+category_id → procurement_categories.category_id (nullable if you allowed it)
+
+inventory_goods_receiving
+
+UNIQUE: (none)
+FK:
+
+po_id → procurement_purchase_orders.po_id
+
+supplier_id → procurement_suppliers.supplier_id
+
+inventory_goods_receiving_items
+
+UNIQUE: (none)
+FK:
+
+grn_id → inventory_goods_receiving.grn_id
+
+po_id → procurement_purchase_orders.po_id
+
+product_id → inventory_products.product_id
+
+supplier_id → procurement_suppliers.supplier_id
+
+inventory_stock
+
+UNIQUE: (recommended: (product_id, location_id) to prevent duplicate rows)
+FK:
+
+product_id → inventory_products.product_id
+
+location_id → inventory_stock_locations.location_id
+
+inventory_stock_ledger
+
+UNIQUE: (none)
+FK:
+
+product_id → inventory_products.product_id
+
+🧾 SALES MODULE
+sales_customers
+
+UNIQUE: customer_code
+FK: (none)
+
+sales_orders
+
+UNIQUE: sales_order_code
+FK:
+
+customer_id → sales_customers.customer_id
+
+sales_order_items
+
+UNIQUE: (none)
+FK:
+
+sales_order_id → sales_orders.sales_order_id
+
+product_id → inventory_products.product_id
+
+sales_invoices
+
+UNIQUE: sales_invoice_code
+FK:
+
+sales_order_id → sales_orders.sales_order_id
+
+customer_id → sales_customers.customer_id
+
+sales_customer_payments
+
+UNIQUE: payment_code
+FK:
+
+sales_invoice_id → sales_invoices.sales_invoice_id
+
+customer_id → sales_customers.customer_id
+
+📊 REPORTING
+reports_sales_daily_summary
+
+UNIQUE / PK: report_date
+FK: (none)
+
+reports_profit_product_summary
+
+UNIQUE / PK (recommended): (report_date, product_id)
+FK:
+
+category_id → procurement_categories.category_id
+
+brand_id → procurement_brands.brand_id
+
+product_id → inventory_products.product_id
+
+⚙ SYSTEM / LARAVEL DEFAULT
+users
+
+UNIQUE: email
+FK: (none)
+
+cache
+
+UNIQUE / PK: key
+FK: (none)
+
+jobs
+
+UNIQUE: (none)
+FK: (none)
+
+migrations
+
+UNIQUE: migration
+FK: (none)

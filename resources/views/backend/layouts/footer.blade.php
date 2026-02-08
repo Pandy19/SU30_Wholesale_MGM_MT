@@ -1,3 +1,125 @@
+<script>
+function previewSupplierDoc(modalId, input) {
+  const wrap = document.getElementById('newDocPreviewWrap-' + modalId);
+  const img  = document.getElementById('newDocImg-' + modalId);
+  const link = document.getElementById('newDocLink-' + modalId);
+  const name = document.getElementById('newDocName-' + modalId);
+
+  if (!input.files || !input.files[0]) {
+    wrap.style.display = 'none';
+    return;
+  }
+
+  const file = input.files[0];
+  const url = URL.createObjectURL(file);
+
+  wrap.style.display = '';
+  name.textContent = file.name;
+
+  const isImage = file.type.startsWith('image/');
+  const isPdf = file.type === 'application/pdf';
+
+  // Reset
+  img.style.display = 'none';
+  link.style.display = 'none';
+
+  if (isImage) {
+    img.src = url;
+    img.style.display = '';
+  } else if (isPdf) {
+    link.href = url;
+    link.style.display = '';
+  } else {
+    // doc/docx cannot be previewed in browser easily
+    link.href = url;
+    link.style.display = '';
+    link.innerHTML = '<i class="fas fa-download mr-1"></i> Download new';
+  }
+}
+</script>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const input = document.getElementById('brandLogoInput');
+    const preview = document.getElementById('brandLogoPreview');
+    const text = document.getElementById('brandLogoText');
+
+    if (!input || !preview) return;
+
+    input.addEventListener('change', function () {
+        const file = this.files && this.files[0];
+        if (!file) return;
+
+        // Basic type guard
+        if (!file.type.startsWith('image/')) {
+            this.value = '';
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = function (e) {
+            preview.src = e.target.result;
+            if (text) text.textContent = 'Change';
+        };
+        reader.readAsDataURL(file);
+    });
+});
+</script>
+
+
+
+<style>
+.brand-photo-wrapper{
+    width: 120px;
+    height: 120px;
+    position: relative;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid #e9ecef;
+    background: #f8f9fa;
+    cursor: pointer;
+    transition: 0.2s ease-in-out;
+}
+.brand-photo-wrapper:hover{
+    border-color: #007bff;
+    box-shadow: 0 0 0 4px rgba(0,123,255,.15);
+}
+
+.brand-photo-preview{
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.brand-photo-overlay{
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,.45);
+    color: #fff;
+    font-weight: 600;
+    opacity: 0;
+    transition: 0.2s ease-in-out;
+    text-align: center;
+}
+.brand-photo-wrapper:hover .brand-photo-overlay{
+    opacity: 1;
+}
+
+.brand-photo-input{
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+</style>
+
+
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
