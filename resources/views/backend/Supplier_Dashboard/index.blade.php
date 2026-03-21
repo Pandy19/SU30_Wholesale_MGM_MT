@@ -12,24 +12,41 @@
                     <h1 class="m-0">Supplier Product Submission</h1>
                     <small class="text-muted">Click a product card to view full details</small>
                 </div>
-                <button class="btn btn-primary" data-toggle="modal" data-target="#uploadModal" onclick="openCreateModal()">
-                    <i class="fas fa-upload"></i> Upload Product
-                </button>
+                <a href="{{ route('Supplier_Dashboard.create') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add New Product
+                </a>
             </div>
 
             {{-- SEARCH & FILTER --}}
-            <div class="row mt-3">
-                <div class="col-md-4">
-                    <input type="text" class="form-control" placeholder="Search product...">
+            <form action="{{ route('Supplier_Dashboard.index') }}" method="GET">
+                <div class="row mt-3">
+                    <div class="col-md-4">
+                        <div class="input-group">
+                            <input type="text" name="search" class="form-control" placeholder="Search by name, SKU or brand..." value="{{ request('search') }}">
+                            <div class="input-group-append">
+                                <button class="btn btn-default" type="submit">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <select name="status" class="form-control" onchange="this.form.submit()">
+                            <option value="all" {{ request('status') == 'all' ? 'selected' : '' }}>All Status</option>
+                            <option value="available" {{ request('status') == 'available' ? 'selected' : '' }}>Available</option>
+                            <option value="limited" {{ request('status') == 'limited' ? 'selected' : '' }}>Limited</option>
+                            <option value="unavailable" {{ request('status') == 'unavailable' ? 'selected' : '' }}>Unavailable</option>
+                        </select>
+                    </div>
+                    @if(request('search') || (request('status') && request('status') != 'all'))
+                        <div class="col-md-2">
+                            <a href="{{ route('Supplier_Dashboard.index') }}" class="btn btn-link text-danger mt-1 p-0">
+                                <i class="fas fa-times-circle"></i> Clear Filters
+                            </a>
+                        </div>
+                    @endif
                 </div>
-                <div class="col-md-3">
-                    <select class="form-control">
-                        <option>All Status</option>
-                        <option>Available</option>
-                        <option>Unavailable</option>
-                    </select>
-                </div>
-            </div>
+            </form>
         </div>
     </div>
 
@@ -39,7 +56,7 @@
             <div class="row mt-3">
 
                 {{-- PRODUCT CARD --}}
-                @for ($i = 1; $i <= 10; $i++)
+                @forelse ($offers as $offer)
                 <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
 
                     <div class="card h-100 shadow-sm">
@@ -48,96 +65,72 @@
                         <div class="product-click"
                              style="cursor:pointer;"
                              onclick="openDetailModal(this)"
-                             data-image="https://assets.swappie.com/cdn-cgi/image/width=600,height=600,fit=contain,format=auto/swappie-iphone-15-pro-natural-titanium.png?v=cc5784d1"
-                             data-title="iPhone 15 Pro"
-                             data-brand="Apple"
-                             data-category="Mobile Phone"
-                             data-status="Available"
-                             data-supplier="ABC Trading"
-                             data-cost="1050"
-                             data-qty="25">
+                             data-image="{{ $offer->image ? asset('storage/' . $offer->image) : 'https://via.placeholder.com/600' }}"
+                             data-title="{{ $offer->product_name }}"
+                             data-brand="{{ $offer->brand_name }}"
+                             data-category="{{ $offer->category_name }}"
+                             data-status="{{ $offer->product_status }}"
+                             data-supplier="{{ $supplier->company_name }}"
+                             data-cost="{{ $offer->price }}"
+                             data-qty="{{ $offer->available_qty }}"
+                             data-specs="{{ e($offer->specs) }}"
+                             data-description="{{ e($offer->description) }}">
 
                             <img
-                                src="https://assets.swappie.com/cdn-cgi/image/width=600,height=600,fit=contain,format=auto/swappie-iphone-15-pro-natural-titanium.png?v=cc5784d1"
+                                src="{{ $offer->image ? asset('storage/' . $offer->image) : 'https://via.placeholder.com/600' }}"
                                 class="card-img-top p-2"
                                 style="height:150px; object-fit:contain;"
                                 alt="product"
                             >
 
                             <div class="card-body p-2">
-                                <h6 class="font-weight-bold mb-1">iPhone 15 Pro</h6>
-                                <small class="text-muted">Apple · Mobile Phone</small>
+                                <h6 class="font-weight-bold mb-1 text-truncate">{{ $offer->product_name }}</h6>
+                                <small class="text-muted">{{ $offer->brand_name }} · {{ $offer->category_name }}</small>
 
-                                <span class="badge badge-success d-block my-1">Available</span>
+                                <span class="badge {{ $offer->product_status == 'available' ? 'badge-success' : ($offer->product_status == 'limited' ? 'badge-warning' : 'badge-secondary') }} d-block my-1">
+                                    {{ ucfirst($offer->product_status) }}
+                                </span>
 
                                 <small>
-                                    Supplier: ABC Trading<br>
-                                    Cost: $1,050<br>
-                                    Qty: 25
+                                    Cost: ${{ number_format($offer->price, 2) }}<br>
+                                    Qty: {{ $offer->available_qty }}
                                 </small>
                             </div>
                         </div>
 
                         {{-- ACTION BUTTONS --}}
                         <div class="card-footer p-1 text-center">
-                            <button class="btn btn-warning btn-xs"
-                                    onclick="event.stopPropagation(); openEditModal(this);"
-                                    data-image="https://assets.swappie.com/cdn-cgi/image/width=600,height=600,fit=contain,format=auto/swappie-iphone-15-pro-natural-titanium.png?v=cc5784d1"
-                                    data-title="iPhone 15 Pro"
-                                    data-desc="A17 Pro, 256GB storage..."
-                                    data-brand="Apple"
-                                    data-category="Mobile Phone"
-                                    data-status="Available"
-                                    data-cost="1050"
-                                    data-qty="25">
+                            <a href="{{ route('Supplier_Dashboard.edit', $offer->id) }}" class="btn btn-warning btn-xs">
                                 <i class="fas fa-edit"></i>
-                            </button>
+                            </a>
 
                             <button class="btn btn-danger btn-xs"
-                                    onclick="event.stopPropagation(); openDeleteModal('iPhone 15 Pro');">
+                                    onclick="event.stopPropagation(); openDeleteModal('{{ route('Supplier_Dashboard.offer.delete', $offer->id) }}');">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
 
                     </div>
                 </div>
-                @endfor
+                @empty
+                <div class="col-12 text-center py-5">
+                    <p class="text-muted">No products uploaded yet.</p>
+                </div>
+                @endforelse
 
             </div>
-
-            {{-- PAGINATION (RIGHT SIDE) --}}
-            <div class="card-footer clearfix">
-                <ul class="pagination pagination-sm m-0 float-right">
-                    <li class="page-item disabled">
-                        <a class="page-link">«</a>
-                    </li>
-                    <li class="page-item active">
-                        <a class="page-link">1</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link">2</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link">3</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link">»</a>
-                    </li>
-                </ul>
-    </div>
 
         </div>
     </section>
 </div>
 
 {{-- ================= PRODUCT DETAIL MODAL ================= --}}
-{{-- ================= PRODUCT DETAIL MODAL (IMPROVED UI) ================= --}}
 <div class="modal fade" id="detailModal" tabindex="-1">
   <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
     <div class="modal-content">
 
       {{-- HEADER --}}
-      <div class="modal-header bg-white">
+      <div class="modal-header bg-white border-bottom">
         <div>
           <h5 class="modal-title font-weight-bold mb-0" id="detailTitle">Product Details</h5>
           <small class="text-muted" id="detailBrandCat">Brand · Category</small>
@@ -167,7 +160,7 @@
             </div>
 
             <div class="card shadow-sm">
-              <div class="card-body">
+              <div class="card-body p-3">
 
                 <div class="d-flex justify-content-between mb-2">
                   <span class="text-muted">Supplier</span>
@@ -184,13 +177,6 @@
                   <span class="font-weight-bold" id="detailQty">0</span>
                 </div>
 
-                <hr>
-
-                <div class="d-flex justify-content-between">
-                  <span class="text-muted">Last Updated</span>
-                  <span class="text-muted">—</span>
-                </div>
-
               </div>
             </div>
 
@@ -201,7 +187,7 @@
 
             {{-- TITLE STRIP --}}
             <div class="card shadow-sm mb-3">
-              <div class="card-body">
+              <div class="card-body p-3">
                 <div class="d-flex justify-content-between align-items-start">
                   <div>
                     <h4 class="font-weight-bold mb-1" id="detailName">Product Name</h4>
@@ -225,11 +211,11 @@
 
             {{-- DESCRIPTION --}}
             <div class="card shadow-sm mb-3">
-              <div class="card-header bg-white font-weight-bold">
+              <div class="card-header bg-white font-weight-bold p-2">
                 <i class="fas fa-align-left mr-1 text-primary"></i> Description
               </div>
-              <div class="card-body">
-                <div id="detailShortDesc" class="text-muted">
+              <div class="card-body p-2">
+                <div id="detailShortDesc" class="text-muted small">
                   No description provided.
                 </div>
               </div>
@@ -237,38 +223,14 @@
 
             {{-- SPECIFICATIONS (LONG TEXT) --}}
             <div class="card shadow-sm">
-              <div class="card-header bg-white font-weight-bold">
+              <div class="card-header bg-white font-weight-bold p-2">
                 <i class="fas fa-list-ul mr-1 text-success"></i> Specifications
               </div>
               <div class="card-body p-0">
-                <div class="p-3" style="background:#f8f9fa;">
+                <div class="p-3" style="background:#f8f9fa; min-height: 100px;">
                   <pre class="mb-0"
-                       style="white-space:pre-wrap;font-family:inherit;line-height:1.45;"
-                       id="detailSpecs">
-Chipset
-A17 Pro
-
-RAM
-8GB
-
-Main Camera
-48 MP (Wide) + 12 MP (Telephoto) + 12 MP (Ultra-wide)
-LiDAR Scanner
-4K HDR Video, ProRes
-
-Selfie Camera
-12 MP
-4K HDR Video
-
-Sound
-Stereo speakers
-
-Connectivity
-Wi-Fi 6E
-Bluetooth 5.3
-USB Type-C 3.2 Gen 2
-NFC supported
-                  </pre>
+                       style="white-space:pre-wrap;font-family:inherit;line-height:1.45; font-size: 0.9rem;"
+                       id="detailSpecs"></pre>
                 </div>
               </div>
             </div>
@@ -287,178 +249,6 @@ NFC supported
   </div>
 </div>
 
-
-{{-- ================= UPLOAD / EDIT MODAL ================= --}}
-{{-- ================= UPLOAD / EDIT PRODUCT MODAL (IMPROVED UI) ================= --}}
-<div class="modal fade" id="uploadModal">
-    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
-        <div class="modal-content">
-
-            <form onsubmit="event.preventDefault(); uploadSuccess();">
-
-                {{-- HEADER --}}
-                <div class="modal-header bg-light">
-                    <h5 class="modal-title font-weight-bold" id="uploadModalTitle">
-                        <i class="fas fa-box-open mr-2 text-primary"></i>
-                        Upload Product
-                    </h5>
-                    <button class="close" data-dismiss="modal">&times;</button>
-                </div>
-
-                {{-- BODY --}}
-                <div class="modal-body">
-
-                    {{-- SECTION: IMAGE --}}
-                    <div class="card mb-3 shadow-sm">
-                        <div class="card-header bg-white font-weight-bold">
-                            <i class="fas fa-image mr-1 text-info"></i> Product Image
-                        </div>
-
-                        <div class="card-body">
-                            <div class="row align-items-center">
-
-                                <div class="col-md-3 text-center">
-                                    <div id="imgBox"
-                                         class="border rounded d-flex align-items-center justify-content-center"
-                                         style="width:140px;height:140px;background:#f8f9fa;">
-                                        <img id="previewImg"
-                                             style="max-width:100%;max-height:100%;object-fit:contain;display:none;">
-                                        <span id="imgBoxText" class="text-muted small">
-                                            No Image
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-9">
-                                    <label class="font-weight-bold mb-1">Upload Image</label>
-                                    <input type="file"
-                                           class="form-control"
-                                           accept="image/*"
-                                           onchange="previewImage(event)">
-                                    <small class="text-muted">
-                                        Recommended size: 800×800px (PNG/JPG)
-                                    </small>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- SECTION: BASIC INFO --}}
-                    <div class="card mb-3 shadow-sm">
-                        <div class="card-header bg-white font-weight-bold">
-                            <i class="fas fa-info-circle mr-1 text-success"></i>
-                            Basic Information
-                        </div>
-
-                        <div class="card-body">
-                            <div class="row">
-
-                                <div class="col-md-6">
-                                    <label class="font-weight-bold">Product Name</label>
-                                    <input class="form-control" id="form_title" placeholder="Enter product name">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="font-weight-bold">Status</label>
-                                    <select class="form-control" id="form_status">
-                                        <option>Available</option>
-                                        <option>Unavailable</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-12 mt-3">
-                                    <label class="font-weight-bold">Description</label>
-                                    <textarea class="form-control"
-                                              rows="4"
-                                              id="form_desc"
-                                              placeholder="Write product description..."></textarea>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- SECTION: CLASSIFICATION --}}
-                    <div class="card mb-3 shadow-sm">
-                        <div class="card-header bg-white font-weight-bold">
-                            <i class="fas fa-tags mr-1 text-warning"></i>
-                            Classification
-                        </div>
-
-                        <div class="card-body">
-                            <div class="row">
-
-                                <div class="col-md-6">
-                                    <label class="font-weight-bold">Brand</label>
-                                    <select class="form-control" id="form_brand">
-                                        <option>Apple</option>
-                                        <option>Samsung</option>
-                                    </select>
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="font-weight-bold">Category</label>
-                                    <select class="form-control" id="form_category">
-                                        <option>Mobile Phone</option>
-                                        <option>Smart TV</option>
-                                    </select>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- SECTION: PRICING & STOCK --}}
-                    <div class="card shadow-sm">
-                        <div class="card-header bg-white font-weight-bold">
-                            <i class="fas fa-coins mr-1 text-danger"></i>
-                            Pricing & Stock
-                        </div>
-
-                        <div class="card-body">
-                            <div class="row">
-
-                                <div class="col-md-6">
-                                    <label class="font-weight-bold">Cost Price ($)</label>
-                                    <input type="number"
-                                           class="form-control"
-                                           id="form_cost"
-                                           placeholder="0.00">
-                                </div>
-
-                                <div class="col-md-6">
-                                    <label class="font-weight-bold">Quantity</label>
-                                    <input type="number"
-                                           class="form-control"
-                                           id="form_qty"
-                                           placeholder="0">
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-
-                {{-- FOOTER --}}
-                <div class="modal-footer bg-light">
-                    <button class="btn btn-secondary" data-dismiss="modal">
-                        Cancel
-                    </button>
-                    <button class="btn btn-success px-4" id="submitBtn">
-                        <i class="fas fa-check mr-1"></i>
-                        Submit Product
-                    </button>
-                </div>
-
-            </form>
-
-        </div>
-    </div>
-</div>
-
-
 {{-- ================= DELETE MODAL ================= --}}
 <div class="modal fade" id="deleteModal">
     <div class="modal-dialog modal-sm modal-dialog-centered">
@@ -469,30 +259,76 @@ NFC supported
             </div>
 
             <h5 class="mb-1">Are you sure?</h5>
-            <p class="text-muted mb-0" id="deleteText">
-                You want to delete this product.
+            <p class="text-muted mb-0">
+                You want to delete this product offer.
             </p>
 
             <div class="mt-3">
-                <button class="btn btn-danger btn-sm mr-2">Yes, Delete</button>
-                <button class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="POST" action="">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-danger btn-sm mr-2">Yes, Delete</button>
+                    <button type="button" class="btn btn-secondary btn-sm" data-dismiss="modal">Cancel</button>
+                </form>
             </div>
         </div>
     </div>
 </div>
 
-{{-- ================= SUCCESS MODAL ================= --}}
-<div class="modal fade" id="successModal">
-    <div class="modal-dialog modal-sm modal-dialog-centered">
-        <div class="modal-content text-center p-4">
-            <i class="fas fa-check-circle text-success" style="font-size:48px;"></i>
-            <h5 class="mt-3">Upload product successful</h5>
-        </div>
-    </div>
-</div>
-
 {{-- ================= SCRIPTS ================= --}}
+<script>
+    function openDeleteModal(url) {
+        document.getElementById('deleteForm').action = url;
+        $('#deleteModal').modal('show');
+    }
 
+    function openDetailModal(element) {
+        console.log("Opening Detail Modal...");
+        var btn = element;
+        
+        var image = btn.getAttribute('data-image');
+        var title = btn.getAttribute('data-title');
+        var brand = btn.getAttribute('data-brand');
+        var category = btn.getAttribute('data-category');
+        var status = btn.getAttribute('data-status');
+        var supplier = btn.getAttribute('data-supplier');
+        var cost = btn.getAttribute('data-cost');
+        var qty = btn.getAttribute('data-qty');
+        var specs = btn.getAttribute('data-specs');
+        var description = btn.getAttribute('data-description');
 
+        console.log("Detail data gathered:", {specs, description});
+        
+        document.getElementById('detailImg').src = image;
+        document.getElementById('detailName').innerText = title;
+        document.getElementById('detailBrandCat').innerText = brand + ' · ' + category;
+        document.getElementById('detailStatus').innerText = status;
+        
+        // Update badge color
+        var badge = document.getElementById('detailStatus');
+        if(status === 'available') {
+            badge.className = 'badge badge-success px-3 py-2 mr-3';
+        } else if(status === 'limited') {
+            badge.className = 'badge badge-warning px-3 py-2 mr-3';
+        } else {
+            badge.className = 'badge badge-secondary px-3 py-2 mr-3';
+        }
+        badge.innerText = status.charAt(0).toUpperCase() + status.slice(1);
+
+        document.getElementById('detailSupplier').innerText = supplier;
+        document.getElementById('detailCost').innerText = parseFloat(cost).toFixed(2);
+        document.getElementById('detailCostBig').innerText = parseFloat(cost).toFixed(2);
+        document.getElementById('detailQty').innerText = qty;
+
+        document.getElementById('detailBrandText').innerText = brand;
+        document.getElementById('detailCategoryText').innerText = category;
+        
+        // Desc & Specs
+        document.getElementById('detailShortDesc').innerText = description ? description : 'No description provided.';
+        document.getElementById('detailSpecs').innerText = specs ? specs : 'No specifications provided.';
+
+        $('#detailModal').modal('show');
+    }
+</script>
 
 @endsection

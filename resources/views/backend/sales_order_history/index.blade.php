@@ -1,234 +1,255 @@
 @extends('backend.layouts.master')
-@section('title', 'Sale Order Historys | Wholesale MGM')
+@section('title', 'Sales Order History | Wholesale MGM')
 @section('main-content')
 
 <div class="content-wrapper">
-<section class="content">
-
-<!-- ===================================================== -->
-<!-- PAGE TITLE -->
-<!-- ===================================================== -->
- <div class="content-header">
+    <!-- Content Header -->
+    <section class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Sales Order History</h1>
-                    <p class="text-muted mb-0">
-                    Complete list of sales orders and invoices
-                    </p>
+                    <h1 class="font-weight-bold">Sales Order History</h1>
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Sale</a></li>
-                        <li class="breadcrumb-item active">Sale Invoice</li>
+                        <li class="breadcrumb-item"><a href="#">Home</a></li>
+                        <li class="breadcrumb-item active">Sales History</li>
                     </ol>
                 </div>
             </div>
         </div>
-    </div>
+    </section>
 
-<!-- ===================================================== -->
-<!-- SUMMARY CARDS -->
-<!-- ===================================================== -->
-<div class="row mb-4">
-
-    <div class="col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-info">
-                <i class="fas fa-file-invoice"></i>
-            </span>
-            <div class="info-box-content">
-                <span class="info-box-text">Total Sales</span>
-                <span class="info-box-number">18</span>
+    <!-- Main content -->
+    <section class="content">
+        <div class="container-fluid">
+            
+            <!-- Summary Stats (Small Boxes - Classic AdminLTE) -->
+            <div class="row">
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ number_format($totalSales) }}</h3>
+                            <p>Total Orders</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-shopping-cart"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>${{ number_format($totalRevenue, 2) }}</h3>
+                            <p>Total Revenue</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-dollar-sign"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>{{ number_format($pendingPayment) }}</h3>
+                            <p>Pending Payments</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-clock text-white"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-secondary">
+                        <div class="inner">
+                            <h3>{{ number_format($b2bCustomersCount) }}</h3>
+                            <p>B2B Customers</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <div class="col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-success">
-                <i class="fas fa-dollar-sign"></i>
-            </span>
-            <div class="info-box-content">
-                <span class="info-box-text">Total Revenue</span>
-                <span class="info-box-number">$52,300</span>
+            <!-- Filter Card -->
+            <div class="card card-default card-outline">
+                <div class="card-header">
+                    <h3 class="card-title text-muted"><i class="fas fa-filter mr-1"></i> Filter Records</h3>
+                    <div class="card-tools">
+                        <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                            <i class="fas fa-minus"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <form action="{{ route('sales_order_history.index') }}" method="GET">
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Search</label>
+                                    <input type="text" name="search" class="form-control" placeholder="Order # or Customer..." value="{{ request('search') }}">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Client Type</label>
+                                    <select name="type" class="form-control">
+                                        <option value="">All Types</option>
+                                        <option value="B2C" {{ request('type') == 'B2C' ? 'selected' : '' }}>Retail (B2C)</option>
+                                        <option value="B2B" {{ request('type') == 'B2B' ? 'selected' : '' }}>Wholesale (B2B)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>Payment</label>
+                                    <select name="payment_status" class="form-control">
+                                        <option value="">All Status</option>
+                                        <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                                        <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>Unpaid</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label>Date</label>
+                                    <input type="date" name="date" class="form-control" value="{{ request('date') }}">
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary btn-block">Search</button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
             </div>
-        </div>
-    </div>
 
-    <div class="col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-warning">
-                <i class="fas fa-clock"></i>
-            </span>
-            <div class="info-box-content">
-                <span class="info-box-text">Pending Payment</span>
-                <span class="info-box-number">3</span>
+            <!-- GROUPED TABLE -->
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Sales Order History Records</h3>
+                </div>
+                <div class="card-body p-0">
+                    <table class="table table-bordered table-striped table-valign-middle mb-0">
+                        <thead class="thead-light text-uppercase small">
+                            <tr>
+                                <th class="pl-4">Invoice #</th>
+                                <th>Order Ref</th>
+                                <th>Customer</th>
+                                <th class="text-center">Type</th>
+                                <th>Date</th>
+                                <th class="text-right">Total Amount</th>
+                                <th class="text-center">Status</th>
+                                <th class="text-center">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @php 
+                                $groupedOrders = $sales_orders->groupBy('customer_id'); 
+                            @endphp
+
+                            @forelse($groupedOrders as $customerId => $orders)
+                                @php $customer = $orders->first()->customer; @endphp
+                                
+                                <!-- CUSTOMER GROUP HEADER ROW -->
+                                <tr class="bg-gray-light customer-group-header" style="cursor: pointer;" data-target="group-{{ $customerId }}">
+                                    <td colspan="7" class="py-2 pl-4">
+                                        <div class="d-flex align-items-center">
+                                            <img src="{{ $customer->profile_picture ? asset($customer->profile_picture) : asset('assets/dist/img/MMOLOGO1.png') }}" 
+                                                 class="img-circle border elevation-1 mr-3" width="30" height="30" style="object-fit: cover;">
+                                            <div>
+                                                <span class="h6 mb-0 font-weight-bold">CUSTOMER: {{ strtoupper($customer->name) }}</span>
+                                                <span class="ml-2 badge badge-info">{{ $customer->type }}</span>
+                                                <small class="ml-2 text-muted">({{ $orders->count() }} Invoices)</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center py-2">
+                                        <button class="btn btn-xs btn-info px-3 btn-toggle-group" data-target="group-{{ $customerId }}">
+                                            <i class="fas fa-eye mr-1"></i> VIEW
+                                        </button>
+                                    </td>
+                                </tr>
+
+                                <!-- INVOICE ROWS (HIDDEN BY DEFAULT) -->
+                                @foreach($orders as $order)
+                                <tr class="invoice-row group-{{ $customerId }}" style="display: none;">
+                                    <td class="pl-5 font-weight-bold">INV-{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}</td>
+                                    <td>{{ $order->order_number }}</td>
+                                    <td>{{ $customer->name }}</td>
+                                    <td class="text-center">{{ $customer->type }}</td>
+                                    <td>{{ $order->order_date ? date('d/m/Y', strtotime($order->order_date)) : '—' }}</td>
+                                    <td class="text-right text-primary font-weight-bold">${{ number_format($order->total_amount, 2) }}</td>
+                                    <td class="text-center">
+                                        @php
+                                            $statusClass = [
+                                                'paid' => 'success',
+                                                'partial' => 'warning',
+                                                'unpaid' => 'danger'
+                                            ][$order->payment_status] ?? 'secondary';
+                                        @endphp
+                                        <span class="badge badge-{{ $statusClass }}">
+                                            {{ strtoupper($order->payment_status) }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="{{ route('sales_order.confirm_sale', $order->id) }}" class="btn btn-xs btn-default border">
+                                            <i class="fas fa-file-invoice mr-1"></i> Invoice
+                                        </a>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            @empty
+                                <tr>
+                                    <td colspan="8" class="text-center py-5">No records found.</td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+                <div class="card-footer clearfix">
+                    <div class="float-left">
+                        Showing {{ $sales_orders->firstItem() ?? 0 }} to {{ $sales_orders->lastItem() ?? 0 }} of {{ $sales_orders->total() }} entries
+                    </div>
+                    <div class="float-right">
+                        {{ $sales_orders->appends(request()->query())->links('pagination::bootstrap-4') }}
+                    </div>
+                </div>
             </div>
+
         </div>
-    </div>
-
-    <div class="col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-secondary">
-                <i class="fas fa-users"></i>
-            </span>
-            <div class="info-box-content">
-                <span class="info-box-text">B2B Customers</span>
-                <span class="info-box-number">7</span>
-            </div>
-        </div>
-    </div>
-
+    </section>
 </div>
 
-<!-- ===================================================== -->
-<!-- FILTERS -->
-<!-- ===================================================== -->
-<div class="card mb-3">
-<div class="card-body">
-<div class="row">
+@push('styles')
+<style>
+    .bg-gray-light { background-color: #f4f6f9; }
+    .customer-group-header:hover { background-color: #e9ecef; }
+</style>
+@endpush
 
-    <div class="col-md-3">
-        <input type="text" class="form-control"
-               placeholder="Search Invoice / Order No">
-    </div>
-
-    <div class="col-md-2">
-        <select class="form-control">
-            <option>All Customers</option>
-            <option>Walk-in Customer</option>
-            <option>ABC Mobile Shop</option>
-            <option>Tech Partner Co.</option>
-        </select>
-    </div>
-
-    <div class="col-md-2">
-        <select class="form-control">
-            <option>All Types</option>
-            <option>B2C</option>
-            <option>B2B</option>
-        </select>
-    </div>
-
-    <div class="col-md-2">
-        <select class="form-control">
-            <option>All Payment Status</option>
-            <option>Paid</option>
-            <option>Unpaid</option>
-            <option>Partial</option>
-        </select>
-    </div>
-
-    <div class="col-md-2">
-        <input type="date" class="form-control">
-    </div>
-
-    <div class="col-md-1 text-right">
-        <button class="btn btn-outline-secondary w-100">
-            Reset
-        </button>
-    </div>
-
-</div>
-</div>
-</div>
-
-<!-- ===================================================== -->
-<!-- SALES ORDER TABLE -->
-<!-- ===================================================== -->
-<div class="card">
-<div class="card-body p-0">
-
-<table class="table table-bordered table-hover mb-0">
-<thead class="thead-light">
-<tr>
-    <th>Invoice No</th>
-    <th>Order Ref</th>
-    <th>Customer</th>
-    <th>Type</th>
-    <th>Order Date</th>
-    <th>Total</th>
-    <th>Payment</th>
-    <th>Created By</th>
-    <th class="text-center">Action</th>
-</tr>
-</thead>
-
-<tbody>
-
-<tr>
-    <td>SI-0001</td>
-    <td>SO-0001</td>
-    <td>Walk-in Customer</td>
-    <td><span class="badge badge-info">B2C</span></td>
-    <td>2025-01-18</td>
-    <td>$3,300</td>
-    <td><span class="badge badge-success">Paid</span></td>
-    <td>Admin</td>
-    <td class="text-center">
-        <a href="{{ route('sales_order.confirm_sale') }}"
-           class="btn btn-sm btn-primary">
-            View Invoice
-        </a>
-    </td>
-</tr>
-
-<tr>
-    <td>SI-0002</td>
-    <td>SO-0002</td>
-    <td>ABC Mobile Shop</td>
-    <td><span class="badge badge-warning">B2B</span></td>
-    <td>2025-01-19</td>
-    <td>$12,400</td>
-    <td><span class="badge badge-warning">Unpaid</span></td>
-    <td>Staff</td>
-    <td class="text-center">
-        <a href="{{ route('sales_order.confirm_sale') }}"
-           class="btn btn-sm btn-primary">
-            View Invoice
-        </a>
-    </td>
-</tr>
-
-<tr>
-    <td>SI-0003</td>
-    <td>SO-0003</td>
-    <td>Tech Partner Co.</td>
-    <td><span class="badge badge-warning">B2B</span></td>
-    <td>2025-01-20</td>
-    <td>$8,700</td>
-    <td><span class="badge badge-success">Paid</span></td>
-    <td>Admin</td>
-    <td class="text-center">
-        <a href="{{ route('sales_order.confirm_sale') }}"
-           class="btn btn-sm btn-primary">
-            View Invoice
-        </a>
-    </td>
-</tr>
-
-</tbody>
-</table>
-
-</div>
-
-<!-- ===================================================== -->
-<!-- PAGINATION -->
-<!-- ===================================================== -->
-<div class="card-footer clearfix">
-<ul class="pagination pagination-sm m-0 float-right">
-    <li class="page-item disabled"><a class="page-link">«</a></li>
-    <li class="page-item active"><a class="page-link">1</a></li>
-    <li class="page-item"><a class="page-link">2</a></li>
-    <li class="page-item"><a class="page-link">3</a></li>
-    <li class="page-item"><a class="page-link">»</a></li>
-</ul>
-</div>
-
-</div>
-
-</section>
-</div>
+@push('scripts')
+<script>
+$(document).ready(function() {
+    $('.customer-group-header').click(function() {
+        const targetClass = $(this).data('target');
+        const btn = $(`.btn-toggle-group[data-target="${targetClass}"]`);
+        const rows = $(`.${targetClass}`);
+        
+        rows.toggle();
+        
+        if (rows.is(':visible')) {
+            btn.removeClass('btn-info').addClass('btn-secondary').html('<i class="fas fa-eye-slash mr-1"></i> HIDE');
+        } else {
+            btn.removeClass('btn-secondary').addClass('btn-info').html('<i class="fas fa-eye mr-1"></i> VIEW');
+        }
+    });
+});
+</script>
+@endpush
 
 @endsection

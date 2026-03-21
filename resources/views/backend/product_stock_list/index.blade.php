@@ -29,14 +29,16 @@
 <!-- ===================================================== -->
 <!-- LOW STOCK ALERT (UI ONLY) -->
 <!-- ===================================================== -->
+@if($lowStockCount > 0)
 <div class="alert alert-warning d-flex align-items-center mb-3">
     <i class="fas fa-exclamation-triangle mr-2"></i>
     <div>
         <strong>Low Stock Alert:</strong>
-        Some products are below minimum stock level.
+        There are {{ $lowStockCount }} products currently below minimum stock level (10 units).
         Please review and reorder soon.
     </div>
 </div>
+@endif
 
 <!-- ===================================================== -->
 <!-- SUMMARY CARDS -->
@@ -44,49 +46,49 @@
 <div class="row mb-4">
 
     <div class="col-md-3">
-        <div class="info-box">
+        <div class="info-box shadow-sm">
             <span class="info-box-icon bg-info">
                 <i class="fas fa-box"></i>
             </span>
             <div class="info-box-content">
                 <span class="info-box-text">Total Products</span>
-                <span class="info-box-number">3</span>
+                <span class="info-box-number">{{ number_format($totalProducts) }}</span>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="info-box">
+        <div class="info-box shadow-sm">
             <span class="info-box-icon bg-success">
                 <i class="fas fa-layer-group"></i>
             </span>
             <div class="info-box-content">
                 <span class="info-box-text">Total Units</span>
-                <span class="info-box-number">62</span>
+                <span class="info-box-number">{{ number_format($totalUnits) }}</span>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="info-box">
+        <div class="info-box shadow-sm">
             <span class="info-box-icon bg-warning">
                 <i class="fas fa-exclamation-triangle"></i>
             </span>
             <div class="info-box-content">
-                <span class="info-box-text">Low Stock</span>
-                <span class="info-box-number">1</span>
+                <span class="info-box-text">Low Stock (Units < 10)</span>
+                <span class="info-box-number">{{ number_format($lowStockCount) }}</span>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="info-box">
+        <div class="info-box shadow-sm">
             <span class="info-box-icon bg-secondary">
                 <i class="fas fa-dollar-sign"></i>
             </span>
             <div class="info-box-content">
                 <span class="info-box-text">Total Stock Value</span>
-                <span class="info-box-number">$58,900</span>
+                <span class="info-box-number">${{ number_format($totalStockValue, 2) }}</span>
             </div>
         </div>
     </div>
@@ -94,175 +96,172 @@
 </div>
 
 <!-- ===================================================== -->
-<!-- STOCK STATUS LEGEND (UI ONLY) -->
-<!-- ===================================================== -->
-<div class="mb-2">
-    <span class="badge badge-success mr-2">Normal Stock</span>
-    <span class="badge badge-warning mr-2">Low Stock</span>
-    <span class="badge badge-danger">Out of Stock</span>
-</div>
-
-<!-- ===================================================== -->
 <!-- FILTERS -->
 <!-- ===================================================== -->
-<div class="card mb-3">
+<div class="card mb-3 shadow-sm border-0">
 <div class="card-body">
+<form action="{{ route('product_stock_list.index') }}" method="GET">
 <div class="row">
 
     <div class="col-md-3">
-        <input type="text" class="form-control"
-               placeholder="Search Product / SKU">
+        <input type="text" name="search" class="form-control"
+               placeholder="Search Product / SKU" value="{{ request('search') }}">
     </div>
 
     <div class="col-md-2">
-        <select class="form-control">
-            <option>All Categories</option>
-            <option>Mobile Phone</option>
-            <option>Smart TV</option>
-            <option>Refrigerator</option>
+        <select name="category_id" class="form-control" onchange="this.form.submit()">
+            <option value="">All Categories</option>
+            @foreach($categories as $cat)
+                <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+            @endforeach
         </select>
     </div>
 
     <div class="col-md-2">
-        <select class="form-control">
-            <option>All Brands</option>
-            <option>Apple</option>
-            <option>Samsung</option>
-            <option>LG</option>
+        <select name="brand_id" class="form-control" onchange="this.form.submit()">
+            <option value="">All Brands</option>
+            @foreach($brands as $brand)
+                <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+            @endforeach
         </select>
     </div>
 
     <div class="col-md-2">
-        <select class="form-control">
-            <option>All Stock Status</option>
-            <option>Normal</option>
-            <option>Low Stock</option>
-            <option>Out of Stock</option>
+        <select name="status" class="form-control" onchange="this.form.submit()">
+            <option value="">All Stock Status</option>
+            <option value="normal" {{ request('status') == 'normal' ? 'selected' : '' }}>Normal Stock</option>
+            <option value="low_stock" {{ request('status') == 'low_stock' ? 'selected' : '' }}>Low Stock</option>
         </select>
     </div>
 
     <div class="col-md-2">
-        <select class="form-control">
-            <option>All Shelves</option>
-            <option>Mobile Shelf A1</option>
-            <option>Mobile Shelf A2</option>
-            <option>TV Shelf B1</option>
+        <select name="location_id" class="form-control" onchange="this.form.submit()">
+            <option value="">All Shelves</option>
+            @foreach($locations as $loc)
+                <option value="{{ $loc->id }}" {{ request('location_id') == $loc->id ? 'selected' : '' }}>{{ $loc->name }}</option>
+            @endforeach
         </select>
     </div>
 
     <div class="col-md-1 text-right">
-        <button class="btn btn-outline-secondary w-100">
+        <a href="{{ route('product_stock_list.index') }}" class="btn btn-outline-secondary w-100">
             Reset
-        </button>
+        </a>
     </div>
 
 </div>
+</form>
 </div>
 </div>
 
 <!-- ===================================================== -->
 <!-- PRODUCT STOCK TABLE -->
 <!-- ===================================================== -->
-<div class="card">
+<div class="card shadow-sm border-0">
 <div class="card-body p-0">
 
 <table class="table table-bordered table-hover mb-0">
-<thead class="thead-light">
+<thead class="bg-light">
 <tr>
-    <th width="70">Image</th>
+    <th width="70" class="text-center">Image</th>
     <th>Product</th>
     <th>SKU</th>
-    <th>Supplier</th>
-    <th width="90">Qty</th>
-    <th width="120">Unit Cost</th>
+    <th>Main Supplier</th>
+    <th width="90" class="text-center">Qty</th>
+    <th width="120" class="text-right">Unit Cost</th>
 
-    <!-- 🔹 NEW SELLING COLUMNS -->
-    <th width="120">Selling Price</th>
-    <th width="120">Profit / Unit</th>
+    <th width="120" class="text-right">Selling Price</th>
+    <th width="120" class="text-right">Profit / Unit</th>
 
-    <th width="130">Stock Value</th>
-    <th width="160">Shelf</th>
-    <th width="120">Stock Status</th>
-    <th width="120" class="text-center">Action</th>
+    <th width="130" class="text-right">Stock Value</th>
+    <th width="200">Shelf / Location</th>
+    <th width="120" class="text-center">Stock Status</th>
+    <th width="80" class="text-center">Action</th>
 </tr>
 </thead>
 <tbody>
 
-<!-- NORMAL STOCK -->
+@forelse($products as $product)
+@php
+    $qty = $product->total_qty ?? 0;
+    $avgCost = $product->avg_cost ?? 0;
+    $sellingPrice = $product->selling_price ?? 0;
+    $profit = $sellingPrice - $avgCost;
+    $stockValue = $qty * $avgCost;
+    
+    $statusLabel = 'Normal';
+    $badgeClass = 'badge-success';
+    $rowClass = '';
+    
+    if ($qty <= 0) {
+        $statusLabel = 'Out of Stock';
+        $badgeClass = 'badge-danger';
+        $rowClass = 'table-danger';
+    } elseif ($qty < 10) {
+        $statusLabel = 'Low Stock';
+        $badgeClass = 'badge-warning';
+        $rowClass = 'table-warning';
+    }
+
+    $imageUrl = $product->image ?? '';
+    if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+        $imageUrl = asset('storage/' . $imageUrl);
+    }
+    if (!$imageUrl) {
+        $imageUrl = asset('assets/dist/img/default-150x150.png');
+    }
+@endphp
+<tr class="{{ $rowClass }}">
+    <td class="text-center">
+        <img src="{{ $imageUrl }}" class="img-thumbnail" width="45" style="height:45px; object-fit:contain;">
+    </td>
+    <td>
+        <strong>{{ $product->name }}</strong><br>
+        <small class="text-muted">{{ $product->brand->name ?? 'N/A' }} · {{ $product->category->name ?? 'N/A' }}</small>
+    </td>
+    <td><small class="text-muted font-weight-bold">{{ $product->sku }}</small></td>
+    <td>{{ $product->suppliers->first()->company_name ?? 'N/A' }}</td>
+    <td class="text-center"><strong>{{ number_format($qty) }}</strong></td>
+
+    <td class="text-right">${{ number_format($avgCost, 2) }}</td>
+
+    <td class="text-right"><strong>${{ number_format($sellingPrice, 2) }}</strong></td>
+    <td class="text-right text-{{ $profit >= 0 ? 'success' : 'danger' }}">
+        <strong>${{ number_format($profit, 2) }}</strong>
+    </td>
+
+    <td class="text-right font-weight-bold">${{ number_format($stockValue, 2) }}</td>
+    <td>
+        @forelse($product->stocks as $stock)
+            <div class="small">
+                <i class="fas fa-map-marker-alt text-muted mr-1"></i>
+                {{ $stock->location->name ?? 'N/A' }} ({{ $stock->quantity }})
+            </div>
+        @empty
+            <small class="text-muted">No specific location</small>
+        @endforelse
+    </td>
+    <td class="text-center"><span class="badge {{ $badgeClass }} shadow-sm px-2 py-1">{{ $statusLabel }}</span></td>
+    <td class="text-center">
+        <button class="btn btn-sm btn-outline-primary shadow-sm"
+                onclick='openProductDetailModal(@json($product), {{ $qty }}, {{ $avgCost }}, {{ $stockValue }}, "{{ $statusLabel }}", "{{ $badgeClass }}", "{{ $imageUrl }}")'>
+            <i class="fas fa-eye"></i>
+        </button>
+    </td>
+</tr>
+@empty
 <tr>
-    <td class="text-center">
-        <img src="https://www.myg.in/images/thumbnails/300/300/detailed/75/s24ultraviolet1-removebg-preview.png.png"
-             width="45">
-    </td>
-    <td>
-        <strong>Samsung Galaxy S24</strong><br>
-        <small class="text-muted">256GB / Factory Unlocked</small>
-    </td>
-    <td>SGS24</td>
-    <td>Global Tech Supply</td>
-    <td><strong>30</strong></td>
-
-    <td>$950</td>
-
-    <!-- SELLING -->
-    <td><strong>$1,100</strong></td>
-    <td class="text-success"><strong>$150</strong></td>
-
-    <td>$28,500</td>
-    <td>Mobile Shelf A3</td>
-    <td><span class="badge badge-success">Normal</span></td>
-    <td class="text-center">
-        <button class="btn btn-sm btn-outline-primary"
-                data-toggle="modal"
-                data-target="#productDetailModal">
-            View
-        </button>
-    </td>
+    <td colspan="12" class="text-center py-5 text-muted">No products found in stock list.</td>
 </tr>
-
-<!-- LOW STOCK -->
-<tr class="table-warning">
-    <td class="text-center">
-        <img src="https://assets.swappie.com/cdn-cgi/image/width=600,height=600,fit=contain,format=auto/swappie-iphone-15-pro-natural-titanium.png"
-             width="45">
-    </td>
-    <td>
-        <strong>iPhone 15 Pro</strong><br>
-        <small class="text-muted">256GB</small>
-    </td>
-    <td>IP15P-256</td>
-    <td>Global Tech Supply</td>
-    <td><strong>22</strong></td>
-
-    <td>$950</td>
-
-    <!-- SELLING -->
-    <td><strong>$1,150</strong></td>
-    <td class="text-success"><strong>$200</strong></td>
-
-    <td>$20,900</td>
-    <td>Mobile Shelf A1</td>
-    <td><span class="badge badge-warning">Low Stock</span></td>
-    <td class="text-center">
-        <button class="btn btn-sm btn-outline-primary"
-                data-toggle="modal"
-                data-target="#productDetailModal">
-            View
-        </button>
-    </td>
-</tr>
+@endforelse
 
 </tbody>
 </table>
 
-<div class="card-footer clearfix">
-<ul class="pagination pagination-sm m-0 float-right">
-    <li class="page-item disabled"><a class="page-link">«</a></li>
-    <li class="page-item active"><a class="page-link">1</a></li>
-    <li class="page-item"><a class="page-link">2</a></li>
-    <li class="page-item"><a class="page-link">3</a></li>
-    <li class="page-item"><a class="page-link">»</a></li>
-</ul>
+<div class="card-footer clearfix bg-white">
+    <div class="float-right">
+        {{ $products->appends(request()->query())->links() }}
+    </div>
 </div>
 </div>
 </div>
@@ -271,62 +270,176 @@
 
 
 <!-- ===================================================== -->
-<!-- PRODUCT DETAIL MODAL (READ ONLY) -->
+<!-- PRODUCT DETAIL MODAL (MODERN REDESIGN) -->
 <!-- ===================================================== -->
 <div class="modal fade" id="productDetailModal" tabindex="-1">
-<div class="modal-dialog modal-lg">
-<div class="modal-content">
+<div class="modal-dialog modal-lg modal-dialog-centered">
+<div class="modal-content border-0 shadow-lg">
 
-    <div class="modal-header">
-        <h5 class="modal-title">Product Details</h5>
-        <button type="button" class="close" data-dismiss="modal">&times;</button>
+    <div class="modal-header border-bottom-0 pb-0">
+        <h5 class="modal-title font-weight-bold text-dark">
+            <i class="fas fa-info-circle text-primary mr-2"></i>Product Stock Details
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
     </div>
 
-    <div class="modal-body">
-
-        <div class="row mb-3">
-            <div class="col-md-3 text-center">
-                <img src="https://www.myg.in/images/thumbnails/300/300/detailed/75/s24ultraviolet1-removebg-preview.png.png"
-                    class="img-fluid rounded">
+    <div class="modal-body pt-2">
+        <!-- TOP SECTION: IDENTITY -->
+        <div class="d-flex align-items-center mb-4 p-3 bg-light rounded shadow-xs">
+            <div class="mr-4">
+                <img id="m_image" src="" class="img-fluid rounded border bg-white shadow-sm" 
+                     style="width:120px; height:120px; object-fit:contain;">
             </div>
-            <div class="col-md-9">
-                <h5>Samsung Galaxy S24</h5>
-                <p class="text-muted mb-1">
-                    SKU: SGS24 · Brand: Samsung · Category: Mobile Phone
-                </p>
-                <span class="badge badge-success">Normal Stock</span>
-            </div>
-        </div>
-
-        <table class="table table-sm table-bordered">
-            <tr><th width="35%">Supplier</th><td>Global Tech Supply</td></tr>
-            <tr><th>Storage Location</th><td>Mobile Shelf A3</td></tr>
-            <tr><th>Current Quantity</th><td><strong>30 Units</strong></td></tr>
-            <tr><th>Unit Cost</th><td>$950</td></tr>
-            <tr><th>Total Stock Value</th><td><strong>$28,500</strong></td></tr>
-            <tr><th>Last Updated</th><td>2025-01-15</td></tr>
-        </table>
-
-        <div class="mt-3">
-            <h6>Description</h6>
-            <div class="border rounded p-2 bg-light"
-                style="max-height:180px; overflow:auto;">
-                Samsung Galaxy S24 features a 6.1-inch AMOLED display,
-                premium performance, factory unlocked support,
-                and 5G connectivity.
+            <div class="flex-grow-1">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <h3 id="m_name" class="font-weight-bold mb-1 text-dark">Product Name</h3>
+                        <p class="text-muted mb-2">
+                            <span class="badge badge-outline-secondary border px-2 py-1">SKU: <span id="m_sku" class="font-weight-bold"></span></span>
+                            <span class="mx-1 text-light">|</span>
+                            <span id="m_brand" class="font-weight-bold"></span>
+                            <span class="mx-1 text-light">·</span>
+                            <span id="m_category" class="text-muted"></span>
+                        </p>
+                    </div>
+                    <span id="m_status" class="badge px-3 py-2 shadow-sm" style="font-size: 0.9rem;">Stock Status</span>
+                </div>
             </div>
         </div>
 
+        <!-- MIDDLE SECTION: KEY METRICS -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="border rounded p-3 text-center bg-white shadow-xs h-100">
+                    <small class="text-uppercase text-muted font-weight-bold d-block mb-2" style="letter-spacing: 0.5px;">Current Stock</small>
+                    <h4 id="m_qty" class="font-weight-bold mb-0 text-primary">—</h4>
+                    <small class="text-muted">Units Available</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="border rounded p-3 text-center bg-white shadow-xs h-100">
+                    <small class="text-uppercase text-muted font-weight-bold d-block mb-2" style="letter-spacing: 0.5px;">Unit Cost</small>
+                    <h4 id="m_cost" class="font-weight-bold mb-0 text-dark">—</h4>
+                    <small class="text-muted">Average Price</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="border rounded p-3 text-center bg-white shadow-xs h-100">
+                    <small class="text-uppercase text-muted font-weight-bold d-block mb-2" style="letter-spacing: 0.5px;">Selling Price</small>
+                    <h4 id="m_selling" class="font-weight-bold mb-0 text-success">—</h4>
+                    <small class="text-muted">Retail Target</small>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="border rounded p-3 text-center bg-white shadow-xs h-100">
+                    <small class="text-uppercase text-muted font-weight-bold d-block mb-2" style="letter-spacing: 0.5px;">Profit / Unit</small>
+                    <h4 id="m_profit" class="font-weight-bold mb-0">—</h4>
+                    <small class="text-muted">Per Item</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM SECTION: SECONDARY DETAILS -->
+        <div class="row">
+            <div class="col-md-7">
+                <div class="card border shadow-none mb-3">
+                    <div class="card-header bg-white py-2">
+                        <small class="text-uppercase font-weight-bold text-muted">Specifications & Description</small>
+                    </div>
+                    <div class="card-body bg-light p-3">
+                        <div id="m_description" style="max-height:150px; overflow-y:auto; line-height: 1.6; color: #444; font-size: 0.95rem;">
+                            Description goes here.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-5">
+                <div class="card border shadow-none mb-3">
+                    <div class="card-header bg-white py-2">
+                        <small class="text-uppercase font-weight-bold text-muted">Logistics Info</small>
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-2 border-bottom-0">
+                            <span class="text-muted small">Main Supplier</span>
+                            <span id="m_supplier" class="font-weight-bold small text-dark">—</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-2 border-bottom-0">
+                            <span class="text-muted small">Stock Value</span>
+                            <span id="m_value" class="font-weight-bold small text-primary">—</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center py-2 border-bottom-0">
+                            <span class="text-muted small">Total Profit</span>
+                            <span id="m_total_profit" class="font-weight-bold small text-success">—</span>
+                        </li>
+                        <li class="list-group-item py-2">
+                            <span class="text-muted small d-block mb-1">Storage Locations</span>
+                            <div id="m_locations" class="p-2 bg-light rounded border-dashed">
+                                <!-- Locations injected here -->
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="modal-footer">
-        <button class="btn btn-secondary" data-dismiss="modal">Close</button>
+    <div class="modal-footer bg-light border-top-0">
+        <button class="btn btn-outline-secondary px-4 shadow-sm" data-dismiss="modal">Close Details</button>
     </div>
 
 </div>
 </div>
 
-</section>
-</div>
+<style>
+    .border-dashed { border: 1px dashed #ced4da; }
+    .shadow-xs { box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .badge-outline-secondary { color: #6c757d; border-color: #6c757d; background: transparent; }
+</style>
 
 @endsection
+
+@push('scripts')
+<script>
+function openProductDetailModal(product, qty, avgCost, stockValue, statusLabel, badgeClass, imageUrl) {
+    $('#m_image').attr('src', imageUrl);
+    $('#m_name').text(product.name);
+    $('#m_sku').text(product.sku);
+    $('#m_brand').text(product.brand ? product.brand.name : 'N/A');
+    $('#m_category').text(product.category ? product.category.name : 'N/A');
+    
+    $('#m_status').text(statusLabel).removeClass('badge-success badge-warning badge-danger').addClass(badgeClass);
+    
+    const supplier = product.suppliers && product.suppliers.length > 0 ? product.suppliers[0].company_name : 'N/A';
+    $('#m_supplier').text(supplier);
+    $('#m_qty').text(qty.toLocaleString() + ' Units');
+    $('#m_cost').text('$' + avgCost.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+    $('#m_selling').text('$' + (product.selling_price || 0).toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+    $('#m_value').text('$' + stockValue.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+    
+    const profitPerUnit = (product.selling_price || 0) - avgCost;
+    $('#m_profit').text('$' + profitPerUnit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}))
+        .removeClass('text-success text-danger').addClass(profitPerUnit >= 0 ? 'text-success' : 'text-danger');
+
+    // Total Potential Profit
+    const totalPotentialProfit = profitPerUnit * qty;
+    $('#m_total_profit').text('$' + totalPotentialProfit.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}))
+        .removeClass('text-success text-danger').addClass(totalPotentialProfit >= 0 ? 'text-success' : 'text-danger');
+
+    let locations = '';
+    if (product.stocks && product.stocks.length > 0) {
+        product.stocks.forEach(stk => {
+            locations += `<div class="small">${stk.location ? stk.location.name : 'N/A'} (${stk.quantity})</div>`;
+        });
+    } else {
+        locations = '<small class="text-muted">No stock location</small>';
+    }
+    $('#m_locations').html(locations);
+    
+    $('#m_description').html(product.description || '<span class="text-muted">No description provided.</span>');
+
+    $('#productDetailModal').modal('show');
+}
+</script>
+@endpush

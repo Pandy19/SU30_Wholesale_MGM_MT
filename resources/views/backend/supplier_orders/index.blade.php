@@ -36,7 +36,7 @@
             </span>
             <div class="info-box-content">
                 <span class="info-box-text">Total Orders</span>
-                <span class="info-box-number">12</span>
+                <span class="info-box-number">{{ $summary['total_orders'] }}</span>
             </div>
         </div>
     </div>
@@ -48,7 +48,7 @@
             </span>
             <div class="info-box-content">
                 <span class="info-box-text">Total Amount</span>
-                <span class="info-box-number">$24,850</span>
+                <span class="info-box-number">${{ number_format($summary['total_amount'], 2) }}</span>
             </div>
         </div>
     </div>
@@ -60,7 +60,7 @@
             </span>
             <div class="info-box-content">
                 <span class="info-box-text">Paid Orders</span>
-                <span class="info-box-number">8</span>
+                <span class="info-box-number">{{ $summary['paid_orders'] }}</span>
             </div>
         </div>
     </div>
@@ -72,7 +72,7 @@
             </span>
             <div class="info-box-content">
                 <span class="info-box-text">Unpaid Orders</span>
-                <span class="info-box-number">4</span>
+                <span class="info-box-number">{{ $summary['unpaid_orders'] }}</span>
             </div>
         </div>
     </div>
@@ -83,34 +83,37 @@
 <!-- ===================================================== -->
 <div class="card mb-3">
 <div class="card-body">
-<div class="row">
+<form action="" method="GET">
+    <div class="row">
+        <div class="col-md-3">
+            <input type="text" name="search" class="form-control"
+                   placeholder="Search PO No (e.g. PO-0001)" value="{{ request('search') }}">
+        </div>
 
-    <div class="col-md-3">
-        <input type="text" class="form-control"
-               placeholder="Search PO No (e.g. PO-0001)">
+        <div class="col-md-3">
+            <select name="supplier" class="form-control">
+                <option value="">All Suppliers</option>
+                @foreach($suppliers as $supplier)
+                    <option value="{{ $supplier->id }}" {{ request('supplier') == $supplier->id ? 'selected' : '' }}>
+                        {{ $supplier->company_name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <select name="payment_status" class="form-control">
+                <option value="">All Payment Status</option>
+                <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>Unpaid</option>
+            </select>
+        </div>
+
+        <div class="col-md-3">
+            <input type="date" name="date" class="form-control" value="{{ request('date') }}" onchange="this.form.submit()">
+        </div>
     </div>
-
-    <div class="col-md-3">
-        <select class="form-control">
-            <option>All Suppliers</option>
-            <option>Global Tech Supply</option>
-            <option>Asia Mobile Distribution</option>
-        </select>
-    </div>
-
-    <div class="col-md-3">
-        <select class="form-control">
-            <option>All Payment Status</option>
-            <option>Paid</option>
-            <option>Unpaid</option>
-        </select>
-    </div>
-
-    <div class="col-md-3">
-        <input type="date" class="form-control">
-    </div>
-
-</div>
+</form>
 </div>
 </div>
 
@@ -140,69 +143,60 @@
 </thead>
 <tbody>
 
+@forelse($purchase_orders as $po)
 <tr>
-    <td>PO-0001</td>
-    <td>Global Tech Supply</td>
-    <td>2025-01-09</td>
-    <td>2025-01-10</td>
-    <td>$1,650.00</td>
-    <td><span class="badge badge-success">Paid</span></td>
+    <td>{{ $po->po_number }}</td>
+    <td>{{ $po->supplier->company_name }}</td>
+    <td>{{ $po->order_date ? $po->order_date->format('Y-m-d') : '-' }}</td>
+    <td>{{ $po->created_at->format('Y-m-d') }}</td>
+    <td>${{ number_format($po->total_amount, 2) }}</td>
+    <td>
+        @php
+            $payStatus = strtolower($po->payment_status);
+            $payBadge = $payStatus === 'paid' ? 'success' : ($payStatus === 'partial' ? 'info' : 'warning');
+        @endphp
+        <span class="badge badge-{{ $payBadge }}">{{ ucfirst($po->payment_status) }}</span>
+    </td>
     <td>Admin</td>
 
     <!-- NEW -->
-    <td><span class="badge badge-info">Pending</span></td>
-    <td><span class="badge badge-warning">Not Added</span></td>
+    <td>
+        @php
+            $status = strtolower($po->status);
+            $statusBadge = [
+                'pending' => 'info',
+                'ordered' => 'primary',
+                'received' => 'success',
+                'completed' => 'success',
+                'cancelled' => 'danger'
+            ][$status] ?? 'secondary';
+        @endphp
+        <span class="badge badge-{{ $statusBadge }}">{{ ucfirst($po->status) }}</span>
+    </td>
+    <td>
+        @if(in_array(strtolower($po->status), ['received', 'completed']))
+            <span class="badge badge-success">Added to Stock</span>
+        @else
+            <span class="badge badge-warning">Not Added</span>
+        @endif
+    </td>
 
     <td class="text-center">
-        <a href="{{ route('purchase_orders.confirm_payment') }}"
+        <a href="{{ route('purchase_orders.confirm_payment', ['session_ids' => $po->id]) }}"
            class="btn btn-sm btn-primary">
             View Invoice
         </a>
-        <button class="btn btn-sm btn-outline-secondary ml-1"
+        <!-- <button class="btn btn-sm btn-outline-secondary ml-1"
                 onclick="window.print()">
             Print
-        </button>
+        </button> -->
     </td>
 </tr>
-
+@empty
 <tr>
-    <td>PO-0002</td>
-    <td>Asia Mobile Distribution</td>
-    <td>2025-01-11</td>
-    <td>2025-01-12</td>
-    <td>$980.00</td>
-    <td><span class="badge badge-warning">Unpaid</span></td>
-    <td>Staff</td>
-
-    <!-- NEW -->
-    <td><span class="badge badge-success">Accepted</span></td>
-    <td><span class="badge badge-success">Added to Stock</span></td>
-
-    <td class="text-center">
-        <a href="{{ route('purchase_orders.confirm_payment') }}"
-           class="btn btn-sm btn-primary">
-            View Invoice
-        </a>
-    </td>
+    <td colspan="10" class="text-center py-4 text-muted">No purchase orders found.</td>
 </tr>
-
-<tr>
-    <td>PO-0003</td>
-    <td>Global Tech Supply</td>
-    <td>2025-01-08</td>
-    <td>2025-01-08</td>
-    <td>$1,200.00</td>
-    <td><span class="badge badge-secondary">N/A</span></td>
-    <td>Admin</td>
-
-    <!-- NEW -->
-    <td><span class="badge badge-danger">Rejected</span></td>
-    <td><span class="badge badge-secondary">Not Added</span></td>
-
-    <td class="text-center text-muted">
-        —
-    </td>
-</tr>
+@endforelse
 
 </tbody>
 </table>

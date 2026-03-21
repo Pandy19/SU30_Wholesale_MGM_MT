@@ -5,23 +5,16 @@
 <div class="content-wrapper">
 <section class="content">
 
-<!-- ===================================================== -->
-<!-- PAGE TITLE -->
-<!-- ===================================================== -->
-
-     <div class="content-header">
+    <div class="content-header">
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h3 class="m-0">Goods Receiving & Approval</h3>
-                    <p class="text-muted mb-0">
-                    Verify purchased products before adding them to stock
-                    </p>
+                    <h3 class="m-0 font-weight-bold text-dark">Goods Receiving & Approval</h3>
+                    <p class="text-muted mb-0">Verify and approve shipments to update warehouse stock</p>
                 </div>
-                
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Supliers</a></li>
+                        <li class="breadcrumb-item"><a href="#">Procurement</a></li>
                         <li class="breadcrumb-item active">Good Receiving</li>
                     </ol>
                 </div>
@@ -29,63 +22,68 @@
         </div>
     </div>
 
-<!-- ===================================================== -->
 <!-- FILTERS -->
-<!-- ===================================================== -->
-<div class="card mb-4">
+<div class="card mb-4 shadow-sm border-0">
 <div class="card-body">
-<div class="row">
+<form action="{{ route('goods_receiving.index') }}" method="GET">
+    <div class="row">
+        <div class="col-md-3 mb-2">
+            <input type="text" name="search" class="form-control"
+                   placeholder="Search Product / SKU / PO No" value="{{ request('search') }}">
+        </div>
 
-    <div class="col-md-3 mb-2">
-        <input type="text" class="form-control"
-               placeholder="Search Product / SKU / PO No">
+        <div class="col-md-2 mb-2">
+            <select name="brand_id" class="form-control" onchange="this.form.submit()">
+                <option value="">All Brands</option>
+                @foreach($brands as $brand)
+                    <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>
+                        {{ $brand->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-2 mb-2">
+            <select name="category_id" class="form-control" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                @foreach($categories as $category)
+                    <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                        {{ $category->name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-2 mb-2">
+            <select name="supplier_id" class="form-control" onchange="this.form.submit()">
+                <option value="">All Suppliers</option>
+                @foreach($suppliers as $supplier)
+                    <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
+                        {{ $supplier->company_name }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-3 mb-2">
+            <select name="status" class="form-control" onchange="this.form.submit()">
+                <option value="">All Status</option>
+                <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>Accepted</option>
+                <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
+            </select>
+        </div>
     </div>
-
-    <div class="col-md-2 mb-2">
-        <select class="form-control">
-            <option>All Brands</option>
-            <option>Samsung</option>
-            <option>Apple</option>
-        </select>
-    </div>
-
-    <div class="col-md-2 mb-2">
-        <select class="form-control">
-            <option>All Categories</option>
-            <option>Mobile Phone</option>
-            <option>Smart TV</option>
-        </select>
-    </div>
-
-    <div class="col-md-2 mb-2">
-        <select class="form-control">
-            <option>All Suppliers</option>
-            <option>Global Tech Supply</option>
-            <option>Asia Mobile Distribution</option>
-        </select>
-    </div>
-
-    <div class="col-md-3 mb-2">
-        <select class="form-control">
-            <option>All Status</option>
-            <option>Pending</option>
-            <option>Accepted</option>
-            <option>Rejected</option>
-        </select>
-    </div>
-
+</form>
 </div>
 </div>
-</div>
 
-<!-- ===================================================== -->
 <!-- GOODS RECEIVING TABLE -->
-<!-- ===================================================== -->
-<div class="card">
+<div class="card shadow-sm border-0">
 <div class="card-body p-0">
 
 <table class="table table-bordered table-hover mb-0 align-middle">
-<thead class="thead-light">
+<thead class="bg-light">
 <tr>
     <th class="text-center">Image</th>
     <th>Product</th>
@@ -94,127 +92,135 @@
     <th>Supplier</th>
     <th class="text-center">Ordered</th>
     <th class="text-center">Received</th>
-    <th class="text-center">Accept</th>
-    <th class="text-center">Reject</th>
+    <th class="text-center" style="width: 100px;">Accept</th>
+    <th class="text-center" style="width: 100px;">Reject</th>
     <th class="text-right">Unit Cost</th>
     <th class="text-right">Total</th>
     <th>Status</th>
     <th>Approved By</th>
-    <th>Date</th>
     <th class="text-center">Action</th>
 </tr>
 </thead>
 <tbody>
 
-<!-- ================= PENDING ================= -->
+@forelse($items as $item)
+@php
+    $gr = $item->goodsReceiving;
+    $product = $item->product;
+    $status = strtolower($gr->status ?? 'pending');
+@endphp
 <tr>
     <td class="text-center">
-        <img src="https://www.myg.in/images/thumbnails/300/300/detailed/75/s24ultraviolet1-removebg-preview.png.png"
-             class="img-thumbnail"
-             width="55">
+        @php
+            $imageUrl = $product->image ?? '';
+            if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+                $imageUrl = asset('storage/' . $imageUrl);
+            }
+            if (!$imageUrl) {
+                $imageUrl = asset('assets/dist/img/default-150x150.png');
+            }
+        @endphp
+        <img src="{{ $imageUrl }}" class="img-thumbnail shadow-sm" width="50" height="50" style="object-fit: cover;">
     </td>
+    <td><strong>{{ $product->name ?? 'N/A' }}</strong></td>
+    <td><small class="text-muted font-weight-bold">{{ $product->sku ?? 'N/A' }}</small></td>
+    <td>{{ $product->brand->name ?? 'N/A' }}</td>
+    <td>{{ $gr->purchaseOrder->supplier->company_name ?? 'N/A' }}</td>
+    <td class="text-center font-weight-bold">{{ $item->ordered_qty }}</td>
+    <td class="text-center font-weight-bold text-primary">{{ $item->received_qty }}</td>
+
+    <td class="text-center">
+        @if($status === 'pending' && $item->accepted_qty == 0 && $item->rejected_qty == 0)
+            <input type="number"
+                   id="accept_qty_{{ $item->id }}"
+                   class="form-control form-control-sm text-center font-weight-bold border-success accept-input"
+                   data-id="{{ $item->id }}"
+                   data-received="{{ $item->received_qty }}"
+                   value="{{ $item->received_qty }}" min="0" max="{{ $item->received_qty }}">
+        @else
+            <span class="text-success font-weight-bold h6">{{ $item->accepted_qty }}</span>
+        @endif
+    </td>
+
+    <td class="text-center">
+        @if($status === 'pending' && $item->accepted_qty == 0 && $item->rejected_qty == 0)
+            <input type="number"
+                   id="reject_qty_{{ $item->id }}"
+                   class="form-control form-control-sm text-center font-weight-bold border-danger reject-input"
+                   data-id="{{ $item->id }}"
+                   value="0" min="0" max="{{ $item->received_qty }}">
+        @else
+            <span class="text-danger font-weight-bold h6">{{ $item->rejected_qty }}</span>
+        @endif
+    </td>
+
+    <td class="text-right font-weight-bold text-dark">${{ number_format($item->unit_cost, 2) }}</td>
+    <td class="text-right font-weight-bold text-dark">${{ number_format($item->total_cost, 2) }}</td>
+
     <td>
-        <strong>Samsung Galaxy S24</strong>
+        @php
+            $itemProcessed = ($item->accepted_qty > 0 || $item->rejected_qty > 0);
+            
+            if (!$itemProcessed) {
+                $displayStatus = 'pending';
+                $badgeClass = 'badge-info';
+                $statusLabel = 'Pending';
+            } else {
+                if ($item->rejected_qty > 0 && $item->accepted_qty == 0) {
+                    $displayStatus = 'rejected';
+                    $badgeClass = 'badge-danger';
+                    $statusLabel = 'Rejected';
+                } elseif ($item->accepted_qty > 0 && $item->rejected_qty == 0) {
+                    $displayStatus = 'accepted';
+                    $badgeClass = 'badge-success';
+                    $statusLabel = 'Approved goods received';
+                } else {
+                    $displayStatus = 'partially_accepted';
+                    $badgeClass = 'badge-warning';
+                    $statusLabel = 'Partially Approved';
+                }
+            }
+        @endphp
+        <span class="badge {{ $badgeClass }} px-2 py-1 shadow-sm">{{ $statusLabel }}</span>
     </td>
-    <td>SGS24</td>
-    <td>Samsung</td>
-    <td>Global Tech Supply</td>
-    <td class="text-center">10</td>
-    <td class="text-center"><strong>10</strong></td>
-
-    <td class="text-center">
-        <input type="number"
-               class="form-control form-control-sm text-center"
-               value="7" min="0" max="10">
+    <td class="{{ !($gr && $gr->approver) ? 'text-muted italic' : 'font-weight-bold' }}">
+        {{ $gr->approver->name ?? '—' }}
     </td>
 
-    <td class="text-center">
-        <input type="number"
-               class="form-control form-control-sm text-center"
-               value="3" min="0" max="10">
-    </td>
-
-    <td class="text-right">$950</td>
-    <td class="text-right">$9,500</td>
-
-    <td>
-        <span class="badge badge-info">Pending</span>
-    </td>
-    <td class="text-muted">—</td>
-    <td class="text-muted">—</td>
-
-    <td class="text-center">
-        <div class="btn-group-vertical">
-            <button class="btn btn-sm btn-success mb-1">
-                Approve
-            </button>
-            <button class="btn btn-sm btn-danger mb-1"
-                    data-toggle="modal"
-                    data-target="#rejectReasonModal">
-                Reject
-            </button>
-            <button class="btn btn-sm btn-outline-secondary" disabled>
-                <i class="fas fa-print"></i> Print
-            </button>
-        </div>
-    </td>
-</tr>
-
-<!-- ================= ACCEPTED ================= -->
-<tr>
-    <td class="text-center">
-        <img src="https://images-cdn.ubuy.co.in/668e509932f72820f85b4e0f-samsung-55-class-4k-uhdtv-2160p-hdr.jpg"
-             class="img-thumbnail"
-             width="55">
-    </td>
-    <td><strong>Samsung Smart TV 55"</strong></td>
-    <td>SS-TV55</td>
-    <td>Samsung</td>
-    <td>Global Tech Supply</td>
-    <td class="text-center">5</td>
-    <td class="text-center">5</td>
-    <td class="text-center text-muted">5</td>
-    <td class="text-center text-muted">0</td>
-    <td class="text-right">$700</td>
-    <td class="text-right">$3,500</td>
-    <td><span class="badge badge-success">Accepted</span></td>
-    <td>Admin</td>
-    <td>2025-01-15</td>
-    <td class="text-center">
-        <button class="btn btn-sm btn-outline-secondary"
-                onclick="printWithStatus('approved','Admin','2025-01-15')">
+<td class="text-center">
+    @if($status === 'pending' && $item->accepted_qty == 0 && $item->rejected_qty == 0)
+        <button type="button" 
+                class="btn btn-sm btn-success shadow-sm px-3"
+                onclick="handleProcess({{ $item->id }}, {{ $item->goods_receiving_id }})">
+            Process / Approve
+        </button>
+        
+        <!-- HIDDEN FORM FOR PROCESSING -->
+        <form id="processForm_{{ $item->id }}" 
+              action="{{ route('goods_receiving.approve', $item->goods_receiving_id) }}" 
+              method="POST" style="display:none;">
+            @csrf
+            <input type="hidden" name="item_id" value="{{ $item->id }}">
+            <input type="hidden" name="accepted_qty_{{ $item->id }}" id="form_accept_{{ $item->id }}">
+            <input type="hidden" name="rejected_qty_{{ $item->id }}" id="form_reject_{{ $item->id }}">
+            <input type="hidden" name="remarks" id="form_remarks_{{ $item->id }}">
+        </form>
+    @else
+        <button class="btn btn-sm btn-outline-secondary shadow-sm"
+                onclick="printReceipt('{{ $status }}','{{ $gr->approver->name ?? 'Admin' }}','{{ $gr->received_date }}')">
             <i class="fas fa-print"></i> Print
         </button>
-    </td>
+    @endif
+</td>
 </tr>
-
-<!-- ================= REJECTED ================= -->
+@empty
 <tr>
-    <td class="text-center">
-        <img src="https://store.storeimages.cdn-apple.com/4668/as-images.apple.com/is/iphone-15-pro-blue-titanium-select?wid=470&hei=556"
-             class="img-thumbnail"
-             width="55">
-    </td>
-    <td><strong>iPhone 15</strong></td>
-    <td>IP15</td>
-    <td>Apple</td>
-    <td>Asia Mobile Distribution</td>
-    <td class="text-center">8</td>
-    <td class="text-center">6</td>
-    <td class="text-center text-muted">0</td>
-    <td class="text-center text-muted">6</td>
-    <td class="text-right">$980</td>
-    <td class="text-right">$5,880</td>
-    <td><span class="badge badge-danger">Rejected</span></td>
-    <td>Staff</td>
-    <td>2025-01-14</td>
-    <td class="text-center">
-        <button class="btn btn-sm btn-outline-secondary"
-                onclick="printWithStatus('rejected','Staff','2025-01-14','Damaged units')">
-            <i class="fas fa-print"></i> Print
-        </button>
+    <td colspan="14" class="text-center py-5 text-muted">
+        <i class="fas fa-box-open fa-3x mb-3 d-block opacity-25"></i>
+        No goods receiving items found.
     </td>
 </tr>
+@endforelse
 
 </tbody>
 </table>
@@ -222,14 +228,10 @@
 </div>
 
 <!-- PAGINATION -->
-<div class="card-footer clearfix">
-<ul class="pagination pagination-sm m-0 float-right">
-    <li class="page-item disabled"><a class="page-link">«</a></li>
-    <li class="page-item active"><a class="page-link">1</a></li>
-    <li class="page-item"><a class="page-link">2</a></li>
-    <li class="page-item"><a class="page-link">3</a></li>
-    <li class="page-item"><a class="page-link">»</a></li>
-</ul>
+<div class="card-footer clearfix bg-white">
+    <div class="float-right">
+        {{ $items->appends(request()->query())->links() }}
+    </div>
 </div>
 
 </div>
@@ -237,35 +239,30 @@
 </section>
 </div>
 
-<!-- ===================================================== -->
 <!-- REJECT REASON MODAL -->
-<!-- ===================================================== -->
-<div class="modal fade" id="rejectReasonModal" tabindex="-1">
+<div class="modal fade" id="rejectReasonModal" tabindex="-1" role="dialog">
 <div class="modal-dialog">
-<div class="modal-content">
+<div class="modal-content border-0 shadow-lg">
 
 <div class="modal-header bg-danger text-white">
-    <h5 class="modal-title">
-        <i class="fas fa-times-circle mr-1"></i> Reject Product
+    <h5 class="modal-title font-weight-bold">
+        <i class="fas fa-exclamation-triangle mr-2"></i> Rejection Reason
     </h5>
-    <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">&times;</button>
 </div>
 
 <div class="modal-body">
+    <p class="text-dark">You have entered a <strong>Rejected Quantity</strong>. Please provide a reason for the warehouse records.</p>
     <div class="form-group">
-        <label><strong>Rejection Reason</strong></label>
-        <textarea class="form-control" rows="3"
-                  placeholder="Explain why this product is rejected"></textarea>
+        <label class="font-weight-bold">Remarks / Rejection Notes</label>
+        <textarea id="modal_remarks" class="form-control" rows="3"
+                  placeholder="e.g., Damaged items, Wrong SKU, etc." required></textarea>
     </div>
 </div>
 
-<div class="modal-footer">
-    <button class="btn btn-secondary" data-dismiss="modal">
-        Cancel
-    </button>
-    <button class="btn btn-danger">
-        Confirm Reject
-    </button>
+<div class="modal-footer bg-light border-0">
+    <button type="button" class="btn btn-secondary shadow-sm" data-dismiss="modal">Cancel</button>
+    <button type="button" onclick="confirmAndSubmit()" class="btn btn-danger shadow-sm font-weight-bold px-4">Confirm & Process</button>
 </div>
 
 </div>
@@ -273,3 +270,74 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+let currentActiveId = null;
+
+function handleProcess(itemId, grId) {
+    const acceptInput = document.getElementById('accept_qty_' + itemId);
+    const rejectInput = document.getElementById('reject_qty_' + itemId);
+    
+    if (!acceptInput || !rejectInput) return;
+
+    const acceptQty = parseInt(acceptInput.value) || 0;
+    const rejectQty = parseInt(rejectInput.value) || 0;
+
+    // Set values in the hidden form
+    document.getElementById('form_accept_' + itemId).value = acceptQty;
+    document.getElementById('form_reject_' + itemId).value = rejectQty;
+    
+    currentActiveId = itemId;
+
+    // If there's any rejection, show the modal
+    if (rejectQty > 0) {
+        $('#modal_remarks').val(''); 
+        $('#rejectReasonModal').modal('show');
+    } else {
+        document.getElementById('processForm_' + itemId).submit();
+    }
+}
+
+function confirmAndSubmit() {
+    const remarks = document.getElementById('modal_remarks').value;
+    if (!remarks || remarks.trim() === '') {
+        alert('Please provide a reason for rejection.');
+        return;
+    }
+    
+    document.getElementById('form_remarks_' + currentActiveId).value = remarks;
+    document.getElementById('processForm_' + currentActiveId).submit();
+    $('#rejectReasonModal').modal('hide');
+}
+
+function printReceipt(status, approver, date) {
+    window.print();
+}
+
+$(document).ready(function() {
+    // Auto-sync quantities logic
+    $(document).on('input', '.accept-input', function() {
+        let id = $(this).data('id');
+        let received = $(this).data('received');
+        let val = parseInt($(this).val()) || 0;
+        
+        if (val > received) { val = received; $(this).val(received); }
+        if (val < 0) { val = 0; $(this).val(0); }
+        
+        $('#reject_qty_' + id).val(received - val);
+    });
+
+    $(document).on('input', '.reject-input', function() {
+        let id = $(this).data('id');
+        let received = $('#accept_qty_' + id).data('received');
+        let val = parseInt($(this).val()) || 0;
+        
+        if (val > received) { val = received; $(this).val(received); }
+        if (val < 0) { val = 0; $(this).val(0); }
+        
+        $('#accept_qty_' + id).val(received - val);
+    });
+});
+</script>
+@endpush

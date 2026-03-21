@@ -182,6 +182,20 @@
             <p>Supplier Dashboard</p>
           </a>
         </li>
+        <li class="nav-item">
+          <a href="{{ route('supplier.orders.manage') }}"
+             class="nav-link {{ request()->routeIs('supplier.orders.manage') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-shipping-fast"></i>
+            <p>Manage Orders</p>
+          </a>
+        </li>
+        <li class="nav-item">
+          <a href="{{ route('Supplier_Dashboard.disputes') }}"
+             class="nav-link {{ request()->routeIs('Supplier_Dashboard.disputes') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-exclamation-triangle"></i>
+            <p>Disputes / Returns</p>
+          </a>
+        </li>
       </ul>
     </nav>
 

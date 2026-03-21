@@ -16,185 +16,128 @@
       </p>
   </div>
 
-  {{-- ===================== SUPPLIER INVOICE #1 ===================== --}}
-  <div class="invoice p-3 mb-4 border rounded bg-white">
+  @forelse($purchase_orders as $po)
+    {{-- ===================== SUPPLIER INVOICE ===================== --}}
+    <div class="invoice p-3 mb-4 border rounded bg-white">
 
-      {{-- HEADER --}}
-      <div class="row">
-          <div class="col-12">
-              <h4 class="mb-0">
-                  <i class="fas fa-globe"></i> Your Wholesale Co.
-                  <small class="float-right">Date: {{ date('d/m/Y') }}</small>
-              </h4>
-              <hr>
-          </div>
-      </div>
+        {{-- HEADER --}}
+        <div class="row">
+            <div class="col-12">
+                <h4 class="mb-0">
+                    <i class="fas fa-globe"></i> Your Wholesale Co.
+                    <small class="float-right">Date: {{ $po->order_date->format('d/m/Y') }}</small>
+                </h4>
+                <hr>
+            </div>
+        </div>
 
-      {{-- FROM / TO / INFO --}}
-      <div class="row invoice-info">
-          <div class="col-sm-4 invoice-col">
-              <strong>From</strong>
-              <address class="mb-0">
-                  <strong>Your Wholesale Co.</strong><br>
-                  Phnom Penh<br>
-                  Phone: 012 345 678<br>
-                  Email: purchase@yourcompany.com
-              </address>
-          </div>
+        {{-- FROM / TO / INFO --}}
+        <div class="row invoice-info">
+            <div class="col-sm-4 invoice-col">
+                <strong>From</strong>
+                <address class="mb-0">
+                    <strong>Your Wholesale Co.</strong><br>
+                    Phnom Penh<br>
+                    Phone: 012 345 678<br>
+                    Email: purchase@yourcompany.com
+                </address>
+            </div>
 
-          <div class="col-sm-4 invoice-col">
-              <strong>To</strong>
-              <address class="mb-0">
-                  <strong>Global Tech Supply</strong><br>
-                  Phnom Penh<br>
-                  Phone: 012 888 999<br>
-                  Email: info@globaltech.com
-              </address>
-          </div>
+            <div class="col-sm-4 invoice-col">
+                <strong>To</strong>
+                <address class="mb-0">
+                    <strong>{{ $po->supplier->company_name }}</strong><br>
+                    {{ $po->supplier->address ?? 'N/A' }}<br>
+                    Phone: {{ $po->supplier->phone ?? 'N/A' }}<br>
+                    Email: {{ $po->supplier->email ?? 'N/A' }}
+                </address>
+            </div>
 
-          <div class="col-sm-4 invoice-col">
-              <b>Purchase Order #PO-0001</b><br>
-              <b>Status:</b> Confirmed<br>
-              <b>Payment Terms:</b> Net 7<br>
-              <b>Payment Method:</b> Bank Transfer
-          </div>
-      </div>
+            <div class="col-sm-4 invoice-col">
+                <b>Purchase Order #{{ $po->po_number }}</b><br>
+                <b>Status:</b> <span class="badge badge-success">{{ ucfirst($po->status) }}</span><br>
+                <b>Payment Status:</b> <span class="badge badge-info">{{ ucfirst($po->payment_status) }}</span><br>
+                <b>Payment Due:</b> {{ $po->due_date ? $po->due_date->format('d/m/Y') : '—' }}<br>
+                <b>Payment Term:</b> {{ $po->payment_term ?? '—' }}<br>
+                <b>Lead Time:</b> {{ $po->supplier->lead_time_days ?? '0' }} Days
+            </div>
+        </div>
 
-      {{-- ITEMS --}}
-      <div class="row mt-3">
-          <div class="col-12 table-responsive">
-              <table class="table table-striped">
-                  <thead>
-                  <tr>
-                      <th>#</th>
-                      <th>Product</th>
-                      <th>SKU</th>
-                      <th>Description</th>
-                      <th class="text-center">Qty</th>
-                      <th class="text-right">Subtotal</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  <tr>
-                      <td>1</td>
-                      <td>Samsung Galaxy S24</td>
-                      <td>SGS24</td>
-                      <td>Mobile Phone – 256GB, Factory Unlocked</td>
-                      <td class="text-center">1</td>
-                      <td class="text-right">$950.00</td>
-                  </tr>
-                  </tbody>
-              </table>
-          </div>
-      </div>
+        {{-- ITEMS --}}
+        <div class="row mt-3">
+            <div class="col-12 table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>#</th>
+                        <th style="width: 80px;">Image</th>
+                        <th>Product</th>
+                        <th>SKU</th>
+                        <th class="text-center">Qty</th>
+                        <th class="text-right">Unit Cost</th>
+                        <th class="text-right">Subtotal</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    @foreach($po->items as $index => $item)
+                        <tr>
+                            <td>{{ $index + 1 }}</td>
+                            <td>
+                                @php
+                                    $imageUrl = asset('assets/dist/img/default-150x150.png');
+                                    if ($item->product->image) {
+                                        $imageUrl = \Illuminate\Support\Facades\Storage::disk('public')->url($item->product->image);
+                                    }
+                                @endphp
+                                <img src="{{ $imageUrl }}" class="img-fluid rounded" style="max-height: 50px;">
+                            </td>
+                            <td>{{ $item->product->name }}</td>
+                            <td>{{ $item->product->sku }}</td>
+                            <td class="text-center">{{ $item->quantity }}</td>
+                            <td class="text-right">${{ number_format($item->unit_cost, 2) }}</td>
+                            <td class="text-right">${{ number_format($item->line_total, 2) }}</td>
+                        </tr>
+                    @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
 
-      {{-- TOTAL --}}
-      <div class="row mt-3">
-          <div class="col-6"></div>
-          <div class="col-6">
-              <table class="table">
-                  <tr><th style="width:50%">Subtotal</th><td class="text-right">$950.00</td></tr>
-                  <tr><th>Tax</th><td class="text-right">$0.00</td></tr>
-                  <tr class="border-top"><th>Total</th><td class="text-right"><strong>$950.00</strong></td></tr>
-              </table>
-          </div>
-      </div>
+        {{-- TOTAL --}}
+        <div class="row mt-3">
+            <div class="col-6">
+                @if($po->remarks)
+                    <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
+                        <strong>Note:</strong> {{ $po->remarks }}
+                    </p>
+                @endif
+                @if($po->payment_method)
+                    <p class="text-muted well well-sm shadow-none">
+                        <strong>Payment Method:</strong> {{ $po->payment_method }}
+                    </p>
+                @endif
+            </div>
+            <div class="col-6">
+                <table class="table">
+                    <tr><th style="width:50%">Subtotal</th><td class="text-right">${{ number_format($po->total_amount, 2) }}</td></tr>
+                    <tr><th>Tax (0%)</th><td class="text-right">$0.00</td></tr>
+                    <tr class="border-top"><th>Total</th><td class="text-right"><strong>${{ number_format($po->total_amount, 2) }}</strong></td></tr>
+                </table>
+            </div>
+        </div>
 
-  </div>
-
-
-  {{-- ===================== SUPPLIER INVOICE #2 ===================== --}}
-  <div class="invoice p-3 mb-4 border rounded bg-white">
-
-      {{-- HEADER --}}
-      <div class="row">
-          <div class="col-12">
-              <h4 class="mb-0">
-                  <i class="fas fa-globe"></i> Your Wholesale Co.
-                  <small class="float-right">Date: {{ date('d/m/Y') }}</small>
-              </h4>
-              <hr>
-          </div>
-      </div>
-
-      {{-- FROM / TO / INFO --}}
-      <div class="row invoice-info">
-          <div class="col-sm-4 invoice-col">
-              <strong>From</strong>
-              <address class="mb-0">
-                  <strong>Your Wholesale Co.</strong><br>
-                  Phnom Penh<br>
-                  Phone: 012 345 678<br>
-                  Email: purchase@yourcompany.com
-              </address>
-          </div>
-
-          <div class="col-sm-4 invoice-col">
-              <strong>To</strong>
-              <address class="mb-0">
-                  <strong>Asia Mobile Distribution</strong><br>
-                  Phnom Penh<br>
-                  Phone: 098 765 432<br>
-                  Email: sales@asiamobile.com
-              </address>
-          </div>
-
-          <div class="col-sm-4 invoice-col">
-              <b>Purchase Order #PO-0002</b><br>
-              <b>Status:</b> Confirmed<br>
-              <b>Payment Terms:</b> Cash<br>
-              <b>Payment Method:</b> Cash
-          </div>
-      </div>
-
-      {{-- ITEMS --}}
-      <div class="row mt-3">
-          <div class="col-12 table-responsive">
-              <table class="table table-striped">
-                  <thead>
-                  <tr>
-                      <th>#</th>
-                      <th>Product</th>
-                      <th>SKU</th>
-                      <th>Description</th>
-                      <th class="text-center">Qty</th>
-                      <th class="text-right">Subtotal</th>
-                  </tr>
-                  </thead>
-                  <tbody>
-                  <tr>
-                      <td>1</td>
-                      <td>Samsung Smart TV 55"</td>
-                      <td>SS-TV55</td>
-                      <td>4K UHD Smart TV, HDR, Wi-Fi Enabled</td>
-                      <td class="text-center">1</td>
-                      <td class="text-right">$700.00</td>
-                  </tr>
-                  </tbody>
-              </table>
-          </div>
-      </div>
-
-      {{-- TOTAL --}}
-      <div class="row mt-3">
-          <div class="col-6"></div>
-          <div class="col-6">
-              <table class="table">
-                  <tr><th style="width:50%">Subtotal</th><td class="text-right">$700.00</td></tr>
-                  <tr><th>Tax</th><td class="text-right">$0.00</td></tr>
-                  <tr class="border-top"><th>Total</th><td class="text-right"><strong>$700.00</strong></td></tr>
-              </table>
-          </div>
-      </div>
-
-  </div>
-
+    </div>
+  @empty
+    <div class="alert alert-warning">
+        No purchase orders found.
+    </div>
+  @endforelse
 
   {{-- ACTIONS --}}
   <div class="row no-print mt-3">
       <div class="col-12">
-          <a href="{{ route('purchase_orders.index') }}" class="btn btn-secondary">
-              Back to Purchase Orders
+          <a href="{{ route('product_management.index') }}" class="btn btn-secondary">
+              <i class="fas fa-shopping-bag mr-1"></i> Back to Products
           </a>
 
           <button class="btn btn-default ml-2" onclick="window.print()">

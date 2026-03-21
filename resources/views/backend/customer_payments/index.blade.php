@@ -12,7 +12,7 @@
         <div class="container-fluid">
             <div class="row mb-2">
                 <div class="col-sm-6">
-                    <h1 class="m-0">Customer Payments</h1>
+                    <h1 class="m-0 font-weight-bold">Customer Payments</h1>
                     <p class="text-muted mb-0">
                     Track and receive payments from B2B & B2C customers
                     </p>
@@ -27,55 +27,64 @@
         </div>
     </div>
 
+    @if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show border-0 shadow-sm mb-4 mx-3" role="alert">
+        <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    @endif
+
 <!-- ===================================================== -->
 <!-- SUMMARY CARDS -->
 <!-- ===================================================== -->
 <div class="row mb-4">
 
     <div class="col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-info">
+        <div class="info-box shadow-sm">
+            <span class="info-box-icon bg-info elevation-1">
                 <i class="fas fa-file-invoice-dollar"></i>
             </span>
             <div class="info-box-content">
                 <span class="info-box-text">Total Invoices</span>
-                <span class="info-box-number">18</span>
+                <span class="info-box-number font-weight-bold">{{ number_format($totalInvoices) }}</span>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-success">
+        <div class="info-box shadow-sm">
+            <span class="info-box-icon bg-success elevation-1">
                 <i class="fas fa-check-circle"></i>
             </span>
             <div class="info-box-content">
                 <span class="info-box-text">Paid Invoices</span>
-                <span class="info-box-number">11</span>
+                <span class="info-box-number font-weight-bold">{{ number_format($paidInvoices) }}</span>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-warning">
+        <div class="info-box shadow-sm">
+            <span class="info-box-icon bg-warning elevation-1 text-white">
                 <i class="fas fa-clock"></i>
             </span>
             <div class="info-box-content">
                 <span class="info-box-text">Pending Payments</span>
-                <span class="info-box-number">5</span>
+                <span class="info-box-number font-weight-bold text-warning">{{ number_format($pendingPayments) }}</span>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="info-box">
-            <span class="info-box-icon bg-danger">
+        <div class="info-box shadow-sm">
+            <span class="info-box-icon bg-danger elevation-1">
                 <i class="fas fa-exclamation-triangle"></i>
             </span>
             <div class="info-box-content">
                 <span class="info-box-text">Overdue Amount</span>
-                <span class="info-box-number">$9,200</span>
+                <span class="info-box-number font-weight-bold text-danger">${{ number_format($overdueAmount, 2) }}</span>
             </div>
         </div>
     </div>
@@ -85,211 +94,226 @@
 <!-- ===================================================== -->
 <!-- FILTERS -->
 <!-- ===================================================== -->
-<div class="card mb-3">
+<div class="card mb-3 border-0 shadow-sm">
 <div class="card-body">
-<div class="row">
+<form action="{{ route('customer_payments.index') }}" method="GET">
+    <div class="row">
+        <div class="col-md-3">
+            <input type="text" name="search" class="form-control"
+                   placeholder="Invoice # or Customer..." value="{{ request('search') }}">
+        </div>
 
-    <div class="col-md-3">
-        <input type="text" class="form-control"
-               placeholder="Search Invoice / Customer">
+        <div class="col-md-2">
+            <select name="customer_id" class="form-control">
+                <option value="">All Customers</option>
+                @foreach($customers as $cust)
+                    <option value="{{ $cust->id }}" {{ request('customer_id') == $cust->id ? 'selected' : '' }}>{{ $cust->name }}</option>
+                @endforeach
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <select name="type" class="form-control">
+                <option value="">All Types</option>
+                <option value="B2C" {{ request('type') == 'B2C' ? 'selected' : '' }}>Retail (B2C)</option>
+                <option value="B2B" {{ request('type') == 'B2B' ? 'selected' : '' }}>Wholesale (B2B)</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <select name="payment_status" class="form-control">
+                <option value="">All Status</option>
+                <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                <option value="partial" {{ request('payment_status') == 'partial' ? 'selected' : '' }}>Partial</option>
+                <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>Unpaid</option>
+                <option value="overdue" {{ request('payment_status') == 'overdue' ? 'selected' : '' }}>Overdue</option>
+            </select>
+        </div>
+
+        <div class="col-md-2">
+            <input type="date" name="date" class="form-control" value="{{ request('date') }}">
+        </div>
+
+        <div class="col-md-1 text-right">
+            <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-search"></i> Search</button>
+        </div>
     </div>
-
-    <div class="col-md-2">
-        <select class="form-control">
-            <option>All Customers</option>
-            <option>Walk-in Customer</option>
-            <option>ABC Mobile Shop</option>
-            <option>Tech Partner Co.</option>
-        </select>
-    </div>
-
-    <div class="col-md-2">
-        <select class="form-control">
-            <option>All Types</option>
-            <option>B2C</option>
-            <option>B2B</option>
-        </select>
-    </div>
-
-    <div class="col-md-2">
-        <select class="form-control">
-            <option>All Payment Status</option>
-            <option>Paid</option>
-            <option>Partial</option>
-            <option>Unpaid</option>
-            <option>Overdue</option>
-        </select>
-    </div>
-
-    <div class="col-md-2">
-        <input type="date" class="form-control">
-    </div>
-
-    <div class="col-md-1 text-right">
-        <button class="btn btn-outline-secondary w-100">
-            Reset
-        </button>
-    </div>
-
-</div>
+</form>
 </div>
 </div>
 
 <!-- ===================================================== -->
 <!-- PAYMENT TABLE -->
 <!-- ===================================================== -->
-<div class="card">
+<div class="card border-0 shadow-sm">
 <div class="card-body p-0">
 
 <table class="table table-bordered table-hover mb-0">
-<thead class="thead-light">
+<thead class="thead-light text-uppercase small">
 <tr>
-    <th>Invoice No</th>
+    <th class="pl-3">Invoice #</th>
     <th>Customer</th>
-    <th>Type</th>
-    <th>Invoice Date</th>
+    <th class="text-center">Type</th>
+    <th>Inv Date</th>
     <th>Due Date</th>
-    <th>Total</th>
-    <th>Paid</th>
-    <th>Balance</th>
-    <th>Status</th>
+    <th class="text-right">Total</th>
+    <th class="text-right text-success">Paid</th>
+    <th class="text-right text-danger">Balance</th>
+    <th class="text-center">Status</th>
     <th width="160" class="text-center">Action</th>
 </tr>
 </thead>
 
 <tbody>
-
-<!-- PAID -->
-<tr>
-    <td>SI-0001</td>
-    <td>Walk-in Customer</td>
-    <td><span class="badge badge-info">B2C</span></td>
-    <td>2025-01-18</td>
-    <td>—</td>
-    <td>$3,300</td>
-    <td>$3,300</td>
-    <td>$0</td>
-    <td><span class="badge badge-success">Paid</span></td>
-    <td class="text-center text-muted">
-        —
+@forelse($sales_orders as $order)
+    @php
+        $isOverdue = ($order->payment_status != 'paid' && $order->due_date && strtotime($order->due_date) < time());
+        $balance = $order->total_amount - $order->paid_amount;
+    @endphp
+<tr class="{{ $isOverdue ? 'table-danger' : '' }}">
+    <td class="pl-3 font-weight-bold">INV-{{ str_pad($order->id, 4, '0', STR_PAD_LEFT) }}</td>
+    <td>{{ $order->customer->name }}</td>
+    <td class="text-center"><span class="badge border text-muted">{{ $order->customer->type }}</span></td>
+    <td>{{ $order->order_date ? date('d/m/Y', strtotime($order->order_date)) : '—' }}</td>
+    <td>
+        @if($order->due_date)
+            <span class="{{ $isOverdue ? 'text-danger font-weight-bold' : '' }}">
+                {{ date('d/m/Y', strtotime($order->due_date)) }}
+            </span>
+        @else
+            <span class="text-muted">—</span>
+        @endif
     </td>
-</tr>
-
-<!-- PARTIAL -->
-<tr>
-    <td>SI-0002</td>
-    <td>ABC Mobile Shop</td>
-    <td><span class="badge badge-warning">B2B</span></td>
-    <td>2025-01-19</td>
-    <td>2025-01-26</td>
-    <td>$12,400</td>
-    <td>$5,000</td>
-    <td>$7,400</td>
-    <td><span class="badge badge-warning">Partial</span></td>
+    <td class="text-right">${{ number_format($order->total_amount, 2) }}</td>
+    <td class="text-right text-success">${{ number_format($order->paid_amount, 2) }}</td>
+    <td class="text-right text-danger font-weight-bold">${{ number_format($balance, 2) }}</td>
     <td class="text-center">
-        <button class="btn btn-sm btn-success"
-                data-toggle="modal"
-                data-target="#receivePaymentModal">
-            Receive Payment
-        </button>
+        @if($isOverdue)
+            <span class="badge badge-danger shadow-sm px-2">OVERDUE</span>
+        @else
+            @php
+                $statusClass = [
+                    'paid' => 'success',
+                    'partial' => 'warning',
+                    'unpaid' => 'secondary'
+                ][$order->payment_status] ?? 'light';
+            @endphp
+            <span class="badge badge-{{ $statusClass }} shadow-sm px-2">{{ strtoupper($order->payment_status) }}</span>
+        @endif
     </td>
-</tr>
-
-<!-- OVERDUE -->
-<tr class="table-danger">
-    <td>SI-0003</td>
-    <td>Tech Partner Co.</td>
-    <td><span class="badge badge-warning">B2B</span></td>
-    <td>2025-01-10</td>
-    <td>2025-01-17</td>
-    <td>$8,700</td>
-    <td>$0</td>
-    <td>$8,700</td>
-    <td><span class="badge badge-danger">Overdue</span></td>
     <td class="text-center">
-        <button class="btn btn-sm btn-success"
+        @if($order->payment_status != 'paid')
+        <button class="btn btn-xs btn-success px-3 shadow-sm"
                 data-toggle="modal"
-                data-target="#receivePaymentModal">
-            Receive Payment
+                data-target="#receivePaymentModal{{ $order->id }}">
+            <i class="fas fa-hand-holding-usd mr-1"></i> PAY
         </button>
+        @else
+        <span class="text-muted small"><i class="fas fa-check-double text-success mr-1"></i> Paid</span>
+        @endif
+
+        <!-- RECEIVE PAYMENT MODAL -->
+        <div class="modal fade text-left" id="receivePaymentModal{{ $order->id }}" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+                    <div class="modal-header bg-success text-white" style="border-radius: 15px 15px 0 0;">
+                        <h5 class="modal-title font-weight-bold">
+                            <i class="fas fa-money-bill-wave mr-2"></i> Receive Payment
+                        </h5>
+                        <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                    </div>
+                    <form action="{{ route('customer_payments.receive', $order->id) }}" method="POST">
+                        @csrf
+                        <div class="modal-body px-4 py-4">
+                            <div class="d-flex justify-content-between mb-3 bg-light p-3 rounded">
+                                <div>
+                                    <span class="text-muted small text-uppercase font-weight-bold">Order Number</span>
+                                    <div class="h6 mb-0">#{{ $order->order_number }}</div>
+                                </div>
+                                <div class="text-right">
+                                    <span class="text-muted small text-uppercase font-weight-bold">Remaining Balance</span>
+                                    <div class="h6 mb-0 text-danger font-weight-bold">${{ number_format($balance, 2) }}</div>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label class="font-weight-bold small text-muted">PAYMENT AMOUNT <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-white border-right-0"><i class="fas fa-dollar-sign text-success"></i></span>
+                                    </div>
+                                    <input type="number" step="0.01" name="payment_amount" class="form-control border-left-0 font-weight-bold text-success" 
+                                           max="{{ $balance }}" value="{{ $balance }}" required>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold small text-muted">METHOD</label>
+                                        <select name="payment_method" class="form-control shadow-sm">
+                                            <option value="cash">Cash</option>
+                                            <option value="bank_transfer">Bank Transfer</option>
+                                            <option value="digital_wallet">Digital Wallet (ABA/KHQR)</option>
+                                            <option value="card">Credit Card</option>
+                                            <option value="cheque">Cheque</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label class="font-weight-bold small text-muted">DATE</label>
+                                        <input type="date" name="payment_date" class="form-control shadow-sm" value="{{ date('Y-m-d') }}" required>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mb-0">
+                                <label class="font-weight-bold small text-muted">REFERENCE / NOTES</label>
+                                <textarea name="payment_note" class="form-control shadow-sm" rows="2" 
+                                          placeholder="Transaction ID, Cheque number, etc."></textarea>
+                            </div>
+                        </div>
+                        <div class="modal-footer bg-light border-0" style="border-radius: 0 0 15px 15px;">
+                            <button type="button" class="btn btn-secondary px-4 shadow-none" data-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-success px-5 font-weight-bold shadow">
+                                <i class="fas fa-check-circle mr-1"></i> CONFIRM PAYMENT
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </td>
 </tr>
-
+@empty
+<tr>
+    <td colspan="10" class="text-center py-5 text-muted">
+        <i class="fas fa-search fa-3x d-block mb-3 opacity-25"></i>
+        No payment records found matching your criteria.
+    </td>
+</tr>
+@endforelse
 </tbody>
 </table>
 
 </div>
 
 <!-- PAGINATION -->
-<div class="card-footer clearfix">
-<ul class="pagination pagination-sm m-0 float-right">
-    <li class="page-item disabled"><a class="page-link">«</a></li>
-    <li class="page-item active"><a class="page-link">1</a></li>
-    <li class="page-item"><a class="page-link">2</a></li>
-    <li class="page-item"><a class="page-link">3</a></li>
-    <li class="page-item"><a class="page-link">»</a></li>
-</ul>
+<div class="card-footer bg-white border-top py-3">
+    <div class="d-flex justify-content-between align-items-center">
+        <div class="text-muted small">
+            Showing {{ $sales_orders->firstItem() ?? 0 }} to {{ $sales_orders->lastItem() ?? 0 }} of {{ $sales_orders->total() }} total entries
+        </div>
+        <div>
+            {{ $sales_orders->appends(request()->query())->links('pagination::bootstrap-4') }}
+        </div>
+    </div>
 </div>
 
 </div>
 
 </section>
-</div>
-
-<!-- ===================================================== -->
-<!-- RECEIVE PAYMENT MODAL (UI ONLY) -->
-<!-- ===================================================== -->
-<div class="modal fade" id="receivePaymentModal" tabindex="-1">
-<div class="modal-dialog">
-<div class="modal-content">
-
-<div class="modal-header">
-    <h5 class="modal-title">Receive Payment</h5>
-    <button type="button" class="close" data-dismiss="modal">&times;</button>
-</div>
-
-<div class="modal-body">
-
-    <div class="form-group">
-        <label><strong>Payment Amount</strong></label>
-        <input type="number" class="form-control" placeholder="Enter amount">
-    </div>
-
-    <div class="form-group">
-        <label><strong>Payment Method</strong></label>
-        <select class="form-control">
-            <option>Cash</option>
-            <option>Bank Transfer</option>
-            <option>Digital Wallet</option>
-            <option>Cheque</option>
-        </select>
-    </div>
-
-    <div class="form-group">
-        <label><strong>Payment Date</strong></label>
-        <input type="date" class="form-control">
-    </div>
-
-    <div class="form-group">
-        <label><strong>Reference / Note</strong></label>
-        <textarea class="form-control" rows="2"
-                  placeholder="Transaction ID / Cheque No"></textarea>
-    </div>
-
-</div>
-
-<div class="modal-footer">
-    <button class="btn btn-secondary" data-dismiss="modal">
-        Cancel
-    </button>
-    <button class="btn btn-success"
-            onclick="alert('Payment recorded successfully (UI only)')">
-        Confirm Payment
-    </button>
-</div>
-
-</div>
-</div>
 </div>
 
 @endsection

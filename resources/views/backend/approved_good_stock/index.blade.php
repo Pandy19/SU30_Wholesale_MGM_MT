@@ -31,51 +31,70 @@
 <!-- SUMMARY CARDS -->
 <!-- ===================================================== -->
 <div class="row mb-4">
+    @php
+        $totalApprovedQty = \App\Models\GoodsReceivingItem::sum('accepted_qty');
+        $stockedQty = \App\Models\GoodsReceivingItem::sum('stocked_qty');
+        $pendingStockQty = $totalApprovedQty - $stockedQty;
+        
+        // Calculate total value of pending items
+        $highValuePending = 0;
+        $allPending = \App\Models\GoodsReceivingItem::whereColumn('accepted_qty', '>', 'stocked_qty')->where('is_stocked', false)->get();
+        foreach($allPending as $pItem) {
+            $unit_cost = 0;
+            if ($pItem->goodsReceiving && $pItem->goodsReceiving->purchase_order_id) {
+                $poItem = \App\Models\PurchaseOrderItem::where('purchase_order_id', $pItem->goodsReceiving->purchase_order_id)
+                                            ->where('product_id', $pItem->product_id)
+                                            ->first();
+                $unit_cost = $poItem ? $poItem->unit_cost : 0;
+            }
+            $highValuePending += (($pItem->accepted_qty - $pItem->stocked_qty) * $unit_cost);
+        }
+    @endphp
 
     <div class="col-md-3">
-        <div class="info-box">
+        <div class="info-box shadow-sm">
             <span class="info-box-icon bg-success">
                 <i class="fas fa-boxes"></i>
             </span>
             <div class="info-box-content">
-                <span class="info-box-text">Approved Items</span>
-                <span class="info-box-number">6</span>
+                <span class="info-box-text">Total Approved Units</span>
+                <span class="info-box-number">{{ number_format($totalApprovedQty) }}</span>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="info-box">
+        <div class="info-box shadow-sm">
             <span class="info-box-icon bg-info">
                 <i class="fas fa-hourglass-half"></i>
             </span>
             <div class="info-box-content">
-                <span class="info-box-text">Pending Stock Add</span>
-                <span class="info-box-number">4</span>
+                <span class="info-box-text">Pending Stock Add (Units)</span>
+                <span class="info-box-number">{{ number_format($pendingStockQty) }}</span>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="info-box">
+        <div class="info-box shadow-sm">
             <span class="info-box-icon bg-secondary">
                 <i class="fas fa-check-circle"></i>
             </span>
             <div class="info-box-content">
-                <span class="info-box-text">Added to Stock</span>
-                <span class="info-box-number">2</span>
+                <span class="info-box-text">Added to Stock (Units)</span>
+                <span class="info-box-number">{{ number_format($stockedQty) }}</span>
             </div>
         </div>
     </div>
 
     <div class="col-md-3">
-        <div class="info-box">
+        <div class="info-box shadow-sm">
             <span class="info-box-icon bg-danger">
                 <i class="fas fa-exclamation-circle"></i>
             </span>
             <div class="info-box-content">
                 <span class="info-box-text">High Value Pending</span>
-                <span class="info-box-number">$12,400</span>
+                <span class="info-box-number">${{ number_format($highValuePending, 2) }}</span>
             </div>
         </div>
     </div>
@@ -85,48 +104,58 @@
 <!-- ===================================================== -->
 <!-- FILTERS -->
 <!-- ===================================================== -->
-<div class="card mb-3">
+<div class="card mb-3 shadow-sm border-0">
 <div class="card-body">
+<form action="{{ route('approved_good_stock.index') }}" method="GET">
 <div class="row">
 
-    <div class="col-md-3">
-        <input type="text" class="form-control"
-               placeholder="Search Product / SKU / PO No">
+    <div class="col-md-2">
+        <input type="text" name="search" class="form-control"
+               placeholder="Search Product / SKU" value="{{ request('search') }}">
     </div>
 
     <div class="col-md-2">
-        <select class="form-control">
-            <option>All Brands</option>
-            <option>Samsung</option>
-            <option>Apple</option>
-        </select>
-    </div>
-
-    <div class="col-md-2">
-        <select class="form-control">
-            <option>All Categories</option>
-            <option>Mobile Phone</option>
-            <option>Smart TV</option>
+        <select class="form-control" name="brand">
+            <option value="">All Brands</option>
+            @foreach(\App\Models\Brand::orderBy('name')->get() as $brand)
+                <option value="{{ $brand->id }}" {{ request('brand') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+            @endforeach
         </select>
     </div>
 
     <div class="col-md-2">
-        <select class="form-control">
-            <option>All Suppliers</option>
-            <option>Global Tech Supply</option>
-            <option>Asia Mobile Distribution</option>
+        <select class="form-control" name="category">
+            <option value="">All Categories</option>
+            @foreach(\App\Models\Category::orderBy('name')->get() as $cat)
+                <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+            @endforeach
         </select>
     </div>
 
-    <div class="col-md-3">
-        <select class="form-control">
-            <option>All Status</option>
-            <option>Pending</option>
-            <option>Added to Stock</option>
+    <div class="col-md-2">
+        <select class="form-control" name="supplier">
+            <option value="">All Suppliers</option>
+            @foreach(\App\Models\Supplier::orderBy('company_name')->get() as $sup)
+                <option value="{{ $sup->id }}" {{ request('supplier') == $sup->id ? 'selected' : '' }}>{{ $sup->company_name }}</option>
+            @endforeach
         </select>
+    </div>
+
+    <div class="col-md-2">
+        <select class="form-control" name="storage_location">
+            <option value="">All Locations</option>
+            @foreach($locations as $loc)
+                <option value="{{ $loc->id }}" {{ request('storage_location') == $loc->id ? 'selected' : '' }}>{{ $loc->name }}</option>
+            @endforeach
+        </select>
+    </div>
+
+    <div class="col-md-2">
+        <button type="submit" class="btn btn-primary btn-block">Filter</button>
     </div>
 
 </div>
+</form>
 </div>
 </div>
 
@@ -148,7 +177,6 @@
     <th>Unit Cost</th>
     <th>Total Value</th>
     <th>PO No</th>
-    <th>Storage Location</th>
     <th>Approved By</th>
     <th>Approved Date</th>
     <th>Status</th>
@@ -157,79 +185,74 @@
 </thead>
 <tbody>
 
-<!-- ================= PENDING ================= -->
+@forelse($items as $item)
+@php
+    $product = $item->product;
+    $gr = $item->goodsReceiving;
+    $po = $gr->purchaseOrder;
+    $status = $item->is_stocked ? 'Added' : 'Pending';
+    $badgeClass = $item->is_stocked ? 'badge-success' : 'badge-warning';
+    $inspectorName = $gr->approver->name ?? 'System';
+    $inspectorIdentity = $inspectorName . " [" . ucfirst($gr->approver->role ?? 'Inspector') . "]";
+
+    // Image logic
+    $imageUrl = $product->image ?? '';
+    if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
+        $imageUrl = asset('storage/' . $imageUrl);
+    }
+    if (!$imageUrl) {
+        $imageUrl = asset('assets/dist/img/default-150x150.png');
+    }
+@endphp
 <tr>
     <td class="text-center">
-        <img src="https://www.myg.in/images/thumbnails/300/300/detailed/75/s24ultraviolet1-removebg-preview.png.png"
-             width="50">
+        <img src="{{ $imageUrl }}" width="50" class="rounded border shadow-sm">
     </td>
-    <td>Samsung Galaxy S24</td>
-    <td>SGS24</td>
-    <td>Samsung</td>
-    <td>Global Tech Supply</td>
-    <td><strong>7</strong></td>
-    <td>$950</td>
-    <td>$6,650</td>
-    <td>PO-0001</td>
+    <td>{{ $product->name }}</td>
+    <td><small class="text-muted font-weight-bold">{{ $product->sku }}</small></td>
+    <td>{{ $product->brand->name ?? 'N/A' }}</td>
+    <td>{{ $po->supplier->company_name ?? 'N/A' }}</td>
+    <td><strong>{{ $item->pending_qty }}</strong></td>
+    <td class="text-right">${{ number_format($item->unit_cost, 2) }}</td>
+    <td class="text-right font-weight-bold">${{ number_format($item->total_value, 2) }}</td>
+    <td><strong>{{ $po->po_number }}</strong></td>
 
-    <!-- STORAGE LOCATION (CATEGORY SHELF ONLY) -->
+    <td><small>{{ $inspectorIdentity }}</small></td>
+    <td><small>{{ $gr->received_date ? date('Y-m-d', strtotime($gr->received_date)) : 'N/A' }}</small></td>
     <td>
-        <select class="form-control form-control-sm">
-            <option selected disabled>Select shelf</option>
-            <option>Mobile Shelf A1</option>
-            <option>Mobile Shelf A2</option>
-            <option>Mobile Shelf A3</option>
-        </select>
-    </td>
-
-    <td>Admin</td>
-    <td>2025-01-15</td>
-    <td>
-        <span class="badge badge-warning">Pending</span>
+        <span class="badge {{ $badgeClass }}">{{ $status }}</span>
     </td>
     <td class="text-center">
-        <button class="btn btn-sm btn-success"
-            onclick="openAddToStockModal({
-                name: 'Samsung Galaxy S24',
-                sku: 'SGS24',
-                po: 'PO-0001',
-                supplier: 'Global Tech Supply',
-                brand: 'Samsung',
-                approvedQty: 7,
-                unitCost: 950,
-                image: 'https://www.myg.in/images/thumbnails/300/300/detailed/75/s24ultraviolet1-removebg-preview.png.png'
-            })">
-            Add to Stock
-        </button>
-
+        @if(!$item->is_stocked)
+            <button class="btn btn-sm btn-success shadow-sm"
+                onclick="openAddToStockModal({
+                            id: {{ $item->id }},
+                            name: {{ json_encode($product->name) }},
+                            sku: {{ json_encode($product->sku) }},
+                            po: {{ json_encode($po->po_number) }},
+                            supplier: {{ json_encode($po->supplier->company_name ?? 'N/A') }},
+                            brand: {{ json_encode($product->brand->name ?? 'N/A') }},
+                            brandId: {{ $product->brand_id ?? 'null' }},
+                            categoryId: {{ $product->category_id ?? 'null' }},
+                            productId: {{ $product->id }},
+                            approvedQty: {{ $item->pending_qty }},
+                            unitCost: {{ $item->unit_cost }},
+                            sellingPrice: {{ $product->selling_price ?? 0 }},
+                            image: {{ json_encode($imageUrl) }},
+                            selectedLocation: '{{ request('storage_location') }}'
+                        })">
+                Add to Stock
+            </button>
+        @else
+            <i class="fas fa-check-double text-success"></i>
+        @endif
     </td>
 </tr>
-
-<!-- ================= ADDED ================= -->
+@empty
 <tr>
-    <td class="text-center">
-        <img src="https://images-cdn.ubuy.co.in/668e509932f72820f85b4e0f-samsung-55-class-4k-uhdtv-2160p-hdr.jpg"
-             width="50">
-    </td>
-    <td>Samsung Smart TV 55"</td>
-    <td>SS-TV55</td>
-    <td>Samsung</td>
-    <td>Global Tech Supply</td>
-    <td>5</td>
-    <td>$700</td>
-    <td>$3,500</td>
-    <td>PO-0002</td>
-
-    <!-- READ ONLY LOCATION -->
-    <td>TV Shelf T1</td>
-
-    <td>Admin</td>
-    <td>2025-01-14</td>
-    <td>
-        <span class="badge badge-success">Added</span>
-    </td>
-    <td class="text-center text-muted">—</td>
+    <td colspan="13" class="text-center py-5 text-muted">No approved items found.</td>
 </tr>
+@endforelse
 
 </tbody>
 </table>
@@ -237,14 +260,10 @@
 </div>
 
 <!-- PAGINATION -->
-<div class="card-footer clearfix">
-    <ul class="pagination pagination-sm m-0 float-right">
-        <li class="page-item disabled"><a class="page-link">«</a></li>
-        <li class="page-item active"><a class="page-link">1</a></li>
-        <li class="page-item"><a class="page-link">2</a></li>
-        <li class="page-item"><a class="page-link">3</a></li>
-        <li class="page-item"><a class="page-link">»</a></li>
-    </ul>
+<div class="card-footer clearfix bg-white">
+    <div class="float-right">
+        {{ $items->appends(request()->query())->links() }}
+    </div>
 </div>
 
 </div>
@@ -293,7 +312,7 @@
 
         <div class="row">
           <!-- Quantity -->
-          <div class="col-md-5">
+          <div class="col-md-3">
             <label class="mb-1">Add Quantity</label>
             <div class="input-group">
               <div class="input-group-prepend">
@@ -315,20 +334,28 @@
             </small>
           </div>
 
+          <!-- Selling Price -->
+          <div class="col-md-3">
+            <label class="mb-1">Selling Price <span class="text-danger">*</span></label>
+            <div class="input-group">
+                <div class="input-group-prepend">
+                    <span class="input-group-text">$</span>
+                </div>
+                <input type="number" step="0.01" class="form-control" id="m_sellingPrice" placeholder="0.00">
+            </div>
+            <small class="text-muted">Required</small>
+          </div>
+
           <!-- Storage location -->
-          <div class="col-md-7">
+          <div class="col-md-6">
             <label class="mb-1">
               Storage Location <span class="text-danger">*</span>
             </label>
             <select class="form-control" id="m_location">
-              <option value="" selected disabled>Select shelf / location</option>
-              <option>Mobile Shelf A1</option>
-              <option>Mobile Shelf A2</option>
-              <option>Mobile Shelf A3</option>
-              <option>TV Shelf T1</option>
+              <option value="" selected disabled>Select matching shelf</option>
             </select>
             <small class="text-muted">
-              Pick a shelf before adding to stock.
+              Only shelves matching both <strong>Brand</strong> and <strong>Category</strong> are shown.
             </small>
           </div>
         </div>
@@ -383,3 +410,183 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script>
+let activeItem = null;
+const allLocations = @json($locations);
+const filterLocId = "{{ request('storage_location') }}";
+
+function openAddToStockModal(data) {
+    activeItem = data;
+    
+    // Fill UI
+    $('#m_image').attr('src', data.image);
+    $('#m_name').text(data.name);
+    $('#m_sku').text(data.sku);
+    $('#m_po').text(data.po);
+    $('#m_brand').text(data.brand);
+    $('#m_supplier').text(data.supplier);
+    $('#m_approvedQty').text(data.approvedQty);
+    
+    $('#m_qty').val(data.approvedQty).attr('max', data.approvedQty);
+    $('#m_qtyMax').text(data.approvedQty);
+    
+    // Auto-calculate suggested selling price
+    // Rule: < $1000 -> +10%, >= $1000 -> +15%
+    let suggestedPrice = 0;
+    if (data.unitCost < 1000) {
+        suggestedPrice = data.unitCost * 1.10;
+    } else {
+        suggestedPrice = data.unitCost * 1.15;
+    }
+    $('#m_sellingPrice').val(suggestedPrice.toFixed(2));
+    
+    // Dynamically filter modal locations based on this item's brand/category
+    const locationSelect = $('#m_location');
+    locationSelect.empty().append('<option value="" selected disabled>Select matching shelf</option>');
+    
+    // STRICT RULE: Only show shelves matching Brand AND Category
+    // Also, if a specific shelf was filtered at the top, only show that one if compatible.
+    allLocations.forEach(loc => {
+        const matchesBrand = (loc.brand_id == data.brandId);
+        const matchesCategory = (loc.category_id == data.categoryId);
+        const isCompatible = matchesBrand && matchesCategory;
+
+        if (isCompatible) {
+            // If user filtered by a specific location, only show that one
+            if (filterLocId && loc.id != filterLocId) return;
+
+            const isOccupiedByOther = (loc.current_product_id && loc.current_product_id != data.productId);
+            const hasNoSpace = (loc.remaining_space < 1); // We can still show it but disable it
+            
+            const disabled = (isOccupiedByOther || hasNoSpace) ? 'disabled' : '';
+            const selected = (filterLocId == loc.id || data.selectedLocation == loc.id) ? 'selected' : '';
+            
+            let label = `${loc.name} (${loc.remaining_space} left)`;
+            if (isOccupiedByOther) label += ' - Occupied';
+            else if (hasNoSpace) label += ' - Full';
+
+            locationSelect.append(`<option value="${loc.id}" ${disabled} ${selected}>${label}</option>`);
+        }
+    });
+    
+    $('#m_unitCost').text('$' + data.unitCost.toLocaleString());
+    updateTotal();
+    
+    $('#m_warn').addClass('d-none');
+    $('#addToStockModal').modal('show');
+}
+
+function updateTotal() {
+    if (!activeItem) return;
+    const qty = parseInt($('#m_qty').val()) || 0;
+    const total = qty * activeItem.unitCost;
+    $('#m_total').text('$' + total.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+}
+
+$(document).ready(function() {
+    // Check for success message after reload
+    const successMsg = sessionStorage.getItem('stock_success_msg');
+    if (successMsg) {
+        Swal.fire({
+            icon: 'success',
+            title: 'Stock Updated!',
+            text: successMsg,
+            toast: true,
+            position: 'top-end',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: true,
+            iconColor: '#28a745'
+        });
+        sessionStorage.removeItem('stock_success_msg');
+    }
+
+    $('#m_qty').on('input', function() {
+        let val = parseInt($(this).val()) || 0;
+        if (val > activeItem.approvedQty) { $(this).val(activeItem.approvedQty); val = activeItem.approvedQty; }
+        if (val < 1) { $(this).val(1); val = 1; }
+        updateTotal();
+    });
+
+    $('#qtyPlus').on('click', function() {
+        let cur = parseInt($('#m_qty').val()) || 0;
+        if (cur < activeItem.approvedQty) {
+            $('#m_qty').val(cur + 1);
+            updateTotal();
+        }
+    });
+
+    $('#qtyMinus').on('click', function() {
+        let cur = parseInt($('#m_qty').val()) || 0;
+        if (cur > 1) {
+            $('#m_qty').val(cur - 1);
+            updateTotal();
+        }
+    });
+
+    $('#m_confirmBtn').on('click', function() {
+        const locId = $('#m_location').val();
+        const qty = $('#m_qty').val();
+        const sellingPrice = $('#m_sellingPrice').val();
+        
+        if (!locId || qty < 1 || !sellingPrice || sellingPrice <= 0) {
+            $('#m_warn').text('Please select a storage location, enter a valid quantity, and set a selling price.').removeClass('d-none');
+            return;
+        }
+
+        $('#m_warn').addClass('d-none');
+        $('#m_spinner').removeClass('d-none');
+        $(this).prop('disabled', true);
+
+        $.ajax({
+            url: "{{ route('approved_good_stock.add_to_stock') }}",
+            method: "POST",
+            data: {
+                _token: "{{ csrf_token() }}",
+                item_id: activeItem.id,
+                location_id: locId,
+                quantity: qty,
+                selling_price: sellingPrice,
+                notes: $('#m_notes').val()
+            },
+            success: function(response) {
+                if (response.success) {
+                    // Store message in session storage to show after reload
+                    sessionStorage.setItem('stock_success_msg', `Successfully added ${response.qty} units of ${response.product_name} to stock.`);
+                    location.reload();
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: response.message,
+                        toast: true,
+                        position: 'top-end',
+                        showConfirmButton: false,
+                        timer: 4000,
+                        timerProgressBar: true
+                    });
+                    $('#m_spinner').addClass('d-none');
+                    $('#m_confirmBtn').prop('disabled', false);
+                }
+            },
+            error: function(xhr) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error!',
+                    text: 'Error processing request. Please try again.',
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 4000,
+                    timerProgressBar: true
+                });
+                $('#m_spinner').addClass('d-none');
+                $('#m_confirmBtn').prop('disabled', false);
+            }
+        });
+    });
+});
+</script>
+@endpush

@@ -45,13 +45,52 @@
 <script src="{{ asset('assets/plugins/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
 <script src="{{ asset('assets/dist/js/adminlte.min.js') }}"></script>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-{{-- SIMPLE JS FOR ROLE TOGGLE --}}
 <script>
-document.getElementById('roleSelect').addEventListener('change', function () {
-    const supplierBox = document.getElementById('supplierFields');
-    supplierBox.style.display = (this.value === 'supplier') ? 'block' : 'none';
-});
+    $(document).ready(function() {
+        // Handle Session Flash Messages with SweetAlert2
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: "{{ session('success') }}",
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                iconColor: '#28a745'
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: "{{ session('error') }}",
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true
+            });
+        @endif
+        
+        // SIMPLE JS FOR ROLE TOGGLE
+        const roleSelect = document.getElementById('roleSelect');
+        if (roleSelect) {
+            roleSelect.addEventListener('change', function () {
+                const supplierBox = document.getElementById('supplierFields');
+                if (supplierBox) {
+                    // Check for slug in dynamic version or simple value
+                    const selectedOption = this.options[this.selectedIndex];
+                    const slug = selectedOption.getAttribute('data-slug') || this.value;
+                    supplierBox.style.display = (slug === 'supplier') ? 'block' : 'none';
+                }
+            });
+        }
+    });
 </script>
 </body>
 </html>

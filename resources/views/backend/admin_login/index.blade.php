@@ -34,17 +34,30 @@
                         <form method="POST" action="{{ route('admin_login.submit') }}">
                             @csrf
 
+                            {{-- Success/Error Alerts --}}
+                            @if(session('success'))
+                                <div class="alert alert-success py-2 small mb-3">
+                                    {{ session('success') }}
+                                </div>
+                            @endif
+
+                            @if(session('error'))
+                                <div class="alert alert-danger py-2 small mb-3">
+                                    <i class="fas fa-exclamation-circle mr-1"></i>
+                                    {{ session('error') }}
+                                </div>
+                            @endif
+
                             <!-- ROLE -->
                             <div class="form-group">
                                 <label>Login As</label>
-                                <select name="role" class="form-control" required>
+                                <select name="role" class="form-control @error('role') is-invalid @enderror" required>
                                     <option value="">-- Select Role --</option>
-                                    <option value="admin">Admin</option>
-                                    <option value="staff">Staff</option>
-                                    <option value="inspector">Inspector</option>
-                                    <option value="accountant">Accountant</option>
-                                    <option value="supplier">Supplier</option>
+                                    <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
+                                    <option value="staff" {{ old('role') == 'staff' ? 'selected' : '' }}>Staff</option>
+                                    <option value="supplier" {{ old('role') == 'supplier' ? 'selected' : '' }}>Supplier</option>
                                 </select>
+                                @error('role') <div class="invalid-feedback">{{ $message }}</div> @enderror
                             </div>
 
                             <!-- EMAIL -->
@@ -52,13 +65,15 @@
                                 <label>Email</label>
                                 <div class="input-group">
                                     <input type="email" name="email"
-                                           class="form-control"
+                                           class="form-control @error('email') is-invalid @enderror"
+                                           value="{{ old('email') }}"
                                            placeholder="Enter email" required>
                                     <div class="input-group-append">
                                         <span class="input-group-text">
                                             <i class="fas fa-envelope"></i>
                                         </span>
                                     </div>
+                                    @error('email') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                 </div>
                             </div>
 
@@ -67,13 +82,14 @@
                                 <label>Password</label>
                                 <div class="input-group">
                                     <input type="password" name="password"
-                                           class="form-control"
+                                           class="form-control @error('password') is-invalid @enderror"
                                            placeholder="Enter password" required>
                                     <div class="input-group-append">
                                         <span class="input-group-text">
                                             <i class="fas fa-lock"></i>
                                         </span>
                                     </div>
+                                    @error('password') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                                 </div>
                             </div>
 

@@ -120,11 +120,49 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
 
+<!-- jQuery -->
+<script src="{{asset('assets/plugins/jquery/jquery.min.js')}}"></script>
+<!-- jQuery UI 1.11.4 -->
+<script src="{{asset('assets/plugins/jquery-ui/jquery-ui.min.js')}}"></script>
+<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
+<script>
+  $.widget.bridge('uibutton', $.ui.button)
+</script>
+<!-- Bootstrap 4 -->
+<script src="{{asset('assets/plugins/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
     $(document).ready(function() {
-        
+        // Handle Session Flash Messages with SweetAlert2
+        @if(session('success'))
+            Swal.fire({
+                icon: 'success',
+                title: 'Success!',
+                text: "{{ session('success') }}",
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+                iconColor: '#28a745'
+            });
+        @endif
+
+        @if(session('error'))
+            Swal.fire({
+                icon: 'error',
+                title: 'Error!',
+                text: "{{ session('error') }}",
+                toast: true,
+                position: 'top-end',
+                showConfirmButton: false,
+                timer: 4000,
+                timerProgressBar: true
+            });
+        @endif
+
         // 1. Function for Green Tick Popup & Badge Update
         // Link this to your button using: onclick="addToCart()"
         window.addToCart = function() {
@@ -307,7 +345,7 @@ function confirmSale() {
 
     // redirect after 1.5 seconds
     setTimeout(function () {
-        window.location.href = "{{ route('sales_order.confirm_sale') }}";
+        window.location.href = "{{ route('sales_order_history.index') }}";
     }, 1500);
 }
 </script>
@@ -520,6 +558,38 @@ document.addEventListener('DOMContentLoaded', function () {
         categoryFilter.addEventListener('change', filterBrands);
     }
 
+    // --- DEPENDENT DROPDOWN FOR ADD SUPPLIER MODAL ---
+    const supplierCatSelect = document.getElementById('supplierCategorySelect');
+    const supplierBrandSelect = document.getElementById('supplierBrandSelect');
+
+    if (supplierCatSelect && supplierBrandSelect) {
+        supplierCatSelect.addEventListener('change', function() {
+            const selectedCatId = this.value;
+            const brandOptions = supplierBrandSelect.querySelectorAll('option');
+
+            // Reset brand select
+            supplierBrandSelect.value = "";
+            
+            brandOptions.forEach(option => {
+                const brandCatId = option.dataset.category;
+                
+                // Always show the placeholder
+                if (!brandCatId) {
+                    option.style.display = '';
+                    option.textContent = selectedCatId ? '-- Choose Brand --' : '-- Choose Brand (Select Category First) --';
+                    return;
+                }
+
+                // Show only brands matching the selected category
+                if (selectedCatId && brandCatId === selectedCatId) {
+                    option.style.display = '';
+                } else {
+                    option.style.display = 'none';
+                }
+            });
+        });
+    }
+
 });
 </script>
 <script>
@@ -652,60 +722,9 @@ function openCartAfterAdded(){
     $('#addToCartModal').modal('hide');
 }
 
-  let currentItem = null;
-
   function money(n) {
     const val = Number(n || 0);
     return '$' + val.toLocaleString(undefined, { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-  }
-
-  function syncTotals() {
-    if (!currentItem) return;
-
-    const qty = Number(document.getElementById('m_qty').value || 0);
-    const unit = Number(currentItem.unitCost || 0);
-    document.getElementById('m_total').textContent = money(qty * unit);
-  }
-
-  function clampQty() {
-    if (!currentItem) return;
-
-    const max = Number(currentItem.approvedQty || 1);
-    const input = document.getElementById('m_qty');
-    let qty = Number(input.value || 1);
-
-    if (qty < 1) qty = 1;
-    if (qty > max) qty = max;
-
-    input.value = qty;
-    syncTotals();
-  }
-
-  function openAddToStockModal(item) {
-    currentItem = item;
-
-    // Fill UI
-    document.getElementById('m_image').src = item.image || '';
-    document.getElementById('m_name').textContent = item.name || '—';
-    document.getElementById('m_sku').textContent = item.sku || '—';
-    document.getElementById('m_po').textContent = item.po || '—';
-    document.getElementById('m_brand').textContent = item.brand || '—';
-    document.getElementById('m_supplier').textContent = item.supplier || '—';
-
-    document.getElementById('m_approvedQty').textContent = item.approvedQty ?? 0;
-    document.getElementById('m_qtyMax').textContent = item.approvedQty ?? 0;
-
-    document.getElementById('m_unitCost').textContent = money(item.unitCost || 0);
-
-    // Defaults
-    document.getElementById('m_qty').value = item.approvedQty || 1;
-    document.getElementById('m_location').value = '';
-    document.getElementById('m_notes').value = '';
-    document.getElementById('m_warn').classList.add('d-none');
-
-    clampQty();
-
-    $('#addToStockModal').modal('show');
   }
 
   // Stepper buttons
@@ -713,77 +732,30 @@ function openCartAfterAdded(){
     const qtyInput = document.getElementById('m_qty');
     const minus = document.getElementById('qtyMinus');
     const plus = document.getElementById('qtyPlus');
-    const confirmBtn = document.getElementById('m_confirmBtn');
 
-    minus.addEventListener('click', () => {
-      qtyInput.value = (Number(qtyInput.value || 1) - 1);
-      clampQty();
-    });
+    if (minus) {
+        minus.addEventListener('click', () => {
+            if (typeof clampQty === 'function') {
+                qtyInput.value = (Number(qtyInput.value || 1) - 1);
+                clampQty();
+            }
+        });
+    }
 
-    plus.addEventListener('click', () => {
-      qtyInput.value = (Number(qtyInput.value || 1) + 1);
-      clampQty();
-    });
+    if (plus) {
+        plus.addEventListener('click', () => {
+            if (typeof clampQty === 'function') {
+                qtyInput.value = (Number(qtyInput.value || 1) + 1);
+                clampQty();
+            }
+        });
+    }
 
-    qtyInput.addEventListener('input', clampQty);
-
-    confirmBtn.addEventListener('click', async () => {
-      const warn = document.getElementById('m_warn');
-      const spinner = document.getElementById('m_spinner');
-
-      const qty = Number(document.getElementById('m_qty').value || 0);
-      const location = document.getElementById('m_location').value;
-      const notes = document.getElementById('m_notes').value || '';
-
-      const max = Number(currentItem?.approvedQty || 0);
-      const valid = location && qty >= 1 && qty <= max;
-
-      if (!valid) {
-        warn.classList.remove('d-none');
-        return;
-      }
-      warn.classList.add('d-none');
-
-      // Build payload (send to backend)
-      const payload = {
-        sku: currentItem.sku,
-        po: currentItem.po,
-        qty: qty,
-        location: location,
-        notes: notes
-      };
-
-      // Loading state
-      spinner.classList.remove('d-none');
-      confirmBtn.disabled = true;
-
-      try {
-        // TODO: replace with your real endpoint + CSRF
-        // Example with fetch:
-        // await fetch("{{ route('stock.addApproved') }}", {
-        //   method: "POST",
-        //   headers: {
-        //     "Content-Type": "application/json",
-        //     "X-CSRF-TOKEN": "{{ csrf_token() }}"
-        //   },
-        //   body: JSON.stringify(payload)
-        // });
-
-        console.log('Submitting payload:', payload);
-
-        $('#addToStockModal').modal('hide');
-
-        // Optionally show toast / reload / update row status
-        // location.reload();
-
-      } catch (e) {
-        warn.textContent = "Something went wrong. Please try again.";
-        warn.classList.remove('d-none');
-      } finally {
-        spinner.classList.add('d-none');
-        confirmBtn.disabled = false;
-      }
-    });
+    if (qtyInput) {
+        qtyInput.addEventListener('input', () => {
+            if (typeof clampQty === 'function') clampQty();
+        });
+    }
   });
 document.querySelectorAll('.payment-card').forEach(card => {
     card.addEventListener('click', function () {
@@ -811,16 +783,6 @@ document.querySelectorAll('.payment-card').forEach(card => {
 </div>
 <!-- ./wrapper -->
 
-<!-- jQuery -->
-<script src="{{asset('assets/plugins/jquery/jquery.min.js')}}"></script>
-<!-- jQuery UI 1.11.4 -->
-<script src="{{asset('assets/plugins/jquery-ui/jquery-ui.min.js')}}"></script>
-<!-- Resolve conflict in jQuery UI tooltip with Bootstrap tooltip -->
-<script>
-  $.widget.bridge('uibutton', $.ui.button)
-</script>
-<!-- Bootstrap 4 -->
-<script src="{{asset('assets/plugins/bootstrap/js/bootstrap.bundle.min.js')}}"></script>
 <!-- ChartJS -->
 <script src="{{asset('assets/plugins/chart.js/Chart.min.js')}}"></script>
 <!-- Sparkline -->
@@ -844,5 +806,9 @@ document.querySelectorAll('.payment-card').forEach(card => {
 
 <!-- AdminLTE dashboard demo (This is only for demo purposes) -->
 <script src="{{asset('assets/dist/js/pages/dashboard.js')}}"></script>
+
+@stack('scripts')
+@yield('scripts')
+
 </body>
 </html>
