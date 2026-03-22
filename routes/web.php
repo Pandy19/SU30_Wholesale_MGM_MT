@@ -52,10 +52,18 @@ Route::middleware(['auth'])->group(function () {
         Route::controller(SupplierController::class)->group(function () {
             Route::get('/suppliers', 'index')->name('suppliers.index');
             Route::post('/suppliers/brand/store', 'storeBrand')->name('suppliers.brand.store');
+            Route::put('/suppliers/brand/{brand}/update', 'updateBrand')->name('suppliers.brand.update');
             Route::post('/suppliers/category/store', 'storeCategory')->name('suppliers.category.store');
+            Route::delete('/suppliers/brand/{brand}', 'deleteBrand')->name('suppliers.brand.delete');
+            Route::delete('/suppliers/category/{category}', 'deleteCategory')->name('suppliers.category.delete');
             Route::post('/suppliers/supplier/store', 'storeSupplier')->name('suppliers.supplier.store');
             Route::put('/suppliers/supplier/{supplier}/update', 'updateSupplier')->name('suppliers.supplier.update');
             Route::delete('/suppliers/supplier/{supplier}', 'deleteSupplier')->name('suppliers.supplier.delete');
+            
+            // New Approval Routes
+            Route::get('/suppliers/approvals', 'approvals')->name('suppliers.approvals');
+            Route::post('/suppliers/approve/{id}', 'approve')->name('suppliers.approve');
+            Route::post('/suppliers/deny/{id}', 'deny')->name('suppliers.deny');
         });
 
         Route::controller(product_managementController::class)->group(function () {

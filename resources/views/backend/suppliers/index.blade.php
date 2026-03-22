@@ -31,33 +31,123 @@
       <div class="container-fluid">
          {{-- SEARCH, FILTER & ACTION BUTTONS --}}
          <div class="row mb-3 align-items-center">
-            <div class="col-md-4">
+            <div class="col-md-2">
                <input type="text" id="brandSearch"
                   class="form-control"
-                  placeholder="Search brand or supplier">
+                  placeholder="Search...">
             </div>
             <div class="col-md-3">
-               <select id="categoryFilter" class="form-control">
-                  <option value="">All Categories</option>
+               <select id="categoryFilter" class="form-control shadow-xs">
+                  <option value="">All Categories (Default)</option>
                   @foreach($categories as $cat)
                      <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                   @endforeach
                </select>
             </div>
-            <div class="col-md-5 text-right">
-               <button class="btn btn-primary mr-2" data-toggle="modal" data-target="#addBrandModal">
-               <i class="fas fa-plus mr-1"></i> Add Brand
-               </button>
-               <button class="btn btn-success" data-toggle="modal" data-target="#addSupplierModal">
-               <i class="fas fa-user-plus mr-1"></i> Add Supplier
-               </button>
-               <button class="btn btn-info ml-2" data-toggle="modal" data-target="#addCategoryModal">
-               <i class="fas fa-tags mr-1"></i> Add Category
-               </button>
+            <div class="col-md-3">
+               <select id="brandFilter" class="form-control shadow-xs">
+                  <option value="">All Brands (Default)</option>
+                  @foreach($allBrands as $brand)
+                     <option value="{{ $brand->id }}" data-category="{{ $brand->category_id }}">
+                        {{ $brand->name }}
+                     </option>
+                  @endforeach
+               </select>
+            </div>
+            <div class="col-md-4 text-right">
+               <div class="btn-group">
+                  <button class="btn btn-primary btn-sm shadow-sm" data-toggle="modal" data-target="#addBrandModal">
+                     <i class="fas fa-plus mr-1"></i> Brand
+                  </button>
+                  <button class="btn btn-success btn-sm shadow-sm" data-toggle="modal" data-target="#addSupplierModal">
+                     <i class="fas fa-user-plus mr-1"></i> Supplier
+                  </button>
+                  <div class="btn-group">
+                     <button type="button" class="btn btn-info btn-sm shadow-sm dropdown-toggle" data-toggle="dropdown">
+                        <i class="fas fa-tags mr-1"></i> Category
+                     </button>
+                     <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#addCategoryModal">
+                           <i class="fas fa-plus-circle mr-2 text-primary"></i>Add Category
+                        </a>
+                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#deleteCategorySelectionModal">
+                           <i class="fas fa-trash-alt mr-2 text-danger"></i>Delete Category
+                        </a>
+                     </div>
+                  </div>
+               </div>
             </div>
          </div>
 
 @include('backend.suppliers.add')
+@include('backend.suppliers.edit_brand')
+@include('backend.suppliers.edit_supplier')
+
+{{-- CATEGORY DELETE SELECTION MODAL (Step 1) --}}
+<div class="modal fade" id="deleteCategorySelectionModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title font-weight-bold"><i class="fas fa-trash-alt mr-2"></i>Delete Category (Step 1/2)</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="form-group">
+                    <label class="font-weight-bold">Select Category to Remove:</label>
+                    <select id="categoryToDelete" class="form-control form-control-lg">
+                        <option value="">-- Choose Category --</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat->id }}" data-name="{{ $cat->name }}" data-brands="{{ $cat->brands->count() }}">
+                                {{ $cat->name }} ({{ $cat->brands->count() }} Brands)
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="alert alert-info small mt-3">
+                    <i class="fas fa-info-circle mr-1"></i> Note: You can only delete categories that don't have active suppliers.
+                </div>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-light border px-4" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-danger px-4" onclick="proceedToCategoryConfirm()">Next Step <i class="fas fa-arrow-right ml-1"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- CATEGORY FINAL CONFIRMATION MODAL (Step 2) --}}
+<div class="modal fade" id="deleteCategoryFinalModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-dark text-white">
+                <h5 class="modal-title font-weight-bold text-warning"><i class="fas fa-exclamation-triangle mr-2"></i>FINAL WARNING (Step 2/2)</h5>
+                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body text-center p-5">
+                <div class="mb-4">
+                    <i class="fas fa-skull-crossbones fa-4x text-danger animate__animated animate__pulse animate__infinite"></i>
+                </div>
+                <h4 class="font-weight-bold">Are you ABSOLUTELY sure?</h4>
+                <p class="text-muted">You are about to delete the category <strong id="finalCategoryName" class="text-danger"></strong>.</p>
+                <div class="bg-light p-3 rounded border text-left small">
+                    <ul class="mb-0">
+                        <li>All associated <strong>Brands</strong> will be deleted.</li>
+                        <li>All <strong>Brand Logos</strong> in storage will be permanently erased.</li>
+                        <li>This action <strong>CANNOT</strong> be undone.</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center pb-4 border-0">
+                <form id="finalCategoryDeleteForm" method="POST">
+                    @csrf
+                    @method('DELETE')
+                    <button type="button" class="btn btn-light border px-4 mr-2" data-dismiss="modal">Wait, Stop!</button>
+                    <button type="submit" class="btn btn-danger btn-lg px-5 shadow">YES, DELETE EVERYTHING</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
 
 {{-- ================= BRAND ACCORDION (ALL BRANDS INSIDE) ================= --}}
 <div id="brandAccordion">
@@ -77,33 +167,110 @@
         @endphp
 
         <div class="card mb-2 brand-card" data-category="{{ $brand->category_id }}">
-            <a href="#{{ $collapseId }}" class="text-dark text-decoration-none" data-toggle="collapse">
-                <div class="card-body brand-toggle">
-                    <div class="row align-items-center">
-                        <div class="col-md-1 text-center">
-                            <img src="{{ $logo }}" class="img-fluid rounded" style="max-height:45px;">
-                        </div>
+            <div class="position-relative">
+                <a href="#{{ $collapseId }}" class="text-dark text-decoration-none" data-toggle="collapse">
+                    <div class="card-body brand-toggle pr-5">
+                        <div class="row align-items-center">
+                            <div class="col-md-1 text-center">
+                                <img src="{{ $logo }}" class="img-fluid rounded" style="max-height:45px;">
+                            </div>
 
-                        <div class="col-md-6">
-                            <h5 class="mb-1">{{ $brand->name }}</h5>
-                            <small class="text-muted">Category: {{ $brandCategoryName }}</small>
-                        </div>
+                            <div class="col-md-6">
+                                <h5 class="mb-1">{{ $brand->name }}</h5>
+                                <small class="text-muted">Category: {{ $brandCategoryName }}</small>
+                            </div>
 
-                        <div class="col-md-3">
-                            <span class="badge {{ $brandStatusClass }} mr-2">
-                                {{ ucfirst($brandStatus) }}
-                            </span>
-                            <span class="badge badge-info">
-                                {{ $supplierCount }} {{ $supplierCount === 1 ? 'Supplier' : 'Suppliers' }}
-                            </span>
-                        </div>
+                            <div class="col-md-3">
+                                <span class="badge {{ $brandStatusClass }} mr-2">
+                                    {{ ucfirst($brandStatus) }}
+                                </span>
+                                <span class="badge badge-info">
+                                    {{ $supplierCount }} {{ $supplierCount === 1 ? 'Supplier' : 'Suppliers' }}
+                                </span>
+                            </div>
 
-                        <div class="col-md-2 text-right">
-                            <i class="fas fa-chevron-down rotate-icon"></i>
+                            <div class="col-md-2 text-right">
+                                <i class="fas fa-chevron-down rotate-icon"></i>
+                            </div>
+                        </div>
+                    </div>
+                </a>
+                {{-- Absolute positioned action buttons --}}
+                <div style="position: absolute; right: 60px; top: 50%; transform: translateY(-50%); z-index: 10;">
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-outline-warning border-0 mr-1" 
+                                data-toggle="modal" 
+                                data-target="#editBrandModal{{ $brand->id }}">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                        <button class="btn btn-sm btn-outline-danger border-0" 
+                                data-toggle="modal" 
+                                data-target="#deleteBrandModal{{ $brand->id }}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+
+            {{-- BRAND DELETE MODAL (Step 1) --}}
+            <div class="modal fade" id="deleteBrandModal{{ $brand->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content border-0 shadow">
+                        <div class="modal-header bg-danger text-white">
+                            <h5 class="modal-title font-weight-bold"><i class="fas fa-trash-alt mr-2"></i>Delete Brand (Step 1/2)</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body text-center p-4">
+                            <p>You are about to remove the brand: <br><strong class="h4 text-primary">{{ $brand->name }}</strong></p>
+                            @if($supplierCount > 0)
+                                <div class="alert alert-warning border-warning mt-3">
+                                    <i class="fas fa-ban mr-1"></i> <strong>Locked:</strong> This brand has {{ $supplierCount }} suppliers and cannot be deleted.
+                                </div>
+                            @else
+                                <p class="text-muted mt-3">This will prepare the brand for permanent removal.</p>
+                            @endif
+                        </div>
+                        <div class="modal-footer justify-content-center border-0">
+                            <button type="button" class="btn btn-light border px-4" data-dismiss="modal">Cancel</button>
+                            @if($supplierCount == 0)
+                                <button type="button" class="btn btn-danger px-4" 
+                                        onclick="$('#deleteBrandModal{{ $brand->id }}').modal('hide'); setTimeout(function(){ $('#finalBrandDeleteModal{{ $brand->id }}').modal('show'); }, 400);">
+                                    Next Step <i class="fas fa-arrow-right ml-1"></i>
+                                </button>
+                            @endif
                         </div>
                     </div>
                 </div>
-            </a>
+            </div>
+
+            {{-- BRAND FINAL DELETE MODAL (Step 2) --}}
+            <div class="modal fade" id="finalBrandDeleteModal{{ $brand->id }}" tabindex="-1" role="dialog" aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered" role="document">
+                    <div class="modal-content border-0 shadow-lg">
+                        <div class="modal-header bg-dark text-white">
+                            <h5 class="modal-title font-weight-bold text-warning"><i class="fas fa-exclamation-triangle mr-2"></i>FINAL CONFIRMATION (Step 2/2)</h5>
+                            <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
+                        </div>
+                        <div class="modal-body text-center p-5">
+                            <i class="fas fa-exclamation-circle fa-4x text-danger animate__animated animate__shakeX mb-4"></i>
+                            <h4 class="font-weight-bold">Delete "{{ $brand->name }}"?</h4>
+                            <p class="text-muted">This will permanently delete the brand and its <strong>Logo File</strong> from the server storage.</p>
+                            <div class="alert alert-danger py-2 small">
+                                <i class="fas fa-info-circle mr-1"></i> THIS ACTION CANNOT BE UNDONE
+                            </div>
+                        </div>
+                        <div class="modal-footer justify-content-center pb-4 border-0">
+                            <form action="{{ route('suppliers.brand.delete', $brand->id) }}" method="POST">
+                                @csrf
+                                @method('DELETE')
+                                <button type="button" class="btn btn-light border px-4 mr-2" data-dismiss="modal">Stop, Go Back</button>
+                                <button type="submit" class="btn btn-danger btn-lg px-5 shadow">YES, DELETE BRAND</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <div class="collapse" id="{{ $collapseId }}" data-parent="#brandAccordion">
                 <div class="card-body border-top">
@@ -158,245 +325,6 @@
                                         </button>
                                     </td>
                                 </tr>
-
-                                {{-- ================= EDIT SUPPLIER MODAL (PER ROW) ================= --}}
-                                 <div class="modal fade" id="{{ $editModalId }}" tabindex="-1">
-                                    <div class="modal-dialog modal-xl">
-                                       <div class="modal-content">
-
-                                             <div class="modal-header bg-warning text-dark">
-                                                <h5 class="modal-title">
-                                                   <i class="fas fa-edit mr-1"></i> Edit Supplier
-                                                </h5>
-                                                <button type="button" class="close" data-dismiss="modal">&times;</button>
-                                             </div>
-
-                                             <div class="modal-body">
-                                                <form method="POST"
-                                                      action="{{ route('suppliers.supplier.update', $supplier->id) }}"
-                                                      enctype="multipart/form-data">
-                                                   @csrf
-                                                   @method('PUT')
-
-                                                   <div class="row">
-
-                                                         <div class="col-md-4">
-                                                            <div class="form-group">
-                                                               <label>Supplier Code</label>
-                                                               <input type="text" class="form-control"
-                                                                        name="code"
-                                                                        value="{{ $supplier->code }}" readonly>
-                                                            </div>
-                                                         </div>
-
-                                                         <div class="col-md-8">
-                                                            <div class="form-group">
-                                                               <label>Company</label>
-                                                               <input type="text"
-                                                                        class="form-control"
-                                                                        name="company_name"
-                                                                        value="{{ old('company_name', $supplier->company_name) }}"
-                                                                        required>
-                                                            </div>
-                                                         </div>
-
-                                                         <div class="col-md-6">
-                                                            <div class="form-group">
-                                                               <label>Contact Person</label>
-                                                               <input type="text"
-                                                                        class="form-control"
-                                                                        name="contact_person"
-                                                                        value="{{ old('contact_person', $supplier->contact_person) }}">
-                                                            </div>
-                                                         </div>
-
-                                                         <div class="col-md-6">
-                                                            <div class="form-group">
-                                                               <label>Phone</label>
-                                                               <input type="text"
-                                                                        class="form-control"
-                                                                        name="phone"
-                                                                        value="{{ old('phone', $supplier->phone) }}">
-                                                            </div>
-                                                         </div>
-
-                                                         <div class="col-md-6">
-                                                            <div class="form-group">
-                                                               <label>Email</label>
-                                                               <input type="email"
-                                                                        class="form-control"
-                                                                        name="email"
-                                                                        value="{{ old('email', $supplier->email) }}">
-                                                            </div>
-                                                         </div>
-
-                                                         <div class="col-md-6">
-                                                            <div class="form-group">
-                                                               <label>Address</label>
-                                                               <input type="text"
-                                                                        class="form-control"
-                                                                        name="address"
-                                                                        value="{{ old('address', $supplier->address) }}">
-                                                            </div>
-                                                         </div>
-
-                                                         {{-- ✅ Payment Term (MUST match ENUM exactly) --}}
-                                                         <div class="col-md-4">
-                                                            <div class="form-group">
-                                                               <label>Payment Term</label>
-                                                               @php
-                                                                     $terms = ['Immediate','Net 7 Days','Net 15 Days','Net 30 Days','Net 60 Days'];
-                                                                     $selected = old('payment_term', $supplier->payment_term);
-                                                               @endphp
-                                                               <select class="form-control" name="payment_term" required>
-                                                                     @foreach($terms as $term)
-                                                                        <option value="{{ $term }}" {{ $selected === $term ? 'selected' : '' }}>
-                                                                           {{ $term }}
-                                                                        </option>
-                                                                     @endforeach
-                                                               </select>
-                                                            </div>
-                                                         </div>
-
-                                                         <div class="col-md-4">
-                                                            <div class="form-group">
-                                                               <label>Lead Time (Days)</label>
-                                                               <input type="number"
-                                                                        class="form-control"
-                                                                        name="lead_time_days"
-                                                                        value="{{ old('lead_time_days', $supplier->lead_time_days) }}">
-                                                            </div>
-                                                         </div>
-
-                                                         <div class="col-md-4">
-                                                            <div class="form-group">
-                                                               <label>Status</label>
-                                                               @php
-                                                                  $selectedStatus = old('status', $supplier->status); // ✅ from DB
-                                                               @endphp
-
-                                                               <select class="form-control" name="status" required>
-                                                                  <option value="active" {{ $selectedStatus === 'active' ? 'selected' : '' }}>Active</option>
-                                                                  <option value="inactive" {{ $selectedStatus === 'inactive' ? 'selected' : '' }}>Inactive</option>
-                                                               </select>
-                                                            </div>
-                                                         </div>
-
-                                                         {{-- ✅ Optional: Update license --}}
-                                                         <div class="col-md-12">
-                                                            <div class="form-group">
-                                                               <label>Update Work ID Card / Business License</label>
-
-                                                               <input type="file"
-                                                                     name="document"
-                                                                     class="form-control"
-                                                                     accept=".jpg,.jpeg,.png,.webp,.pdf,.doc,.docx"
-                                                                     onchange="previewSupplierDoc('{{ $editModalId }}', this)">
-
-                                                               {{-- OLD FILE --}}
-                                                               <div class="mt-3">
-                                                                  <div class="small font-weight-bold text-muted mb-1">Current file:</div>
-
-                                                                  @if($supplier->document)
-                                                                     <a class="btn btn-sm btn-outline-info"
-                                                                        href="{{ asset('storage/' . $supplier->document) }}"
-                                                                        target="_blank">
-                                                                        <i class="fas fa-file mr-1"></i> View current
-                                                                     </a>
-
-                                                                     <small class="text-muted ml-2">
-                                                                        {{ basename($supplier->document) }}
-                                                                     </small>
-                                                                  @else
-                                                                     <span class="text-muted">No file uploaded</span>
-                                                                  @endif
-                                                               </div>
-
-                                                               {{-- NEW FILE PREVIEW --}}
-                                                               <div class="mt-3" id="newDocPreviewWrap-{{ $editModalId }}" style="display:none;">
-                                                                  <div class="small font-weight-bold text-muted mb-1">New selected file:</div>
-
-                                                                  <div class="d-flex align-items-center">
-                                                                     <img id="newDocImg-{{ $editModalId }}"
-                                                                        src=""
-                                                                        alt="New preview"
-                                                                        style="max-height:60px; display:none;"
-                                                                        class="border rounded p-1 mr-2">
-
-                                                                     <a id="newDocLink-{{ $editModalId }}"
-                                                                        href="#"
-                                                                        target="_blank"
-                                                                        class="btn btn-sm btn-outline-success"
-                                                                        style="display:none;">
-                                                                        <i class="fas fa-eye mr-1"></i> Preview new
-                                                                     </a>
-
-                                                                     <small id="newDocName-{{ $editModalId }}" class="text-muted ml-2"></small>
-                                                                  </div>
-
-                                                                  <small class="text-muted d-block mt-1">
-                                                                     (This is only preview. It will save after you click <b>Update Supplier</b>.)
-                                                                  </small>
-                                                               </div>
-
-                                                            </div>
-                                                         </div>
-
-                                                   </div>
-
-                                                   <div class="text-right">
-                                                         <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                                                         <button type="submit" class="btn btn-warning">
-                                                            <i class="fas fa-save mr-1"></i> Update Supplier
-                                                         </button>
-                                                   </div>
-
-                                                </form>
-                                             </div>
-
-                                       </div>
-                                    </div>
-                                 </div>
-
-
-                                {{-- ================= DELETE SUPPLIER MODAL (PER ROW) ================= --}}
-                                <div class="modal fade" id="{{ $deleteModalId }}" tabindex="-1">
-                                    <div class="modal-dialog modal-md modal-dialog-centered">
-                                        <div class="modal-content">
-                                            <div class="modal-header bg-danger text-white">
-                                                <h5 class="modal-title">
-                                                    <i class="fas fa-exclamation-triangle mr-1"></i> Confirm Delete
-                                                </h5>
-                                                <button type="button" class="close text-white" data-dismiss="modal">&times;</button>
-                                            </div>
-
-                                            <div class="modal-body text-center">
-                                                <i class="fas fa-trash fa-3x text-danger mb-3"></i>
-                                                <h5>Are you sure?</h5>
-                                                <p class="text-muted mb-0">
-                                                    This supplier will be <strong>permanently deleted</strong>.<br>
-                                                    This action cannot be undone.
-                                                </p>
-                                            </div>
-
-                                            <div class="modal-footer justify-content-center">
-                                                <button class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-
-                                                {{-- DELETE route later --}}
-                                                <form method="POST"
-                                                      action="{{ route('suppliers.supplier.delete', $supplier->id) }}"
-                                                      class="m-0">
-                                                   @csrf
-                                                   @method('DELETE')
-                                                   <button type="submit" class="btn btn-danger">
-                                                      Yes, Delete
-                                                   </button>
-                                                </form>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
                             @empty
                                 <tr>
                                     <td colspan="10" class="text-center text-muted">
@@ -427,3 +355,88 @@
    </section>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+$(document).ready(function() {
+    const brandSearch = $('#brandSearch');
+    const categoryFilter = $('#categoryFilter');
+    const brandFilter = $('#brandFilter');
+    const brandCards = $('.brand-card');
+
+    function performFilter() {
+        const searchText = brandSearch.val().toLowerCase();
+        const selectedCat = categoryFilter.val();
+        const selectedBrandId = brandFilter.val();
+
+        brandCards.each(function() {
+            const card = $(this);
+            const cardText = card.text().toLowerCase();
+            const cardCatId = card.data('category');
+            
+            // Extract Brand ID from collapse link or similar
+            const brandLink = card.find('a[data-toggle="collapse"]').attr('href');
+            const cardBrandId = brandLink ? brandLink.replace('#brandCollapse', '') : null;
+
+            const matchesSearch = searchText === '' || cardText.includes(searchText);
+            const matchesCat = selectedCat === '' || cardCatId == selectedCat;
+            const matchesBrand = selectedBrandId === '' || cardBrandId == selectedBrandId;
+
+            if (matchesSearch && matchesCat && matchesBrand) {
+                card.fadeIn(200);
+            } else {
+                card.hide();
+            }
+        });
+    }
+
+    // Filter Logic
+    brandSearch.on('keyup', performFilter);
+    
+    categoryFilter.on('change', function() {
+        const catId = $(this).val();
+        
+        // Synchronize Brand Dropdown: Show only brands in this category
+        brandFilter.val(''); // Reset brand selection when category changes
+        
+        if (catId) {
+            brandFilter.find('option').each(function() {
+                const opt = $(this);
+                const optCat = opt.data('category');
+                if (opt.val() === '' || optCat == catId) {
+                    opt.show();
+                } else {
+                    opt.hide();
+                }
+            });
+        } else {
+            brandFilter.find('option').show();
+        }
+        
+        performFilter();
+    });
+
+    brandFilter.on('change', performFilter);
+});
+
+function proceedToCategoryConfirm() {
+    const select = $('#categoryToDelete');
+    const id = select.val();
+    const name = select.find('option:selected').data('name');
+    
+    if (!id) {
+        alert('Please select a category first.');
+        return;
+    }
+
+    $('#finalCategoryName').text(name);
+    $('#finalCategoryDeleteForm').attr('action', '/suppliers/category/' + id);
+    
+    // Hide current modal and show final one
+    $('#deleteCategorySelectionModal').modal('hide');
+    setTimeout(function() {
+        $('#deleteCategoryFinalModal').modal('show');
+    }, 400); // Small delay for smooth transition
+}
+</script>
+@endpush

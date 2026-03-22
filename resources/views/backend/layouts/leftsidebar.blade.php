@@ -53,6 +53,22 @@
         </li>
 
         <li class="nav-item">
+          <a href="{{ route('suppliers.approvals') }}"
+             class="nav-link {{ request()->routeIs('suppliers.approvals') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-user-check"></i>
+            <p>
+              Supplier Approvals
+              @php
+                  $pendingCount = \App\Models\Supplier::where('status', 'pending')->count();
+              @endphp
+              @if($pendingCount > 0)
+                  <span class="badge badge-warning right">{{ $pendingCount }}</span>
+              @endif
+            </p>
+          </a>
+        </li>
+
+        <li class="nav-item">
           <a href="{{ url('/product_management') }}"
              class="nav-link {{ request()->is('product_management') ? 'active' : '' }}">
             <i class="nav-icon fas fa-boxes"></i>

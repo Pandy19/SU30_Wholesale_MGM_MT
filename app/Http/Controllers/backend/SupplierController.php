@@ -10,6 +10,11 @@ use Illuminate\Support\Carbon;
 use App\Models\Brand;
 use App\Models\Category;
 use App\Models\Supplier;
+use App\Models\User;
+use App\Models\Role;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SupplierStatusMail;
+use Illuminate\Support\Facades\Hash;
 
 class SupplierController extends Controller
 {
@@ -56,7 +61,7 @@ class SupplierController extends Controller
     public function storeBrand(Request $request)
     {
         $request->validate([
-            'brand_name'  => 'required|string|max:255',
+            'brand_name'  => 'required|string|max:255|unique:brands,name',
             'category_id' => 'required|exists:categories,id',
             'status'      => 'required|in:active,inactive',
             'logo'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
@@ -78,26 +83,75 @@ class SupplierController extends Controller
         return redirect()->route('suppliers.index')->with('success', 'Brand added successfully');
     }
 
+    public function updateBrand(Request $request, Brand $brand)
+    {
+        $request->validate([
+            'brand_name'  => 'required|string|max:255|unique:brands,name,' . $brand->id,
+            'category_id' => 'required|exists:categories,id',
+            'status'      => 'required|in:active,inactive',
+            'logo'        => 'nullable|image|mimes:jpg,jpeg,png,webp|max:5120',
+        ]);
+
+        $logoPath = $brand->logo;
+        if ($request->hasFile('logo')) {
+            // Delete old logo
+            if ($brand->logo && \Storage::disk('public')->exists($brand->logo)) {
+                \Storage::disk('public')->delete($brand->logo);
+            }
+            
+            $fileName = Str::slug($request->brand_name) . '_' . now()->format('YmdHis') . '.' . $request->file('logo')->getClientOriginalExtension();
+            $logoPath = $request->file('logo')->storeAs('img/brand', $fileName, 'public');
+        }
+
+        $brand->update([
+            'category_id' => $request->category_id,
+            'name'        => $request->brand_name,
+            'logo'        => $logoPath,
+            'status'      => $request->status,
+        ]);
+
+        return redirect()->route('suppliers.index')->with('success', 'Brand updated successfully');
+    }
+
     public function storeSupplier(Request $request)
     {
         $request->validate([
             'brand_id'        => 'required|exists:brands,id',
             'company_name'    => 'required|string|max:255',
+            'email'           => 'required|email|unique:users,email',
+            'password'        => 'required|string|min:8|confirmed',
             'payment_term'    => 'required|in:Immediate,Net 7 Days,Net 15 Days,Net 30 Days,Net 60 Days',
             'status'          => 'required|in:active,inactive',
+            'document'        => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf,doc,docx|max:5120',
         ]);
 
-        // Generate code
+        // 1. Create User Account
+        $supplierRole = Role::where('slug', 'supplier')->first();
+        if (!$supplierRole) {
+            return redirect()->back()->with('error', 'Supplier role not found in the system.');
+        }
+
+        $user = User::create([
+            'name'     => $request->company_name,
+            'email'    => $request->email,
+            'password' => Hash::make($request->password),
+            'status'   => $request->status, // active or inactive
+            'role_id'  => $supplierRole->id,
+        ]);
+
+        // 2. Generate Supplier Code
         $lastCode = Supplier::orderBy('id', 'desc')->value('code');
         $num = ($lastCode && strlen($lastCode) >= 7) ? ((int) substr($lastCode, 4) + 1) : 1;
         $supplierCode = 'SUP-' . str_pad($num, 3, '0', STR_PAD_LEFT);
 
         $documentPath = null;
         if ($request->hasFile('document')) {
-            $fileName = $supplierCode . '_' . Str::slug($request->company_name) . '_' . now()->format('YmdHis') . '.' . $request->file('document')->getClientOriginalExtension();
+            $extension = $request->file('document')->getClientOriginalExtension();
+            $fileName = $supplierCode . '-' . $request->company_name . '.' . $extension;
             $documentPath = $request->file('document')->storeAs('img/SupplierLicense', $fileName, 'public');
         }
 
+        // 3. Create Supplier Profile
         Supplier::create([
             'brand_id'        => $request->brand_id,
             'code'            => $supplierCode,
@@ -112,13 +166,13 @@ class SupplierController extends Controller
             'status'          => $request->status,
         ]);
 
-        return redirect()->route('suppliers.index')->with('success', 'Supplier added successfully');
+        return redirect()->route('suppliers.index')->with('success', 'Supplier and User Account created successfully');
     }
 
     public function storeCategory(Request $request)
     {
         $request->validate([
-            'category_name' => 'required|string|max:255',
+            'category_name' => 'required|string|max:255|unique:categories,name',
             'status'        => 'required|in:active,inactive',
         ]);
 
@@ -146,7 +200,8 @@ class SupplierController extends Controller
 
         $documentPath = $supplier->document;
         if ($request->hasFile('document')) {
-            $fileName = $supplier->code . '_' . Str::slug($request->company_name) . '_' . now()->format('YmdHis') . '.' . $request->file('document')->getClientOriginalExtension();
+            $extension = $request->file('document')->getClientOriginalExtension();
+            $fileName = $supplier->code . '-' . $request->company_name . '.' . $extension;
             $documentPath = $request->file('document')->storeAs('img/SupplierLicense', $fileName, 'public');
         }
 
@@ -165,9 +220,104 @@ class SupplierController extends Controller
         return redirect()->route('suppliers.index')->with('success', 'Supplier updated successfully');
     }
 
+    public function deleteBrand(Brand $brand)
+    {
+        // Check if brand has suppliers
+        if ($brand->suppliers()->count() > 0) {
+            return redirect()->back()->with('error', 'Cannot delete brand "' . $brand->name . '" because it has active suppliers. Please reassign or delete the suppliers first.');
+        }
+
+        // Delete logo if exists
+        if ($brand->logo && \Storage::disk('public')->exists($brand->logo)) {
+            \Storage::disk('public')->delete($brand->logo);
+        }
+
+        $brand->delete();
+        return redirect()->route('suppliers.index')->with('success', 'Brand deleted successfully');
+    }
+
+    public function deleteCategory(Category $category)
+    {
+        // 1. Check if any brand under this category has suppliers
+        foreach ($category->brands as $brand) {
+            if ($brand->suppliers()->count() > 0) {
+                return redirect()->back()->with('error', 'Cannot delete category "' . $category->name . '" because one of its brands (' . $brand->name . ') has active suppliers. Please handle those suppliers first.');
+            }
+        }
+
+        // 2. Cleanup all brand logos in this category
+        foreach ($category->brands as $brand) {
+            if ($brand->logo && \Storage::disk('public')->exists($brand->logo)) {
+                \Storage::disk('public')->delete($brand->logo);
+            }
+        }
+
+        // 3. Delete Category (Brands will cascade delete in DB)
+        $category->delete();
+
+        return redirect()->route('suppliers.index')->with('success', 'Category and its associated brands have been removed successfully.');
+    }
+
     public function deleteSupplier(Supplier $supplier)
     {
         $supplier->delete();
         return redirect()->route('suppliers.index')->with('success', 'Supplier deleted successfully');
+    }
+
+    public function approvals()
+    {
+        $pendingSuppliers = Supplier::with('brand')->where('status', 'pending')->latest()->get();
+        $activeSuppliersCount = Supplier::where('status', 'active')->count();
+        return view('backend.suppliers.approval', compact('pendingSuppliers', 'activeSuppliersCount'));
+    }
+
+    public function approve(Request $request, $id)
+    {
+        $supplier = Supplier::findOrFail($id);
+        
+        // Update Supplier Status
+        $supplier->update(['status' => 'active']);
+
+        // Update User Status if exists
+        $user = \App\Models\User::where('email', $supplier->email)->first();
+        if ($user) {
+            $user->update(['status' => 'active']);
+        }
+
+        // Send Approval Email
+        if ($supplier->email) {
+            try {
+                Mail::to($supplier->email)->send(new SupplierStatusMail($supplier, 'approved'));
+            } catch (\Exception $e) {
+                \Log::error("Failed to send approval email to " . $supplier->email . ": " . $e->getMessage());
+            }
+        }
+
+        return redirect()->route('suppliers.approvals')->with('success', 'Supplier ' . $supplier->company_name . ' has been approved and notified.');
+    }
+
+    public function deny(Request $request, $id)
+    {
+        $supplier = Supplier::findOrFail($id);
+        
+        // Send Denial Email BEFORE deletion
+        if ($supplier->email) {
+            try {
+                Mail::to($supplier->email)->send(new SupplierStatusMail($supplier, 'denied'));
+            } catch (\Exception $e) {
+                \Log::error("Failed to send denial email to " . $supplier->email . ": " . $e->getMessage());
+            }
+        }
+
+        // Delete User if exists
+        $user = \App\Models\User::where('email', $supplier->email)->first();
+        if ($user) {
+            $user->delete();
+        }
+
+        $companyName = $supplier->company_name;
+        $supplier->delete();
+
+        return redirect()->route('suppliers.approvals')->with('success', 'Supplier ' . $companyName . ' registration has been denied and removed.');
     }
 }

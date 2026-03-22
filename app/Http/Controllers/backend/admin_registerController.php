@@ -39,7 +39,7 @@ class admin_registerController extends Controller
             'password' => Hash::make($request->password),
             'role'     => $roleSlug, // Backward compatibility
             'role_id'  => $request->role_id,
-            'status'   => $roleSlug === 'supplier' ? 'inactive' : 'active',
+            'status'   => $roleSlug === 'supplier' ? 'pending' : 'active',
         ]);
 
         // 2. Handle Profile Avatar (Real file or Base64 fallback)
@@ -59,25 +59,30 @@ class admin_registerController extends Controller
 
             $documentPath = null;
             if ($request->hasFile('license_doc')) {
-                $documentPath = $request->file('license_doc')->store('img/SupplierLicense', 'public');
+                $extension = $request->file('license_doc')->getClientOriginalExtension();
+                $fileName = $supplierCode . '-' . $request->name . '.' . $extension;
+                $documentPath = $request->file('license_doc')->storeAs('img/SupplierLicense', $fileName, 'public');
             } elseif ($request->license_base64) {
-                // Optional: Decode base64 and save as file if user didn't re-upload
                 $base64Data = $request->license_base64;
                 if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $type)) {
                     $base64Data = substr($base64Data, strpos($base64Data, ',') + 1);
-                    $type = strtolower($type[1]); // jpg, png, etc
+                    $type = strtolower($type[1]);
                     $base64Data = base64_decode($base64Data);
-                    $fileName = 'license_' . time() . '.' . $type;
+                    $fileName = $supplierCode . '-' . $request->name . '.' . $type;
                     \Storage::disk('public')->put('img/SupplierLicense/' . $fileName, $base64Data);
                     $documentPath = 'img/SupplierLicense/' . $fileName;
                 }
             }
 Supplier::create([
     'code'           => $supplierCode,
-    'company_name'   => $request->company_name ?? $request->name,
+    'company_name'   => $request->name, // Registration name is the company name
+    'contact_person' => $request->contact_person,
+    'phone'          => $request->phone,
     'email'          => $request->email,
-    'status'         => 'inactive',
-    'payment_term'   => 'Net 30 Days',
+    'address'        => $request->address,
+    'payment_term'   => $request->payment_term ?? 'Net 30 Days',
+    'lead_time_days' => $request->lead_time_days ?? 7,
+    'status'         => 'pending',
     'document'       => $documentPath,
 ]);
 

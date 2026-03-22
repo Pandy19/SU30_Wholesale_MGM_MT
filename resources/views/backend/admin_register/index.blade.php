@@ -94,9 +94,10 @@
                             <!-- BASIC INFO -->
                             <div class="form-row">
                                 <div class="form-group col-md-6">
-                                    <label>Full Name</label>
+                                    <label id="nameLabel">Full Name / Company Name</label>
                                     <input type="text"
                                            name="name"
+                                           id="nameInput"
                                            class="form-control @error('name') is-invalid @enderror"
                                            placeholder="Enter full name"
                                            value="{{ old('name') }}"
@@ -149,30 +150,49 @@
                             <div id="supplierFields" style="display: {{ $isSupplier ? 'block' : 'none' }};">
                                 <hr class="my-3">
 
-                                <h6 class="text-warning font-weight-bold mb-2">
-                                    Supplier Verification
+                                <h6 class="text-warning font-weight-bold mb-3">
+                                    Supplier Detailed Information
                                 </h6>
 
-                                <div class="form-group">
-                                    <label>Company Name</label>
-                                    <input type="text"
-                                           name="company_name"
-                                           class="form-control"
-                                           placeholder="Registered company name"
-                                           value="{{ old('company_name') }}">
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Contact Person Name</label>
+                                        <input type="text" name="contact_person" class="form-control" placeholder="Full name of contact person" value="{{ old('contact_person') }}">
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Phone Number</label>
+                                        <input type="text" name="phone" class="form-control" placeholder="Business phone number" value="{{ old('phone') }}">
+                                    </div>
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Company ID / Business License</label>
-                                    <input type="text"
-                                           name="company_id"
-                                           class="form-control"
-                                           placeholder="Company ID number"
-                                           value="{{ old('company_id') }}">
+                                    <label>Business Address</label>
+                                    <textarea name="address" class="form-control" rows="2" placeholder="Full business address">{{ old('address') }}</textarea>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group col-md-6">
+                                        <label>Payment Terms</label>
+                                        <select name="payment_term" class="form-control">
+                                            <option value="Immediate">Immediate</option>
+                                            <option value="Net 7 Days">Net 7 Days</option>
+                                            <option value="Net 15 Days">Net 15 Days</option>
+                                            <option value="Net 30 Days" selected>Net 30 Days</option>
+                                            <option value="Net 60 Days">Net 60 Days</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <label>Lead Time (Days)</label>
+                                        <select name="lead_time_days" class="form-control">
+                                            @for($i = 1; $i <= 30; $i++)
+                                                <option value="{{ $i }}" {{ old('lead_time_days') == $i ? 'selected' : ($i == 7 ? 'selected' : '') }}>{{ $i }} Days</option>
+                                            @endfor
+                                        </select>
+                                    </div>
                                 </div>
 
                                 <div class="form-group">
-                                    <label>Upload ID Card / License</label>
+                                    <label>Business License / Document (PDF/JPG)</label>
                                     <div class="mb-2" id="licensePreviewContainer">
                                         @if(old('license_base64'))
                                             @if(Str::startsWith(old('license_base64'), 'data:image'))
