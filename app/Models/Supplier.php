@@ -11,6 +11,11 @@ class Supplier extends Model
         'payment_term', 'lead_time_days', 'document', 'status', 'brand_id'
     ];
 
+    public function user()
+    {
+        return $this->hasOne(User::class, 'email', 'email');
+    }
+
     public function brand()
     {
         return $this->belongsTo(Brand::class);

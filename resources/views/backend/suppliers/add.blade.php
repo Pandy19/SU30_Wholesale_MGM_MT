@@ -116,6 +116,32 @@
          <div class="modal-body p-4">
             <form method="POST" action="{{ route('suppliers.supplier.store') }}" enctype="multipart/form-data">
                @csrf
+
+               {{-- PROFILE PICTURE UPLOAD --}}
+               <div class="form-group text-center mb-4">
+                  <label class="d-block font-weight-bold text-muted mb-3 text-uppercase small">User Profile Picture</label>
+                  <div class="brand-photo-wrapper mx-auto shadow-sm border rounded-circle" style="width: 120px; height: 120px; overflow: hidden; position: relative; cursor: pointer;">
+                     {{-- Preview image --}}
+                     <img id="supplierProfilePreview"
+                           src="{{ asset('assets/dist/img/MMOLOGO1.png') }}"
+                           alt="Profile Preview"
+                           class="brand-photo-preview w-100 h-100"
+                           style="object-fit: cover;">
+
+                     {{-- Hover overlay --}}
+                     <div class="brand-photo-overlay bg-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center" 
+                          style="position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 0.3s ease;">
+                           <i class="fas fa-camera fa-2x mb-1 text-white"></i>
+                           <span class="font-weight-bold text-white small">UPLOAD</span>
+                     </div>
+
+                     {{-- Real file input --}}
+                     <input type="file" name="profile_picture" id="supplierProfileInput" class="brand-photo-input" accept="image/*" 
+                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;">
+                  </div>
+                  @error('profile_picture') <div class="text-danger small mt-2"><i class="fas fa-exclamation-circle mr-1"></i>{{ $message }}</div> @enderror
+                  <p class="text-muted small mt-2 mb-0">Contact Person Image (Max 2MB)</p>
+               </div>
                
                <div class="row">
                   {{-- LEFT COLUMN: Basic Info --}}
@@ -300,6 +326,18 @@ $(document).ready(function() {
             reader.onload = function(e) {
                 $('#brandLogoPreview').attr('src', e.target.result);
                 $('#brandLogoText').text('Change Logo');
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    // SUPPLIER PROFILE PREVIEW
+    $('#supplierProfileInput').on('change', function() {
+        const file = this.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                $('#supplierProfilePreview').attr('src', e.target.result);
             }
             reader.readAsDataURL(file);
         }

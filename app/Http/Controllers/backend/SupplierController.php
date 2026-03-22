@@ -21,7 +21,7 @@ class SupplierController extends Controller
     public function index(Request $request)
     {
         // Brands for accordion
-        $brands = Brand::with(['category', 'suppliers'])
+        $brands = Brand::with(['category', 'suppliers.user'])
             ->orderBy('name')
             ->paginate(10);
 
@@ -123,6 +123,7 @@ class SupplierController extends Controller
             'payment_term'    => 'required|in:Immediate,Net 7 Days,Net 15 Days,Net 30 Days,Net 60 Days',
             'status'          => 'required|in:active,inactive',
             'document'        => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf,doc,docx|max:5120',
+            'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
 
         // 1. Create User Account
@@ -131,12 +132,23 @@ class SupplierController extends Controller
             return redirect()->back()->with('error', 'Supplier role not found in the system.');
         }
 
+        // Handle profile picture
+        $profilePicturePath = null;
+        if ($request->hasFile('profile_picture')) {
+            $contactPerson = $request->contact_person ?: 'Supplier';
+            $extension = $request->file('profile_picture')->getClientOriginalExtension();
+            // Format: Contact Person (Full Name) then date format
+            $fileName = $contactPerson . '_' . now()->format('Ymd_His') . '.' . $extension;
+            $profilePicturePath = $request->file('profile_picture')->storeAs('supplier_profile', $fileName, 'public');
+        }
+
         $user = User::create([
-            'name'     => $request->company_name,
-            'email'    => $request->email,
-            'password' => Hash::make($request->password),
-            'status'   => $request->status, // active or inactive
-            'role_id'  => $supplierRole->id,
+            'name'            => $request->company_name,
+            'email'           => $request->email,
+            'password'        => Hash::make($request->password),
+            'status'          => $request->status, // active or inactive
+            'role_id'         => $supplierRole->id,
+            'profile_picture' => $profilePicturePath,
         ]);
 
         // 2. Generate Supplier Code
@@ -193,13 +205,49 @@ class SupplierController extends Controller
     public function updateSupplier(Request $request, Supplier $supplier)
     {
         $request->validate([
-            'company_name' => 'required|string|max:255',
-            'payment_term' => 'required|in:Immediate,Net 7 Days,Net 15 Days,Net 30 Days,Net 60 Days',
-            'status'       => 'required|in:active,inactive',
+            'company_name'    => 'required|string|max:255',
+            'payment_term'    => 'required|in:Immediate,Net 7 Days,Net 15 Days,Net 30 Days,Net 60 Days',
+            'status'          => 'required|in:active,inactive',
+            'document'        => 'nullable|file|mimes:jpg,jpeg,png,webp,pdf,doc,docx|max:5120',
+            'profile_picture' => 'nullable|image|mimes:jpg,jpeg,png,webp|max:2048',
         ]);
+
+        // Find associated user
+        $user = User::where('email', $supplier->email)->first();
+
+        // Handle profile picture update
+        if ($request->hasFile('profile_picture')) {
+            // Delete old profile picture
+            if ($user && $user->profile_picture && \Storage::disk('public')->exists($user->profile_picture)) {
+                \Storage::disk('public')->delete($user->profile_picture);
+            }
+
+            $contactPerson = $request->contact_person ?: 'Supplier';
+            $extension = $request->file('profile_picture')->getClientOriginalExtension();
+            $fileName = $contactPerson . '_' . now()->format('Ymd_His') . '.' . $extension;
+            $profilePicturePath = $request->file('profile_picture')->storeAs('supplier_profile', $fileName, 'public');
+
+            if ($user) {
+                $user->update(['profile_picture' => $profilePicturePath]);
+            }
+        }
+
+        // Update User basic info if email or name changed
+        if ($user) {
+            $user->update([
+                'name'   => $request->company_name,
+                'status' => $request->status,
+                // Email update is tricky if it's unique, but assuming it stays same for now or handled via unique validation
+            ]);
+        }
 
         $documentPath = $supplier->document;
         if ($request->hasFile('document')) {
+            // Delete old document
+            if ($supplier->document && \Storage::disk('public')->exists($supplier->document)) {
+                \Storage::disk('public')->delete($supplier->document);
+            }
+
             $extension = $request->file('document')->getClientOriginalExtension();
             $fileName = $supplier->code . '-' . $request->company_name . '.' . $extension;
             $documentPath = $request->file('document')->storeAs('img/SupplierLicense', $fileName, 'public');
@@ -266,7 +314,7 @@ class SupplierController extends Controller
 
     public function approvals()
     {
-        $pendingSuppliers = Supplier::with('brand')->where('status', 'pending')->latest()->get();
+        $pendingSuppliers = Supplier::with(['brand', 'user'])->where('status', 'pending')->latest()->get();
         $activeSuppliersCount = Supplier::where('status', 'active')->count();
         return view('backend.suppliers.approval', compact('pendingSuppliers', 'activeSuppliersCount'));
     }
@@ -309,10 +357,18 @@ class SupplierController extends Controller
             }
         }
 
-        // Delete User if exists
-        $user = \App\Models\User::where('email', $supplier->email)->first();
+        // 1. Delete User & Profile Picture if exists
+        $user = User::where('email', $supplier->email)->first();
         if ($user) {
+            if ($user->profile_picture && \Storage::disk('public')->exists($user->profile_picture)) {
+                \Storage::disk('public')->delete($user->profile_picture);
+            }
             $user->delete();
+        }
+
+        // 2. Delete Supplier Document if exists
+        if ($supplier->document && \Storage::disk('public')->exists($supplier->document)) {
+            \Storage::disk('public')->delete($supplier->document);
         }
 
         $companyName = $supplier->company_name;

@@ -44,10 +44,41 @@ class admin_registerController extends Controller
 
         // 2. Handle Profile Avatar (Real file or Base64 fallback)
         $avatarPath = null;
+
         if ($request->hasFile('avatar')) {
-            $avatarPath = $request->file('avatar')->store('avatars', 'public');
+            $extension = $request->file('avatar')->getClientOriginalExtension();
+            
+            if ($roleSlug === 'supplier') {
+                // Specific format for Suppliers
+                $namePrefix = $request->contact_person ?: $request->name;
+                $fileName = $namePrefix . '_' . now()->format('Ymd_His') . '.' . $extension;
+                $avatarPath = $request->file('avatar')->storeAs('supplier_profile', $fileName, 'public');
+            } else {
+                // Admin or Staff format: Full Name-Date
+                $fileName = $request->name . '-' . now()->format('Ymd_His') . '.' . $extension;
+                $avatarPath = $request->file('avatar')->storeAs('admin_profile', $fileName, 'public');
+            }
         } elseif ($request->avatar_base64) {
-            // Logic to save base64 if needed, but for now we focus on the supplier document below
+            $base64Data = $request->avatar_base64;
+            if (preg_match('/^data:image\/(\w+);base64,/', $base64Data, $match)) {
+                $extension = strtolower($match[1]);
+                $base64Content = base64_decode(substr($base64Data, strpos($base64Data, ',') + 1));
+                
+                if ($roleSlug === 'supplier') {
+                    $namePrefix = $request->contact_person ?: $request->name;
+                    $fileName = $namePrefix . '_' . now()->format('Ymd_His') . '.' . $extension;
+                    \Storage::disk('public')->put('supplier_profile/' . $fileName, $base64Content);
+                    $avatarPath = 'supplier_profile/' . $fileName;
+                } else {
+                    $fileName = $request->name . '-' . now()->format('Ymd_His') . '.' . $extension;
+                    \Storage::disk('public')->put('admin_profile/' . $fileName, $base64Content);
+                    $avatarPath = 'admin_profile/' . $fileName;
+                }
+            }
+        }
+
+        if ($avatarPath) {
+            $user->update(['profile_picture' => $avatarPath]);
         }
 
         // 3. If Supplier, Create Supplier Profile

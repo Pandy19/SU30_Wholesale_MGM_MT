@@ -25,6 +25,9 @@ use App\Http\Controllers\backend\supplier_dashboardController;
 use App\Http\Controllers\backend\StockController;
 
 
+use App\Http\Controllers\backend\SettingController;
+
+
 // Auth Routes (Public)
 Route::controller(admin_loginController::class)->group(function () {
     Route::get('/admin_login', 'index')->name('admin_login.index');
@@ -44,6 +47,11 @@ Route::middleware(['auth'])->group(function () {
     // Shared Routes (All authenticated users)
     Route::controller(DashboardController::class)->group(function () {
         Route::get('/', 'index')->name('dashboard.index');
+    });
+
+    Route::controller(SettingController::class)->group(function () {
+        Route::get('/setting', 'index')->name('setting.index');
+        Route::post('/setting/update', 'update')->name('setting.update');
     });
 
     // Admin & Staff Only

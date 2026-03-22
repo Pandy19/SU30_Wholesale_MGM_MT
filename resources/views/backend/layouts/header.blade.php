@@ -100,60 +100,56 @@
       </div>
     </li>
 
-    <!-- Messages -->
-    <li class="nav-item dropdown">
-      <a class="nav-link nav-icon-btn" data-toggle="dropdown" href="#" title="Messages">
-        <i class="far fa-comments"></i>
-        <span class="badge badge-danger navbar-badge badge-pill">3</span>
-      </a>
-      <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-        <span class="dropdown-item dropdown-header font-weight-bold">3 Messages</span>
-        <div class="dropdown-divider"></div>
-
-        <a href="#" class="dropdown-item">
-          <div class="media">
-            <img src="{{asset('assets/dist/img/user1-128x128.jpg')}}"
-                 alt="User Avatar"
-                 class="img-size-50 mr-3 img-circle">
-            <div class="media-body">
-              <h3 class="dropdown-item-title mb-0">
-                Brad Diesel
-                <span class="float-right text-sm text-danger"><i class="fas fa-star"></i></span>
-              </h3>
-              <p class="text-sm mb-0">Call me whenever you can...</p>
-              <p class="text-sm text-muted mb-0"><i class="far fa-clock mr-1"></i> 4 Hours Ago</p>
-            </div>
-          </div>
-        </a>
-
-        <div class="dropdown-divider"></div>
-        <a href="#" class="dropdown-item dropdown-footer">See All Messages</a>
-      </div>
-    </li>
-
     <!-- Notifications -->
     <li class="nav-item dropdown">
+      @php
+        $pendingSuppliersCount = \App\Models\Supplier::where('status', 'pending')->count();
+        $pendingGRNCount = \App\Models\GoodsReceiving::where('status', 'pending')->count();
+        $pendingStockCount = \App\Models\GoodsReceivingItem::where('is_stocked', false)->where('received_qty', '>', 0)->count();
+        $totalNotifications = $pendingSuppliersCount + $pendingGRNCount + $pendingStockCount;
+      @endphp
       <a class="nav-link nav-icon-btn" data-toggle="dropdown" href="#" title="Notifications">
         <i class="far fa-bell"></i>
-        <span class="badge badge-warning navbar-badge badge-pill">15</span>
+        @if($totalNotifications > 0)
+          <span class="badge badge-warning navbar-badge badge-pill">{{ $totalNotifications }}</span>
+        @endif
       </a>
-      <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">
-        <span class="dropdown-item dropdown-header font-weight-bold">15 Notifications</span>
-        <div class="dropdown-divider"></div>
+      <div class="dropdown-menu dropdown-menu-lg dropdown-menu-right shadow border-0">
+        <span class="dropdown-item dropdown-header font-weight-bold bg-light">{{ $totalNotifications }} Pending Actions</span>
+        
+        @if($pendingSuppliersCount > 0)
+          <div class="dropdown-divider"></div>
+          <a href="{{ route('suppliers.approvals') }}" class="dropdown-item">
+            <i class="fas fa-user-plus mr-2 text-primary"></i> {{ $pendingSuppliersCount }} Supplier Approvals
+            <span class="float-right badge badge-warning">{{ $pendingSuppliersCount }}</span>
+          </a>
+        @endif
 
-        <a href="#" class="dropdown-item">
-          <i class="fas fa-envelope mr-2 text-primary"></i> 4 new messages
-          <span class="float-right text-muted text-sm">3 mins</span>
-        </a>
+        @if($pendingGRNCount > 0)
+          <div class="dropdown-divider"></div>
+          <a href="{{ route('goods_receiving.index') }}" class="dropdown-item">
+            <i class="fas fa-truck-loading mr-2 text-info"></i> {{ $pendingGRNCount }} GRN Pending
+            <span class="float-right badge badge-info">{{ $pendingGRNCount }}</span>
+          </a>
+        @endif
 
-        <div class="dropdown-divider"></div>
-        <a href="#" class="dropdown-item">
-          <i class="fas fa-users mr-2 text-success"></i> 8 friend requests
-          <span class="float-right text-muted text-sm">12 hours</span>
-        </a>
+        @if($pendingStockCount > 0)
+          <div class="dropdown-divider"></div>
+          <a href="{{ route('approved_good_stock.index') }}" class="dropdown-item">
+            <i class="fas fa-boxes mr-2 text-success"></i> {{ $pendingStockCount }} Stock Approval
+            <span class="float-right badge badge-success">{{ $pendingStockCount }}</span>
+          </a>
+        @endif
 
+        @if($totalNotifications == 0)
+          <div class="dropdown-divider"></div>
+          <div class="dropdown-item text-center text-muted small py-3">
+            <i class="fas fa-check-circle mr-1 text-success"></i> Everything is up to date!
+          </div>
+        @endif
+        
         <div class="dropdown-divider"></div>
-        <a href="#" class="dropdown-item dropdown-footer">See All Notifications</a>
+        <a href="#" class="dropdown-item dropdown-footer">View All Activities</a>
       </div>
     </li>
 
@@ -166,24 +162,45 @@
 
     <!-- User dropdown -->
     <li class="nav-item dropdown ml-2">
+      @php
+        $authUser = auth()->user();
+        $userName = $authUser->name ?? 'Guest';
+        // Display role from role_id if available, otherwise from role string
+        $userRole = 'User';
+        if ($authUser) {
+            if ($authUser->role_id) {
+                $roleModel = \App\Models\Role::find($authUser->role_id);
+                $userRole = $roleModel ? $roleModel->name : ucfirst($authUser->role);
+            } else {
+                $userRole = ucfirst($authUser->role);
+            }
+        }
+        
+        $profilePic = ($authUser && $authUser->profile_picture) 
+          ? asset('storage/' . $authUser->profile_picture) 
+          : asset('assets/dist/img/MMOLOGO1.png');
+      @endphp
       <a class="nav-link d-flex align-items-center" data-toggle="dropdown" href="#">
-        <img src="{{ asset('assets/dist/img/user2-160x160.jpg') }}"
+        <img src="{{ $profilePic }}"
              class="img-circle elevation-1 mr-2"
              style="width:32px;height:32px;object-fit:cover;"
              alt="User">
-        <span class="d-none d-md-inline font-weight-bold">Admin</span>
+        <span class="d-none d-md-inline font-weight-bold">
+            {{ $userName }} [{{ $userRole }}]
+        </span>
         <i class="fas fa-angle-down ml-2 text-muted"></i>
       </a>
 
       <div class="dropdown-menu dropdown-menu-right">
-        <a href="#" class="dropdown-item">
-          <i class="fas fa-user mr-2"></i> Profile
-        </a>
-        <a href="#" class="dropdown-item">
-          <i class="fas fa-cog mr-2"></i> Settings
+        <div class="dropdown-divider"></div>
+        <a href="{{ route('setting.index') }}" class="dropdown-item">
+          <i class="fas fa-user mr-2"></i> Profile Settings
         </a>
         <div class="dropdown-divider"></div>
-        <a href="{{ url('/logout') }}" class="dropdown-item text-danger">
+        <form method="POST" action="{{ route('logout') }}" id="logout-form" style="display: none;">
+            @csrf
+        </form>
+        <a href="#" class="dropdown-item text-danger" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
           <i class="fas fa-sign-out-alt mr-2"></i> Logout
         </a>
       </div>

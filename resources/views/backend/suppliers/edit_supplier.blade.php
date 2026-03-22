@@ -23,6 +23,37 @@
                             @csrf
                             @method('PUT')
 
+                            {{-- PROFILE PICTURE UPLOAD --}}
+                            <div class="form-group text-center mb-4">
+                                @php
+                                    $profilePath = $supplier->user && $supplier->user->profile_picture 
+                                        ? asset('storage/' . $supplier->user->profile_picture) 
+                                        : asset('assets/dist/img/MMOLOGO1.png');
+                                @endphp
+                                <label class="d-block font-weight-bold text-muted mb-3 text-uppercase small">Update User Profile Picture</label>
+                                <div class="brand-photo-wrapper mx-auto shadow-sm border rounded-circle" style="width: 120px; height: 120px; overflow: hidden; position: relative; cursor: pointer;">
+                                    {{-- Preview image --}}
+                                    <img id="editProfilePreview-{{ $supplier->id }}"
+                                        src="{{ $profilePath }}"
+                                        alt="Profile Preview"
+                                        class="brand-photo-preview w-100 h-100"
+                                        style="object-fit: cover;">
+
+                                    {{-- Hover overlay --}}
+                                    <div class="brand-photo-overlay bg-primary w-100 h-100 d-flex flex-column align-items-center justify-content-center" 
+                                        style="position: absolute; top: 0; left: 0; opacity: 0; transition: opacity 0.3s ease;">
+                                        <i class="fas fa-camera fa-2x mb-1 text-white"></i>
+                                        <span class="font-weight-bold text-white small">CHANGE</span>
+                                    </div>
+
+                                    {{-- Real file input --}}
+                                    <input type="file" name="profile_picture" id="editProfileInput-{{ $supplier->id }}" class="brand-photo-input" accept="image/*" 
+                                            onchange="previewSupplierProfileEdit('{{ $supplier->id }}', this)"
+                                            style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; z-index: 10;">
+                                </div>
+                                <p class="text-muted small mt-2 mb-0">Contact Person Image (Max 2MB)</p>
+                            </div>
+
                             <div class="row">
                                 <div class="col-md-4">
                                     <div class="form-group mb-3">
@@ -198,6 +229,16 @@ function previewSupplierDocEdit(id, input) {
         $(`#editDocName-${id}`).text(fileName);
         $(`#editDocPreviewWrap-${id}`).fadeIn();
         $(input).next('.custom-file-label').text(fileName);
+    }
+}
+
+function previewSupplierProfileEdit(id, input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            $(`#editProfilePreview-${id}`).attr('src', e.target.result);
+        }
+        reader.readAsDataURL(input.files[0]);
     }
 }
 </script>

@@ -277,6 +277,7 @@
                     <table class="table table-sm table-bordered mb-0">
                         <thead>
                             <tr>
+                                <th width="50">Avatar</th>
                                 <th>Code</th>
                                 <th>Company</th>
                                 <th>Contact</th>
@@ -298,9 +299,16 @@
 
                                     $editModalId = 'editSupplierModal' . $supplier->id;
                                     $deleteModalId = 'deleteSupplierModal' . $supplier->id;
+
+                                    $userProfile = $supplier->user && $supplier->user->profile_picture 
+                                        ? asset('storage/' . $supplier->user->profile_picture) 
+                                        : asset('assets/dist/img/MMOLOGO1.png');
                                 @endphp
 
                                 <tr>
+                                    <td class="text-center">
+                                        <img src="{{ $userProfile }}" class="img-circle elevation-1" style="width:35px; height:35px; object-fit:cover;">
+                                    </td>
                                     <td>{{ $supplier->code }}</td>
                                     <td>{{ $supplier->company_name }}</td>
                                     <td>{{ $supplier->contact_person }}</td>

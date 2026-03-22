@@ -98,9 +98,23 @@
                                 <tr>
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            @if($supplier->brand && $supplier->brand->logo)
+                                            @php
+                                                $userProfile = ($supplier->user && $supplier->user->profile_picture) 
+                                                    ? asset('storage/' . $supplier->user->profile_picture) 
+                                                    : null;
+                                                
+                                                $brandLogo = ($supplier->brand && $supplier->brand->logo) 
+                                                    ? asset('storage/' . $supplier->brand->logo) 
+                                                    : null;
+                                            @endphp
+
+                                            @if($userProfile)
+                                                <div class="mr-3 shadow-sm border rounded-circle overflow-hidden bg-white" style="width: 45px; height: 45px;">
+                                                    <img src="{{ $userProfile }}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                                                </div>
+                                            @elseif($brandLogo)
                                                 <div class="mr-3 shadow-sm border rounded-circle overflow-hidden bg-white d-flex align-items-center justify-content-center" style="width: 45px; height: 45px;">
-                                                    <img src="{{ asset('storage/' . $supplier->brand->logo) }}" alt="{{ $supplier->brand->name }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
+                                                    <img src="{{ $brandLogo }}" alt="{{ $supplier->brand->name }}" style="max-width: 100%; max-height: 100%; object-fit: contain;">
                                                 </div>
                                             @else
                                                 <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mr-3 shadow-sm" style="width: 45px; height: 45px; font-size: 1.2rem; font-weight: bold;">
