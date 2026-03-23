@@ -26,10 +26,22 @@
 <div class="card mb-4 shadow-sm border-0">
 <div class="card-body">
 <form action="{{ route('goods_receiving.index') }}" method="GET">
+    <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
     <div class="row">
         <div class="col-md-3 mb-2">
             <input type="text" name="search" class="form-control"
                    placeholder="Search Product / SKU / PO No" value="{{ request('search') }}">
+        </div>
+
+                <div class="col-md-2 mb-2">
+            <select name="category_id" class="form-control" onchange="this.form.submit()">
+                <option value="">All Categories</option>
+                @foreach($categories as $category)
+                    <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                        {{ $category->name }}
+                    </option>
+                @endforeach
+            </select>
         </div>
 
         <div class="col-md-2 mb-2">
@@ -43,16 +55,7 @@
             </select>
         </div>
 
-        <div class="col-md-2 mb-2">
-            <select name="category_id" class="form-control" onchange="this.form.submit()">
-                <option value="">All Categories</option>
-                @foreach($categories as $category)
-                    <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
-                        {{ $category->name }}
-                    </option>
-                @endforeach
-            </select>
-        </div>
+
 
         <div class="col-md-2 mb-2">
             <select name="supplier_id" class="form-control" onchange="this.form.submit()">
@@ -229,9 +232,7 @@
 
 <!-- PAGINATION -->
 <div class="card-footer clearfix bg-white">
-    <div class="float-right">
-        {{ $items->appends(request()->query())->links() }}
-    </div>
+    <x-pagination :data="$items" />
 </div>
 
 </div>

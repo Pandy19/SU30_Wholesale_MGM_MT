@@ -31,33 +31,42 @@
    </div>
    <section class="content">
       <div class="container-fluid">
-         <div class="row mb-3 align-items-center">
-            <div class="col-md-5">
-               <input type="text" id="productSearch"
-                  class="form-control shadow-sm"
-                  placeholder="Search product name or SKU...">
-            </div>
-            <div class="col-md-3">
-               <select id="categoryFilter" class="form-control select2 shadow-xs" multiple="multiple" data-placeholder="Filter by Category">
-                  @foreach($categories as $cat)
-                     <option value="{{ $cat->id }}">{{ $cat->name }}</option>
-                  @endforeach
-               </select>
-            </div>
-            <div class="col-md-3">
-               <select id="brandFilter" class="form-control select2 shadow-xs" multiple="multiple" data-placeholder="Filter by Brand">
-                  @foreach($brands as $brand)
-                     <option value="{{ $brand->id }}" data-category="{{ $brand->category_id }}">
-                        {{ $brand->name }}
-                     </option>
-                  @endforeach
-               </select>
-            </div>
-            <div class="col-md-1 text-right">
-               <button class="btn btn-warning btn-block position-relative shadow-sm" data-toggle="modal" data-target="#cartModal">
-                  <i class="fas fa-shopping-cart"></i>
-                  <span class="badge badge-danger navbar-badge" style="position: absolute; top: -5px; right: -5px;">0</span>
-               </button>
+         <!-- ===================================================== -->
+         <!-- FILTERS -->
+         <!-- ===================================================== -->
+         <div class="card mb-3">
+            <div class="card-body">
+               <div class="row">
+                  <div class="col-md-3">
+                     <input type="text" id="productSearch" class="form-control shadow-sm"
+                        placeholder="Search product name or SKU...">
+                  </div>
+
+                  <div class="col-md-3">
+                     <select id="categoryFilter" class="form-control select2 shadow-xs" multiple="multiple" data-placeholder="All Categories">
+                        @foreach($categories as $cat)
+                           <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                        @endforeach
+                     </select>
+                  </div>
+
+                  <div class="col-md-3">
+                     <select id="brandFilter" class="form-control select2 shadow-xs" multiple="multiple" data-placeholder="All Brands">
+                        @foreach($brands as $brand)
+                           <option value="{{ $brand->id }}" data-category="{{ $brand->category_id }}">
+                              {{ $brand->name }}
+                           </option>
+                        @endforeach
+                     </select>
+                  </div>
+
+                  <div class="col-md-3">
+                     <button type="button" class="btn btn-warning btn-block position-relative shadow-sm" data-toggle="modal" data-target="#cartModal">
+                        <i class="fas fa-shopping-cart mr-1"></i> View Cart
+                        <span class="badge badge-danger navbar-badge" style="position: absolute; top: -5px; right: -5px;">0</span>
+                     </button>
+                  </div>
+               </div>
             </div>
          </div>
          <div class="card">
@@ -75,7 +84,7 @@
                         <th width="120">Action</th>
                      </tr>
                   </thead>
-                  <tbody>
+                  <tbody id="productTableBody">
                      @forelse($products as $p)
                      <tr class="product-row" 
                         data-brand="{{ $p->brand_id }}"
@@ -128,25 +137,9 @@
                      @endforelse
                   </tbody>
                </table>
-               <!-- ================= PAGINATION (UI ONLY) ================= -->
+               <!-- ================= PAGINATION ================= -->
                <div class="card-footer clearfix">
-                  <ul class="pagination pagination-sm m-0 float-right">
-                     <li class="page-item disabled">
-                        <a class="page-link" href="#">«</a>
-                     </li>
-                     <li class="page-item active">
-                        <a class="page-link" href="#">1</a>
-                     </li>
-                     <li class="page-item">
-                        <a class="page-link" href="#">2</a>
-                     </li>
-                     <li class="page-item">
-                        <a class="page-link" href="#">3</a>
-                     </li>
-                     <li class="page-item">
-                        <a class="page-link" href="#">»</a>
-                     </li>
-                  </ul>
+                  <x-pagination :data="$products" />
                </div>
             </div>
          </div>
@@ -215,6 +208,7 @@ $(document).ready(function() {
     const categoryFilter = $('#categoryFilter');
     const brandFilter = $('#brandFilter');
     const productRows = $('.product-row');
+    const tableBody = $('#productTableBody');
 
     function performFilter() {
         const searchText = productSearch.val().toLowerCase();
@@ -229,10 +223,8 @@ $(document).ready(function() {
 
             const matchesSearch = searchText === '' || rowText.includes(searchText);
             
-            // Check if rowCatId is in selectedCats array
+            // For multiple select, check if the ID is in the selected array
             const matchesCat = !selectedCats || selectedCats.length === 0 || selectedCats.includes(rowCatId.toString());
-            
-            // Check if rowBrandId is in selectedBrands array
             const matchesBrand = !selectedBrands || selectedBrands.length === 0 || selectedBrands.includes(rowBrandId.toString());
 
             if (matchesSearch && matchesCat && matchesBrand) {
@@ -241,14 +233,23 @@ $(document).ready(function() {
                 row.hide();
             }
         });
+
+        // Show "No data found" if all rows are hidden
+        if (productRows.filter(':visible').length === 0) {
+            if ($('#noDataRow').length === 0) {
+                tableBody.append('<tr id="noDataRow"><td colspan="8" class="text-center py-4 text-muted">No products matching your filters.</td></tr>');
+            }
+        } else {
+            $('#noDataRow').remove();
+        }
     }
 
     productSearch.on('keyup', performFilter);
     
     categoryFilter.on('change', function() {
-        const catIds = $(this).val(); // Array of selected IDs
+        const catIds = $(this).val();
         
-        // Update brand filter options based on selected categories
+        // Update brand filter options based on selected categories (UI only)
         if (catIds && catIds.length > 0) {
             brandFilter.find('option').each(function() {
                 const opt = $(this);
@@ -257,15 +258,11 @@ $(document).ready(function() {
                     opt.prop('disabled', false);
                 } else {
                     opt.prop('disabled', true);
-                    // If this brand was selected but is now filtered out, we should remove it
-                    // but Select2 handles that mostly. We might need to trigger change.
                 }
             });
         } else {
             brandFilter.find('option').prop('disabled', false);
         }
-        
-        // Re-initialize or refresh Select2 for brand filter
         brandFilter.trigger('change.select2');
         
         performFilter();

@@ -114,20 +114,20 @@
                placeholder="Search Product / SKU" value="{{ request('search') }}">
     </div>
 
-    <div class="col-md-2">
-        <select class="form-control" name="brand">
-            <option value="">All Brands</option>
-            @foreach(\App\Models\Brand::orderBy('name')->get() as $brand)
-                <option value="{{ $brand->id }}" {{ request('brand') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+        <div class="col-md-2">
+        <select class="form-control" name="category">
+            <option value="">All Categories</option>
+            @foreach(\App\Models\Category::orderBy('name')->get() as $cat)
+                <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
             @endforeach
         </select>
     </div>
 
     <div class="col-md-2">
-        <select class="form-control" name="category">
-            <option value="">All Categories</option>
-            @foreach(\App\Models\Category::orderBy('name')->get() as $cat)
-                <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
+        <select class="form-control" name="brand">
+            <option value="">All Brands</option>
+            @foreach(\App\Models\Brand::orderBy('name')->get() as $brand)
+                <option value="{{ $brand->id }}" {{ request('brand') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
             @endforeach
         </select>
     </div>

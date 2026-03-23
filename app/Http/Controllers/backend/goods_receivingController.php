@@ -62,7 +62,8 @@ class goods_receivingController extends Controller
             });
         }
 
-        $items = $query->orderBy('id', 'desc')->paginate(10);
+        $perPage = $request->input('per_page', 10);
+        $items = $query->orderBy('id', 'desc')->paginate($perPage);
         $stockLocationCount = \App\Models\StockLocation::count();
 
         // Fetch unit cost for each item from its PurchaseOrder

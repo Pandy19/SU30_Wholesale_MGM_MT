@@ -14,9 +14,9 @@ class product_managementController extends Controller
 {
     public function index(Request $request)
     {
-        $category_id = $request->query('category');
-        $brand_id    = $request->query('brand');
-        $search      = $request->query('search');
+        $category_ids = $request->query('category');
+        $brand_ids    = $request->query('brand');
+        $search       = $request->query('search');
 
         $productsQuery = DB::table('products as p')
             ->leftJoin('supplier_products as sp', 'sp.product_id', '=', 'p.id')
@@ -38,11 +38,11 @@ class product_managementController extends Controller
                 DB::raw('MIN(sp.price) as best_price')
             );
 
-        if (!empty($category_id)) {
-            $productsQuery->where('p.category_id', $category_id);
+        if (!empty($category_ids)) {
+            $productsQuery->whereIn('p.category_id', (array)$category_ids);
         }
-        if (!empty($brand_id)) {
-            $productsQuery->where('p.brand_id', $brand_id);
+        if (!empty($brand_ids)) {
+            $productsQuery->whereIn('p.brand_id', (array)$brand_ids);
         }
         if (!empty($search)) {
             $productsQuery->where(function ($q) use ($search) {
@@ -51,15 +51,16 @@ class product_managementController extends Controller
             });
         }
 
+        $perPage = $request->input('per_page', 10);
         $products = $productsQuery
             ->groupBy(
                 'p.name', 'c.name', 'b.name', 'p.category_id', 'p.brand_id'
             )
             ->orderBy('product_id', 'desc')
-            ->get();
+            ->paginate($perPage);
 
         // Format image URLs
-        $products->transform(function($p) {
+        $products->getCollection()->transform(function($p) {
             if ($p->image_url && !filter_var($p->image_url, FILTER_VALIDATE_URL)) {
                 $p->image_url = Storage::disk('public')->url($p->image_url);
             } elseif (!$p->image_url) {

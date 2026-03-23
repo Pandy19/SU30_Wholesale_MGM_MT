@@ -97,6 +97,17 @@
                placeholder="Search Product / SKU" value="{{ request('search') }}">
     </div>
 
+     <div class="col-md-2 mb-2">
+        <select name="category_id" class="form-control" onchange="this.form.submit()">
+            <option value="">All Categories</option>
+            @foreach($allCategories as $cat)
+                <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>
+                    {{ $cat->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+
     <div class="col-md-2 mb-2">
         <select name="brand_id" class="form-control" onchange="this.form.submit()">
             <option value="">All Brands</option>
@@ -108,16 +119,6 @@
         </select>
     </div>
 
-    <div class="col-md-2 mb-2">
-        <select name="category_id" class="form-control" onchange="this.form.submit()">
-            <option value="">All Categories</option>
-            @foreach($allCategories as $cat)
-                <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>
-                    {{ $cat->name }}
-                </option>
-            @endforeach
-        </select>
-    </div>
 
     <div class="col-md-2 mb-2">
         <select name="status" class="form-control" onchange="this.form.submit()">
