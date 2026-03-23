@@ -32,7 +32,8 @@ class supplier_ordersController extends Controller
             $query->whereDate('order_date', $request->date);
         }
 
-        $purchase_orders = $query->orderBy('id', 'desc')->get();
+        $perPage = $request->input('per_page', 10);
+        $purchase_orders = $query->orderBy('id', 'desc')->paginate($perPage);
 
         // Summary should ideally be calculated from unfiltered data or based on specific requirements
         // For now, let's show summary based on total database records

@@ -1,5 +1,16 @@
 @extends('backend.layouts.master')
 @section('title', 'Product Management | Wholesale MGM')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+<style>
+   .select2-container--bootstrap4 .select2-selection--multiple .select2-selection__choice {
+      background-color: #007bff;
+      border-color: #006fe6;
+      color: #fff;
+   }
+</style>
+@endpush
 @section('main-content')
 <div class="content-wrapper">
    <div class="content-header">
@@ -20,30 +31,32 @@
    </div>
    <section class="content">
       <div class="container-fluid">
-         <div class="row mb-3">
-            <div class="col-md-3">
-               <select class="form-control" id="categoryFilter" onchange="filterProducts()">
-                  <option value="">All Categories</option>
-                  @foreach($categories as $cat)
-                  <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
-                  @endforeach
-               </select>
-            </div>
-            <div class="col-md-3">
-               <select class="form-control" id="brandFilter" onchange="filterProducts()">
-                  <option value="">All Brands</option>
-                  @foreach($brands as $brand)
-                  <option value="{{ $brand->id }}" {{ request('brand') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
-                  @endforeach
-               </select>
-            </div>
+         <div class="row mb-3 align-items-center">
             <div class="col-md-5">
-               <input type="text" class="form-control" id="searchInput" placeholder="Search product name or SKU" value="{{ request('search') }}" onkeyup="if(event.key === 'Enter') filterProducts()">
+               <input type="text" id="productSearch"
+                  class="form-control shadow-sm"
+                  placeholder="Search product name or SKU...">
             </div>
-            <div class="col-md-1">
-               <button class="btn btn-warning btn-block position-relative" data-toggle="modal" data-target="#cartModal">
-               <i class="fas fa-shopping-cart"></i>
-               <span class="badge badge-danger navbar-badge" style="position: absolute; top: -5px; right: -5px;">0</span>
+            <div class="col-md-3">
+               <select id="categoryFilter" class="form-control select2 shadow-xs" multiple="multiple" data-placeholder="Filter by Category">
+                  @foreach($categories as $cat)
+                     <option value="{{ $cat->id }}">{{ $cat->name }}</option>
+                  @endforeach
+               </select>
+            </div>
+            <div class="col-md-3">
+               <select id="brandFilter" class="form-control select2 shadow-xs" multiple="multiple" data-placeholder="Filter by Brand">
+                  @foreach($brands as $brand)
+                     <option value="{{ $brand->id }}" data-category="{{ $brand->category_id }}">
+                        {{ $brand->name }}
+                     </option>
+                  @endforeach
+               </select>
+            </div>
+            <div class="col-md-1 text-right">
+               <button class="btn btn-warning btn-block position-relative shadow-sm" data-toggle="modal" data-target="#cartModal">
+                  <i class="fas fa-shopping-cart"></i>
+                  <span class="badge badge-danger navbar-badge" style="position: absolute; top: -5px; right: -5px;">0</span>
                </button>
             </div>
          </div>
@@ -64,8 +77,9 @@
                   </thead>
                   <tbody>
                      @forelse($products as $p)
-                     <tr data-brand="{{ strtolower($p->brand_name ?? '') }}"
-                        data-category="{{ strtolower($p->category_name ?? '') }}">
+                     <tr class="product-row" 
+                        data-brand="{{ $p->brand_id }}"
+                        data-category="{{ $p->category_id }}">
                         <td class="text-center">
                            <img
                               src="{{ !empty($p->image_url) ? $p->image_url : asset('images/no-image.png') }}"
@@ -188,19 +202,77 @@
 </div>
 @endsection
 @section('scripts')
+<script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
 <script>
-function filterProducts() {
-    const category = document.getElementById('categoryFilter').value;
-    const brand = document.getElementById('brandFilter').value;
-    const search = document.getElementById('searchInput').value;
+$(document).ready(function() {
+    // Initialize Select2
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: '100%'
+    });
+
+    const productSearch = $('#productSearch');
+    const categoryFilter = $('#categoryFilter');
+    const brandFilter = $('#brandFilter');
+    const productRows = $('.product-row');
+
+    function performFilter() {
+        const searchText = productSearch.val().toLowerCase();
+        const selectedCats = categoryFilter.val(); // Returns array or null
+        const selectedBrands = brandFilter.val(); // Returns array or null
+
+        productRows.each(function() {
+            const row = $(this);
+            const rowText = row.text().toLowerCase();
+            const rowCatId = row.data('category');
+            const rowBrandId = row.data('brand');
+
+            const matchesSearch = searchText === '' || rowText.includes(searchText);
+            
+            // Check if rowCatId is in selectedCats array
+            const matchesCat = !selectedCats || selectedCats.length === 0 || selectedCats.includes(rowCatId.toString());
+            
+            // Check if rowBrandId is in selectedBrands array
+            const matchesBrand = !selectedBrands || selectedBrands.length === 0 || selectedBrands.includes(rowBrandId.toString());
+
+            if (matchesSearch && matchesCat && matchesBrand) {
+                row.show();
+            } else {
+                row.hide();
+            }
+        });
+    }
+
+    productSearch.on('keyup', performFilter);
     
-    let url = new URL(window.location.href);
-    if(category) url.searchParams.set('category', category); else url.searchParams.delete('category');
-    if(brand) url.searchParams.set('brand', brand); else url.searchParams.delete('brand');
-    if(search) url.searchParams.set('search', search); else url.searchParams.delete('search');
-    
-    window.location.href = url.toString();
-}
+    categoryFilter.on('change', function() {
+        const catIds = $(this).val(); // Array of selected IDs
+        
+        // Update brand filter options based on selected categories
+        if (catIds && catIds.length > 0) {
+            brandFilter.find('option').each(function() {
+                const opt = $(this);
+                const optCat = opt.data('category');
+                if (optCat && catIds.includes(optCat.toString())) {
+                    opt.prop('disabled', false);
+                } else {
+                    opt.prop('disabled', true);
+                    // If this brand was selected but is now filtered out, we should remove it
+                    // but Select2 handles that mostly. We might need to trigger change.
+                }
+            });
+        } else {
+            brandFilter.find('option').prop('disabled', false);
+        }
+        
+        // Re-initialize or refresh Select2 for brand filter
+        brandFilter.trigger('change.select2');
+        
+        performFilter();
+    });
+
+    brandFilter.on('change', performFilter);
+});
 
 document.addEventListener('click', async function (e) {
   // 1. OPEN SUPPLIER MODAL

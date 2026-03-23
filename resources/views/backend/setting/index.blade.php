@@ -15,8 +15,7 @@
                 </div>
                 <div class="col-sm-6 text-right">
                     <div class="btn-group shadow-sm">
-                        <button class="btn btn-white btn-sm border font-weight-bold"><i class="fas fa-download mr-1"></i> Export Data</button>
-                        <button class="btn btn-white btn-sm border font-weight-bold"><i class="fas fa-print mr-1"></i> Print ID</button>
+                        <a href="{{ route('export.activity') }}" class="btn btn-white btn-sm border font-weight-bold"><i class="fas fa-download mr-1"></i> Export Data</a>
                     </div>
                 </div>
             </div>

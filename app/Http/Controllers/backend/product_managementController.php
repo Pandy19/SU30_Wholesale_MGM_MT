@@ -25,6 +25,8 @@ class product_managementController extends Controller
             ->select(
                 DB::raw('MIN(p.id) as product_id'), // Use MIN ID as representative
                 'p.name as product_name',
+                'p.category_id',
+                'p.brand_id',
                 DB::raw('MAX(p.sku) as sku'), // Take one SKU
                 DB::raw('MAX(p.image) as image_url'),
                 DB::raw('MAX(p.specs) as specs_text'),
@@ -51,7 +53,7 @@ class product_managementController extends Controller
 
         $products = $productsQuery
             ->groupBy(
-                'p.name', 'c.name', 'b.name'
+                'p.name', 'c.name', 'b.name', 'p.category_id', 'p.brand_id'
             )
             ->orderBy('product_id', 'desc')
             ->get();
@@ -66,8 +68,8 @@ class product_managementController extends Controller
             return $p;
         });
 
-        $categories = Category::where('status', 'active')->get();
-        $brands     = Brand::where('status', 'active')->get();
+        $categories = Category::orderBy('name')->get();
+        $brands     = Brand::orderBy('name')->get();
 
         return view('backend.product_management.index', compact('products', 'categories', 'brands'));
     }

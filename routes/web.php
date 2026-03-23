@@ -28,12 +28,14 @@ use App\Http\Controllers\backend\StockController;
 use App\Http\Controllers\backend\SettingController;
 
 
+use App\Http\Controllers\backend\AuditLogExportController;
+
 // Auth Routes (Public)
 Route::controller(admin_loginController::class)->group(function () {
     Route::get('/admin_login', 'index')->name('admin_login.index');
     Route::get('/login', 'index')->name('login'); // Standard Laravel login name
     Route::post('/admin_login', 'login')->name('admin_login.submit');
-    Route::get('/logout', 'logout')->name('logout');
+    Route::post('/logout', 'logout')->name('logout');
 });
 
 Route::controller(admin_registerController::class)->group(function () {
@@ -53,6 +55,8 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/setting', 'index')->name('setting.index');
         Route::post('/setting/update', 'update')->name('setting.update');
     });
+
+    Route::get('/export-activity', [AuditLogExportController::class, 'exportCsv'])->name('export.activity');
 
     // Admin & Staff Only
     Route::middleware(['role:admin,staff'])->group(function () {

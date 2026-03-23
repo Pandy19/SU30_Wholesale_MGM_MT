@@ -31,12 +31,12 @@
       <div class="container-fluid">
          {{-- SEARCH, FILTER & ACTION BUTTONS --}}
          <div class="row mb-3 align-items-center">
-            <div class="col-md-2">
+            <div class="col-md-4">
                <input type="text" id="brandSearch"
                   class="form-control"
                   placeholder="Search...">
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                <select id="categoryFilter" class="form-control shadow-xs">
                   <option value="">All Categories (Default)</option>
                   @foreach($categories as $cat)
@@ -44,7 +44,7 @@
                   @endforeach
                </select>
             </div>
-            <div class="col-md-3">
+            <div class="col-md-2">
                <select id="brandFilter" class="form-control shadow-xs">
                   <option value="">All Brands (Default)</option>
                   @foreach($allBrands as $brand)

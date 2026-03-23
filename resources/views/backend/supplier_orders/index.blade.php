@@ -1,5 +1,14 @@
 @extends('backend.layouts.master')
 @section('title', 'Supplier Order Historys | Wholesale MGM')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+<style>
+   .select2-container--bootstrap4 .select2-selection--single {
+      height: calc(2.25rem + 2px) !important;
+   }
+</style>
+@endpush
 @section('main-content')
 
 <div class="content-wrapper">
@@ -83,15 +92,14 @@
 <!-- ===================================================== -->
 <div class="card mb-3">
 <div class="card-body">
-<form action="" method="GET">
     <div class="row">
         <div class="col-md-3">
-            <input type="text" name="search" class="form-control"
+            <input type="text" id="poSearch" class="form-control shadow-sm"
                    placeholder="Search PO No (e.g. PO-0001)" value="{{ request('search') }}">
         </div>
 
         <div class="col-md-3">
-            <select name="supplier" class="form-control">
+            <select id="supplierFilter" class="form-control select2 shadow-xs">
                 <option value="">All Suppliers</option>
                 @foreach($suppliers as $supplier)
                     <option value="{{ $supplier->id }}" {{ request('supplier') == $supplier->id ? 'selected' : '' }}>
@@ -102,7 +110,7 @@
         </div>
 
         <div class="col-md-3">
-            <select name="payment_status" class="form-control">
+            <select id="paymentFilter" class="form-control shadow-xs">
                 <option value="">All Payment Status</option>
                 <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
                 <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>Unpaid</option>
@@ -110,10 +118,9 @@
         </div>
 
         <div class="col-md-3">
-            <input type="date" name="date" class="form-control" value="{{ request('date') }}" onchange="this.form.submit()">
+            <input type="date" id="dateFilter" class="form-control shadow-sm" value="{{ request('date') }}">
         </div>
     </div>
-</form>
 </div>
 </div>
 
@@ -141,10 +148,13 @@
     <th class="text-center">Action</th>
 </tr>
 </thead>
-<tbody>
+<tbody id="poTableBody">
 
 @forelse($purchase_orders as $po)
-<tr>
+<tr class="po-row" 
+    data-supplier="{{ $po->supplier_id }}" 
+    data-payment="{{ strtolower($po->payment_status) }}"
+    data-date="{{ $po->order_date ? $po->order_date->format('Y-m-d') : '' }}">
     <td>{{ $po->po_number }}</td>
     <td>{{ $po->supplier->company_name }}</td>
     <td>{{ $po->order_date ? $po->order_date->format('Y-m-d') : '-' }}</td>
@@ -186,10 +196,6 @@
            class="btn btn-sm btn-primary">
             View Invoice
         </a>
-        <!-- <button class="btn btn-sm btn-outline-secondary ml-1"
-                onclick="window.print()">
-            Print
-        </button> -->
     </td>
 </tr>
 @empty
@@ -207,23 +213,7 @@
 <!-- PAGINATION -->
 <!-- ===================================================== -->
 <div class="card-footer clearfix">
-<ul class="pagination pagination-sm m-0 float-right">
-    <li class="page-item disabled">
-        <a class="page-link" href="#">«</a>
-    </li>
-    <li class="page-item active">
-        <a class="page-link" href="#">1</a>
-    </li>
-    <li class="page-item">
-        <a class="page-link" href="#">2</a>
-    </li>
-    <li class="page-item">
-        <a class="page-link" href="#">3</a>
-    </li>
-    <li class="page-item">
-        <a class="page-link" href="#">»</a>
-    </li>
-</ul>
+    <x-pagination :data="$purchase_orders" />
 </div>
 
 </div>
@@ -231,4 +221,63 @@
 </section>
 </div>
 
+@endsection
+
+@section('scripts')
+<script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+    // Initialize Select2 for the supplier filter
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: '100%'
+    });
+
+    const poSearch = $('#poSearch');
+    const supplierFilter = $('#supplierFilter');
+    const paymentFilter = $('#paymentFilter');
+    const dateFilter = $('#dateFilter');
+    const poRows = $('.po-row');
+
+    function performFilter() {
+        const searchText = poSearch.val().toLowerCase();
+        const selectedSupplier = supplierFilter.val();
+        const selectedPayment = paymentFilter.val().toLowerCase();
+        const selectedDate = dateFilter.val();
+
+        poRows.each(function() {
+            const row = $(this);
+            const poNumber = row.find('td:first').text().toLowerCase();
+            const supplierId = row.data('supplier');
+            const paymentStatus = row.data('payment').toLowerCase();
+            const orderDate = row.data('date');
+
+            const matchesSearch = searchText === '' || poNumber.includes(searchText);
+            const matchesSupplier = selectedSupplier === '' || supplierId == selectedSupplier;
+            const matchesPayment = selectedPayment === '' || paymentStatus === selectedPayment;
+            const matchesDate = selectedDate === '' || orderDate === selectedDate;
+
+            if (matchesSearch && matchesSupplier && matchesPayment && matchesDate) {
+                row.show();
+            } else {
+                row.hide();
+            }
+        });
+
+        // Show "No data found" if all rows are hidden
+        if (poRows.filter(':visible').length === 0) {
+            if ($('#noDataRow').length === 0) {
+                $('#poTableBody').append('<tr id="noDataRow"><td colspan="10" class="text-center py-4 text-muted">No purchase orders matching your filters.</td></tr>');
+            }
+        } else {
+            $('#noDataRow').remove();
+        }
+    }
+
+    poSearch.on('keyup', performFilter);
+    supplierFilter.on('change', performFilter);
+    paymentFilter.on('change', performFilter);
+    dateFilter.on('change', performFilter);
+});
+</script>
 @endsection
