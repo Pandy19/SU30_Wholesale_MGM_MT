@@ -21,13 +21,10 @@ use App\Http\Controllers\backend\sale_reportController;
 use App\Http\Controllers\backend\profit_reportController;
 use App\Http\Controllers\backend\admin_loginController;
 use App\Http\Controllers\backend\admin_registerController;
+use App\Http\Controllers\backend\UserManagementController;
 use App\Http\Controllers\backend\supplier_dashboardController;
 use App\Http\Controllers\backend\StockController;
-
-
 use App\Http\Controllers\backend\SettingController;
-
-
 use App\Http\Controllers\backend\AuditLogExportController;
 
 // Auth Routes (Public)
@@ -46,6 +43,27 @@ Route::controller(admin_registerController::class)->group(function () {
 // Protected Backend Routes
 Route::middleware(['auth'])->group(function () {
     
+    // Owner & Admin (High-level Management)
+    Route::middleware(['role:owner,admin'])->group(function () {
+        Route::controller(UserManagementController::class)->group(function () {
+            Route::get('/user_management', 'index')->name('user_management.index');
+            Route::post('/user_management', 'store')->name('user_management.store');
+            Route::put('/user_management/{id}', 'update')->name('user_management.update');
+            Route::delete('/user_management/{id}', 'destroy')->name('user_management.destroy');
+        });
+
+        // Sensitive Deletions (Only Admin/Owner)
+        Route::delete('/customers/{id}', [customersController::class, 'destroy'])->name('customers.destroy');
+        Route::delete('/suppliers/brand/{brand}', [SupplierController::class, 'deleteBrand'])->name('suppliers.brand.delete');
+        Route::delete('/suppliers/category/{category}', [SupplierController::class, 'deleteCategory'])->name('suppliers.category.delete');
+        Route::delete('/suppliers/supplier/{supplier}', [SupplierController::class, 'deleteSupplier'])->name('suppliers.supplier.delete');
+        
+        // Approvals (Procurement)
+        Route::get('/suppliers/approvals', [SupplierController::class, 'approvals'])->name('suppliers.approvals');
+        Route::post('/suppliers/approve/{id}', [SupplierController::class, 'approve'])->name('suppliers.approve');
+        Route::post('/suppliers/deny/{id}', [SupplierController::class, 'deny'])->name('suppliers.deny');
+    });
+
     // Shared Routes (All authenticated users)
     Route::controller(DashboardController::class)->group(function () {
         Route::get('/', 'index')->name('dashboard.index');
@@ -58,26 +76,64 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/export-activity', [AuditLogExportController::class, 'exportCsv'])->name('export.activity');
 
-    // Admin & Staff Only
-    Route::middleware(['role:admin,staff'])->group(function () {
-        // suppliers category
+    // PROCUREMENT & INVENTORY (Staff, Inspector, Accountant common + specific)
+    Route::middleware(['role:admin,staff,inspector,accountant'])->group(function () {
         Route::controller(SupplierController::class)->group(function () {
             Route::get('/suppliers', 'index')->name('suppliers.index');
+            // Accountant can't store/update/delete (handled in view)
             Route::post('/suppliers/brand/store', 'storeBrand')->name('suppliers.brand.store');
             Route::put('/suppliers/brand/{brand}/update', 'updateBrand')->name('suppliers.brand.update');
             Route::post('/suppliers/category/store', 'storeCategory')->name('suppliers.category.store');
-            Route::delete('/suppliers/brand/{brand}', 'deleteBrand')->name('suppliers.brand.delete');
-            Route::delete('/suppliers/category/{category}', 'deleteCategory')->name('suppliers.category.delete');
             Route::post('/suppliers/supplier/store', 'storeSupplier')->name('suppliers.supplier.store');
             Route::put('/suppliers/supplier/{supplier}/update', 'updateSupplier')->name('suppliers.supplier.update');
-            Route::delete('/suppliers/supplier/{supplier}', 'deleteSupplier')->name('suppliers.supplier.delete');
-            
-            // New Approval Routes
-            Route::get('/suppliers/approvals', 'approvals')->name('suppliers.approvals');
-            Route::post('/suppliers/approve/{id}', 'approve')->name('suppliers.approve');
-            Route::post('/suppliers/deny/{id}', 'deny')->name('suppliers.deny');
         });
 
+        Route::controller(stock_categorysController::class)->group(function () {
+            Route::get('/stock_categorys', 'index')->name('stock_categorys.index');
+        });
+
+        Route::controller(product_stock_listController::class)->group(function () {
+            Route::get('/product_stock_list', 'index')->name('product_stock_list.index');
+        });
+
+        Route::controller(stock_ledgerController::class)->group(function () {
+            Route::get('/stock_ledger', 'index')->name('stock_ledger.index');
+        });
+    });
+
+    // Staff & Accountant (Buying Side View)
+    Route::middleware(['role:admin,staff,accountant'])->group(function () {
+        Route::controller(purchase_ordersController::class)->group(function () {
+            Route::get('/purchase_orders', 'index')->name('purchase_orders.index');
+        });
+
+        Route::controller(supplier_ordersController::class)->group(function () {
+            Route::get('/supplier_orders', 'index')->name('supplier_orders.index');
+        });
+
+        Route::controller(sales_order_historyController::class)->group(function () {
+            Route::get('/sales_order_history', 'index')->name('sales_order_history.index');
+        });
+
+        Route::controller(customer_paymentsController::class)->group(function () {
+            Route::get('/customer_payments', 'index')->name('customer_payments.index');
+            Route::post('/customer_payments/{id}/receive', 'processPayment')->name('customer_payments.receive');
+        });
+
+        Route::controller(sale_reportController::class)->group(function () {
+            Route::get('/sale_report', 'index')->name('sale_report.index');
+        });
+    });
+
+    // Shared View Access (Buying/Procurement View)
+    Route::middleware(['role:admin,staff,accountant,supplier'])->group(function () {
+        Route::controller(purchase_ordersController::class)->group(function () {
+            Route::get('/purchase_orders/confirm_payment', 'confirmPayment')->name('purchase_orders.confirm_payment');
+        });
+    });
+
+    // Staff Specific (Buying Side Actions)
+    Route::middleware(['role:admin,staff'])->group(function () {
         Route::controller(product_managementController::class)->group(function () {
             Route::get('/product_management', 'index')->name('product_management.index');
             Route::get('/cart', 'getCart')->name('cart.get');
@@ -86,16 +142,23 @@ Route::middleware(['auth'])->group(function () {
             Route::delete('/cart/remove/{key}', 'removeFromCart')->name('cart.remove');
         });
 
-        Route::controller(purchase_ordersController::class)->group(function () {
-            Route::get('/purchase_orders', 'index')->name('purchase_orders.index');
-            Route::post('/purchase_orders/store', 'store')->name('purchase_orders.store');
-            Route::get('/purchase_orders/confirm_payment', 'confirmPayment')->name('purchase_orders.confirm_payment');
+        Route::post('/purchase_orders/store', [purchase_ordersController::class, 'store'])->name('purchase_orders.store');
+
+        Route::controller(customersController::class)->group(function () {
+            Route::get('/customers', 'index')->name('customers.index');
+            Route::post('/customers/store', 'store')->name('customers.store');
+            Route::put('/customers/{id}', 'update')->name('customers.update');
         });
 
-        Route::controller(supplier_ordersController::class)->group(function () {
-            Route::get('/supplier_orders', 'index')->name('supplier_orders.index');
+        Route::controller(sales_orderController::class)->group(function () {
+            Route::get('/sales_order', 'index')->name('sales_order.index');
+            Route::post('/sales_order/store', 'store')->name('sales_order.store');
+            Route::get('/sales_order/confirm/{id}', 'confirm')->name('sales_order.confirm_sale');
         });
+    });
 
+    // Inspector Specific (Receiving Side)
+    Route::middleware(['role:admin,inspector'])->group(function () {
         Route::controller(goods_receivingController::class)->group(function () {
             Route::get('/goods_receiving', 'index')->name('goods_receiving.index');
             Route::post('/goods_receiving/{id}/approve', 'approve')->name('goods_receiving.approve');
@@ -112,52 +175,17 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/approved_good_stock/add-to-stock', 'addToStock')->name('approved_good_stock.add_to_stock');
         });
 
-        Route::controller(stock_categorysController::class)->group(function () {
-            Route::get('/stock_categorys', 'index')->name('stock_categorys.index');
-        });
-
-        Route::controller(product_stock_listController::class)->group(function () {
-            Route::get('/product_stock_list', 'index')->name('product_stock_list.index');
-        });
-
-        Route::controller(stock_ledgerController::class)->group(function () {
-            Route::get('/stock_ledger', 'index')->name('stock_ledger.index');
-        });
-
-        Route::controller(customersController::class)->group(function () {
-            Route::get('/customers', 'index')->name('customers.index');
-            Route::post('/customers/store', 'store')->name('customers.store');
-            Route::put('/customers/{id}', 'update')->name('customers.update');
-            Route::delete('/customers/{id}', 'destroy')->name('customers.destroy');
-        });
-
-        Route::controller(sales_orderController::class)->group(function () {
-            Route::get('/sales_order', 'index')->name('sales_order.index');
-            Route::post('/sales_order/store', 'store')->name('sales_order.store');
-            Route::get('/sales_order/confirm/{id}', 'confirm')->name('sales_order.confirm_sale');
-        });
-
-        Route::controller(sales_order_historyController::class)->group(function () {
-            Route::get('/sales_order_history', 'index')->name('sales_order_history.index');
-        });
-
-        Route::controller(customer_paymentsController::class)->group(function () {
-            Route::get('/customer_payments', 'index')->name('customer_payments.index');
-            Route::post('/customer_payments/{id}/receive', 'processPayment')->name('customer_payments.receive');
-        });
-
-        Route::controller(sale_reportController::class)->group(function () {
-            Route::get('/sale_report', 'index')->name('sale_report.index');
-        });
-
-        Route::controller(profit_reportController::class)->group(function () {
-            Route::get('/profit_report', 'index')->name('profit_report.index');
-        });
-
         Route::post('/stock/add-approved', [StockController::class, 'addApproved'])->name('stock.addApproved');
     });
 
-    // Product details (AJAX) - allowed for admin, staff, and potentially suppliers if they need to see what they are offering
+    // Admin, Owner & Accountant (Financials)
+    Route::middleware(['role:owner,admin,accountant'])->group(function () {
+        Route::controller(profit_reportController::class)->group(function () {
+            Route::get('/profit_report', 'index')->name('profit_report.index');
+        });
+    });
+
+    // Product details (AJAX) - allowed for everyone authenticated
     Route::get('/product_management/{id}/details', [product_managementController::class, 'details'])->name('product_management.details');
 
     // Supplier Only
@@ -179,5 +207,3 @@ Route::middleware(['auth'])->group(function () {
         });
     });
 });
-
-

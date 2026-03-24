@@ -6,6 +6,7 @@
 <section class="content p-4">
 
   {{-- CONFIRMATION MESSAGE --}}
+  @if(session('last_po_ids'))
   <div class="alert alert-success text-center">
       <h4 class="mb-1">
           <i class="fas fa-check-circle"></i>
@@ -15,6 +16,7 @@
           Your order has been confirmed and recorded. This invoice serves as official purchase documentation.
       </p>
   </div>
+  @endif
 
   @forelse($purchase_orders as $po)
     {{-- ===================== SUPPLIER INVOICE ===================== --}}
@@ -136,9 +138,15 @@
   {{-- ACTIONS --}}
   <div class="row no-print mt-3">
       <div class="col-12">
-          <a href="{{ route('product_management.index') }}" class="btn btn-secondary">
-              <i class="fas fa-shopping-bag mr-1"></i> Back to Products
-          </a>
+          @if(auth()->user()->role === 'supplier')
+            <a href="{{ route('supplier.orders.manage') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-1"></i> Back to Manage Orders
+            </a>
+          @else
+            <a href="{{ route('product_management.index') }}" class="btn btn-secondary">
+                <i class="fas fa-shopping-bag mr-1"></i> Back to Products
+            </a>
+          @endif
 
           <button class="btn btn-default ml-2" onclick="window.print()">
               <i class="fas fa-print"></i> Print

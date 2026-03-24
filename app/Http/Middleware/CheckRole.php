@@ -24,6 +24,11 @@ class CheckRole
         }
 
         $user = Auth::user();
+
+        // ALWAYS allow access for Owners
+        if ($user->role === 'owner') {
+            return $next($request);
+        }
         
         // If no roles specified, allow access (already passed auth)
         if (empty($roles)) {

@@ -149,12 +149,29 @@ class purchase_ordersController extends Controller
         
         if (empty($id_array)) {
             // Revert back to index or a more general confirmed view if no IDs in session
+            if (auth()->user()->role === 'supplier') {
+                return redirect()->route('supplier.orders.manage');
+            }
             return redirect()->route('purchase_orders.index');
         }
 
-        $purchase_orders = PurchaseOrder::with(['supplier', 'items.product'])
-                            ->whereIn('id', $id_array)
-                            ->get();
+        $query = PurchaseOrder::with(['supplier', 'items.product'])
+                            ->whereIn('id', $id_array);
+
+        // Security check: Suppliers can only see their own POs
+        if (auth()->user()->role === 'supplier') {
+            $supplier = Supplier::where('email', auth()->user()->email)->first();
+            if (!$supplier) {
+                return abort(403, 'Unauthorized access.');
+            }
+            $query->where('supplier_id', $supplier->id);
+        }
+
+        $purchase_orders = $query->get();
+
+        if ($purchase_orders->isEmpty()) {
+            return abort(403, 'Unauthorized access or order not found.');
+        }
 
         return view('backend.purchase_orders.confirm_payment', compact('purchase_orders'));
     }

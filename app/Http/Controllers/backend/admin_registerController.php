@@ -16,7 +16,7 @@ class admin_registerController extends Controller
 {
     public function index()
     {
-        $roles = Role::orderBy('name')->get();
+        $roles = Role::where('slug', 'supplier')->get();
         return view('backend.admin_register.index', compact('roles'));
     }
 
@@ -31,6 +31,11 @@ class admin_registerController extends Controller
 
         $roleObj = Role::findOrFail($request->role_id);
         $roleSlug = $roleObj->slug;
+
+        // Security check: only allow supplier role for this public registration form
+        if ($roleSlug !== 'supplier') {
+            return back()->withErrors(['role_id' => 'Invalid role selected. Only supplier registration is allowed.']);
+        }
 
         // 1. Create User
         $user = User::create([

@@ -1,7 +1,7 @@
 <!-- Main Sidebar Container -->
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
   <!-- Brand Logo -->
-  <a href="{{ url('/') }}" class="brand-link">
+  <a href="{{ auth()->user()->role === 'supplier' ? route('Supplier_Dashboard.index') : url('/') }}" class="brand-link">
     <img src="{{ asset('assets/dist/img/MMOLOGO2.png') }}"
          alt="AdminLTE Logo"
          class="brand-image img-circle elevation-3"
@@ -10,8 +10,6 @@
   </a>
 
   <div class="sidebar">
-
-  
 
     <!-- Sidebar Search -->
     <div class="form-inline mt-4">
@@ -32,6 +30,7 @@
           role="menu"
           data-accordion="false">
 
+        @if(auth()->user()->role !== 'supplier')
         <!-- DASHBOARD -->
         <li class="nav-item">
           <a href="{{ url('/') }}"
@@ -40,6 +39,16 @@
             <p>Dashboard</p>
           </a>
         </li>
+
+        @if(in_array(auth()->user()->role, ['owner', 'admin']))
+        <li class="nav-item">
+          <a href="{{ route('user_management.index') }}"
+             class="nav-link {{ request()->routeIs('user_management.index') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-users-cog"></i>
+            <p>User Management</p>
+          </a>
+        </li>
+        @endif
 
         <!-- SUPPLIERS -->
         <li class="nav-header">PROCUREMENT</li>
@@ -52,6 +61,7 @@
           </a>
         </li>
 
+        @if(in_array(auth()->user()->role, ['owner', 'admin']))
         <li class="nav-item">
           <a href="{{ route('suppliers.approvals') }}"
              class="nav-link {{ request()->routeIs('suppliers.approvals') ? 'active' : '' }}">
@@ -67,7 +77,9 @@
             </p>
           </a>
         </li>
+        @endif
 
+        @if(in_array(auth()->user()->role, ['owner', 'admin', 'staff']))
         <li class="nav-item">
           <a href="{{ url('/product_management') }}"
              class="nav-link {{ request()->is('product_management') ? 'active' : '' }}">
@@ -75,7 +87,9 @@
             <p>Supplier Products</p>
           </a>
         </li>
+        @endif
 
+        @if(in_array(auth()->user()->role, ['owner', 'admin', 'staff']))
         <li class="nav-item">
           <a href="{{ url('/supplier_orders') }}"
              class="nav-link {{ request()->is('supplier_orders') ? 'active' : '' }}">
@@ -83,7 +97,9 @@
             <p>Purchase Orders</p>
           </a>
         </li>
+        @endif
 
+        @if(in_array(auth()->user()->role, ['owner', 'admin', 'inspector']))
         <li class="nav-item">
           <a href="{{ url('/goods_receiving') }}"
              class="nav-link {{ request()->is('goods_receiving') ? 'active' : '' }}">
@@ -99,10 +115,12 @@
             <p>Supplier Returns</p>
           </a>
         </li>
+        @endif
 
         <!-- STOCKS -->
         <li class="nav-header">INVENTORY</li>
 
+        @if(in_array(auth()->user()->role, ['owner', 'admin', 'inspector']))
         <li class="nav-item">
           <a href="{{ url('/approved_good_stock') }}"
              class="nav-link {{ request()->is('approved_good_stock') ? 'active' : '' }}">
@@ -110,6 +128,7 @@
             <p>Stock Approval</p>
           </a>
         </li>
+        @endif
 
         <li class="nav-item">
           <a href="{{ url('/stock_categorys') }}"
@@ -135,9 +154,11 @@
           </a>
         </li>
 
+        @if(in_array(auth()->user()->role, ['owner', 'admin', 'staff', 'accountant']))
         <!-- CUSTOMERS -->
         <li class="nav-header">SALES</li>
 
+        @if(in_array(auth()->user()->role, ['owner', 'admin', 'staff']))
         <li class="nav-item">
           <a href="{{ url('/customers') }}"
              class="nav-link {{ request()->is('customers') ? 'active' : '' }}">
@@ -153,6 +174,7 @@
             <p>Sales Orders</p>
           </a>
         </li>
+        @endif
 
         <li class="nav-item">
           <a href="{{ url('/sales_order_history') }}"
@@ -181,6 +203,7 @@
           </a>
         </li>
 
+        @if(in_array(auth()->user()->role, ['owner', 'admin', 'accountant']))
         <li class="nav-item">
           <a href="{{ url('/profit_report') }}"
              class="nav-link {{ request()->is('profit_report') ? 'active' : '' }}">
@@ -188,9 +211,12 @@
             <p>Profit Reports</p>
           </a>
         </li>
+        @endif
+        @endif
+        @endif
 
-        <!-- REPORTS -->
-        <li class="nav-header">SUPPLIER DASHBOARD</li>
+        @if(auth()->user()->role === 'supplier')
+        <li class="nav-header">SUPPLIER AREA</li>
         <li class="nav-item">
           <a href="{{ url('/Supplier_Dashboard') }}"
              class="nav-link {{ request()->is('Supplier_Dashboard') ? 'active' : '' }}">
@@ -212,6 +238,8 @@
             <p>Disputes / Returns</p>
           </a>
         </li>
+        @endif
+
       </ul>
     </nav>
 

@@ -55,6 +55,7 @@
                </select>
             </div>
             <div class="col-md-4 text-right">
+               @if(!in_array(auth()->user()->role, ['inspector', 'accountant']))
                <div class="btn-group">
                   <button class="btn btn-primary btn-sm shadow-sm" data-toggle="modal" data-target="#addBrandModal">
                      <i class="fas fa-plus mr-1"></i> Brand
@@ -76,6 +77,7 @@
                      </div>
                   </div>
                </div>
+               @endif
             </div>
          </div>
 
@@ -196,6 +198,7 @@
                     </div>
                 </a>
                 {{-- Absolute positioned action buttons --}}
+                @if(in_array(auth()->user()->role, ['owner', 'admin']))
                 <div style="position: absolute; right: 60px; top: 50%; transform: translateY(-50%); z-index: 10;">
                     <div class="btn-group">
                         <button class="btn btn-sm btn-outline-warning border-0 mr-1" 
@@ -210,6 +213,16 @@
                         </button>
                     </div>
                 </div>
+                @elseif(auth()->user()->role === 'staff')
+                {{-- Staff can only edit --}}
+                <div style="position: absolute; right: 60px; top: 50%; transform: translateY(-50%); z-index: 10;">
+                    <button class="btn btn-sm btn-outline-warning border-0" 
+                            data-toggle="modal" 
+                            data-target="#editBrandModal{{ $brand->id }}">
+                        <i class="fas fa-edit"></i>
+                    </button>
+                </div>
+                @endif
             </div>
 
 
@@ -287,7 +300,9 @@
                                 <th>Payment</th>
                                 <th>Lead Time</th>
                                 <th>Status</th>
+                                @if(auth()->user()->role !== 'inspector')
                                 <th width="120">Actions</th>
+                                @endif
                             </tr>
                         </thead>
 
@@ -319,6 +334,7 @@
                                     <td>{{ $supplier->lead_time_days ? $supplier->lead_time_days.' Days' : '' }}</td>
                                     <td><span class="badge {{ $sStatusClass }}">{{ ucfirst($sStatus) }}</span></td>
 
+                                    @if(in_array(auth()->user()->role, ['owner', 'admin']))
                                     <td class="text-center">
                                         <button class="btn btn-sm btn-warning"
                                                 data-toggle="modal"
@@ -332,6 +348,15 @@
                                             <i class="fas fa-trash"></i>
                                         </button>
                                     </td>
+                                    @elseif(auth()->user()->role === 'staff')
+                                    <td class="text-center">
+                                        <button class="btn btn-sm btn-warning"
+                                                data-toggle="modal"
+                                                data-target="#{{ $editModalId }}">
+                                            <i class="fas fa-edit"></i>
+                                        </button>
+                                    </td>
+                                    @endif
                                 </tr>
                             @empty
                                 <tr>

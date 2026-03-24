@@ -5,6 +5,7 @@ namespace App\Http\Controllers\backend;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Models\Role;
 
 class admin_loginController extends Controller
 {
@@ -13,7 +14,8 @@ class admin_loginController extends Controller
         if (Auth::check()) {
             return redirect()->route('dashboard.index');
         }
-        return view('backend.admin_login.index');
+        $roles = Role::orderBy('name')->get();
+        return view('backend.admin_login.index', compact('roles'));
     }
 
     public function login(Request $request)
@@ -38,10 +40,27 @@ class admin_loginController extends Controller
             // 2. Verify Status
             if ($user->status === 'inactive') {
                 Auth::logout();
-                return back()->with('error', 'Your account is inactive or pending approval.');
+                return back()->with('error', 'Your account is inactive.');
+            }
+
+            // If status is pending:
+            // - If internal role (admin, staff, etc.), activate on login
+            // - If supplier, they still need manual approval
+            if ($user->status === 'pending') {
+                if ($user->role === 'supplier') {
+                    Auth::logout();
+                    return back()->with('error', 'Your supplier account is pending admin approval.');
+                } else {
+                    // Activate internal staff on first login
+                    $user->update(['status' => 'active']);
+                }
             }
 
             $request->session()->regenerate();
+
+            if ($user->role === 'supplier') {
+                return redirect()->route('Supplier_Dashboard.index')->with('success', 'Logged in successfully!');
+            }
 
             return redirect()->intended('/')->with('success', 'Logged in successfully!');
         }

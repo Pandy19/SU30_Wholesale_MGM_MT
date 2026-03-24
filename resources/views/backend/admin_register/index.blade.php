@@ -27,9 +27,9 @@
                 <div class="col-md-8">
                     <div class="card-body p-4">
 
-                        <h4 class="mb-1 font-weight-bold">Create Backend Account</h4>
+                        <h4 class="mb-1 font-weight-bold">Supplier Registration</h4>
                         <p class="text-muted mb-3">
-                            Register a new user for the wholesale system
+                            Register a new supplier account for the wholesale system
                         </p>
 
                         <form method="POST" action="{{ route('admin_register.store') }}" enctype="multipart/form-data">
@@ -77,11 +77,10 @@
                                         id="roleSelect"
                                         class="form-control @error('role_id') is-invalid @enderror"
                                         required>
-                                    <option value="">-- Select Role --</option>
                                     @foreach($roles as $role)
                                         <option value="{{ $role->id }}" 
                                                 data-slug="{{ $role->slug }}"
-                                                {{ old('role_id') == $role->id ? 'selected' : '' }}>
+                                                {{ (old('role_id') == $role->id || count($roles) === 1) ? 'selected' : '' }}>
                                             {{ $role->name }}
                                         </option>
                                     @endforeach
@@ -143,6 +142,8 @@
                                 if(old('role_id')) {
                                     $selectedRole = $roles->firstWhere('id', old('role_id'));
                                     if($selectedRole && $selectedRole->slug === 'supplier') $isSupplier = true;
+                                } elseif (count($roles) === 1 && $roles->first()->slug === 'supplier') {
+                                    $isSupplier = true;
                                 }
                             @endphp
 

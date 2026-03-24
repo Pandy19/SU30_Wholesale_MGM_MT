@@ -162,9 +162,11 @@
                               <button class="btn btn-sm btn-outline-primary ml-1" data-toggle="modal" data-target="#editCustomerModal{{ $customer->id }}" title="Edit">
                                  <i class="fas fa-edit"></i>
                               </button>
+                              @if(in_array(auth()->user()->role, ['owner', 'admin']))
                               <button class="btn btn-sm btn-outline-danger ml-1" data-toggle="modal" data-target="#deleteCustomerModal{{ $customer->id }}" title="Delete">
                                  <i class="fas fa-trash"></i>
                               </button>
+                              @endif
                            </div>
 
                            {{-- Include Edit Modal for this specific customer --}}
