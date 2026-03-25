@@ -19,6 +19,7 @@ class customer_paymentsController extends Controller
             $search = $request->search;
             $query->where(function($q) use ($search) {
                 $q->where('order_number', 'like', "%{$search}%")
+                  ->orWhere('id', 'like', "%{$search}%")
                   ->orWhereHas('customer', function($sq) use ($search) {
                       $sq->where('name', 'like', "%{$search}%");
                   });

@@ -1,5 +1,14 @@
 @extends('backend.layouts.master')
 @section('title', 'Good Receiving | Wholesale MGM')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+<style>
+   .select2-container--bootstrap4 .select2-selection--single {
+      height: calc(2.25rem + 2px) !important;
+   }
+</style>
+@endpush
 @section('main-content')
 
 <div class="content-wrapper">
@@ -29,12 +38,12 @@
     <input type="hidden" name="per_page" value="{{ request('per_page', 10) }}">
     <div class="row">
         <div class="col-md-3 mb-2">
-            <input type="text" name="search" class="form-control"
+            <input type="text" id="grSearch" name="search" class="form-control shadow-sm"
                    placeholder="Search Product / SKU / PO No" value="{{ request('search') }}">
         </div>
 
-                <div class="col-md-2 mb-2">
-            <select name="category_id" class="form-control" onchange="this.form.submit()">
+        <div class="col-md-2 mb-2">
+            <select id="categoryFilter" name="category_id" class="form-control select2 shadow-xs">
                 <option value="">All Categories</option>
                 @foreach($categories as $category)
                     <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
@@ -45,7 +54,7 @@
         </div>
 
         <div class="col-md-2 mb-2">
-            <select name="brand_id" class="form-control" onchange="this.form.submit()">
+            <select id="brandFilter" name="brand_id" class="form-control select2 shadow-xs">
                 <option value="">All Brands</option>
                 @foreach($brands as $brand)
                     <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>
@@ -55,10 +64,8 @@
             </select>
         </div>
 
-
-
         <div class="col-md-2 mb-2">
-            <select name="supplier_id" class="form-control" onchange="this.form.submit()">
+            <select id="supplierFilter" name="supplier_id" class="form-control select2 shadow-xs">
                 <option value="">All Suppliers</option>
                 @foreach($suppliers as $supplier)
                     <option value="{{ $supplier->id }}" {{ request('supplier_id') == $supplier->id ? 'selected' : '' }}>
@@ -69,7 +76,7 @@
         </div>
 
         <div class="col-md-3 mb-2">
-            <select name="status" class="form-control" onchange="this.form.submit()">
+            <select id="statusFilter" name="status" class="form-control shadow-xs">
                 <option value="">All Status</option>
                 <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                 <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>Accepted</option>
@@ -111,8 +118,17 @@
     $gr = $item->goodsReceiving;
     $product = $item->product;
     $status = strtolower($gr->status ?? 'pending');
+    $category_id = $product->category_id ?? '';
+    $brand_id = $product->brand_id ?? '';
+    $supplier_id = $gr->purchaseOrder->supplier_id ?? '';
+    $po_number = $gr->purchaseOrder->po_number ?? '';
 @endphp
-<tr>
+<tr class="gr-item-row" 
+    data-category="{{ $category_id }}" 
+    data-brand="{{ $brand_id }}" 
+    data-supplier="{{ $supplier_id }}" 
+    data-status="{{ $status }}"
+    data-po="{{ $po_number }}">
     <td class="text-center">
         @php
             $imageUrl = $product->image ?? '';
@@ -273,6 +289,7 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
 <script>
 let currentActiveId = null;
 
@@ -317,6 +334,70 @@ function printReceipt(status, approver, date) {
 }
 
 $(document).ready(function() {
+    // Initialize Select2
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: '100%'
+    });
+
+    const grSearch = $('#grSearch');
+    const categoryFilter = $('#categoryFilter');
+    const brandFilter = $('#brandFilter');
+    const supplierFilter = $('#supplierFilter');
+    const statusFilter = $('#statusFilter');
+    const grRows = $('.gr-item-row');
+
+    function performFilter() {
+        const searchText = grSearch.val().toLowerCase();
+        const selectedCat = categoryFilter.val();
+        const selectedBrand = brandFilter.val();
+        const selectedSupplier = supplierFilter.val();
+        const selectedStatus = statusFilter.val().toLowerCase();
+
+        grRows.each(function() {
+            const row = $(this);
+            const productText = row.find('td:nth-child(2)').text().toLowerCase();
+            const skuText = row.find('td:nth-child(3)').text().toLowerCase();
+            const poNumber = row.data('po').toString().toLowerCase();
+            
+            const catId = row.data('category').toString();
+            const brandId = row.data('brand').toString();
+            const supplierId = row.data('supplier').toString();
+            const status = row.data('status').toString().toLowerCase();
+
+            const matchesSearch = searchText === '' || 
+                                 productText.includes(searchText) || 
+                                 skuText.includes(searchText) || 
+                                 poNumber.includes(searchText);
+            
+            const matchesCat = selectedCat === '' || catId === selectedCat;
+            const matchesBrand = selectedBrand === '' || brandId === selectedBrand;
+            const matchesSupplier = selectedSupplier === '' || supplierId === selectedSupplier;
+            const matchesStatus = selectedStatus === '' || status === selectedStatus;
+
+            if (matchesSearch && matchesCat && matchesBrand && matchesSupplier && matchesStatus) {
+                row.show();
+            } else {
+                row.hide();
+            }
+        });
+
+        // Show "No data found" if all rows are hidden
+        if (grRows.filter(':visible').length === 0) {
+            if ($('#noDataRow').length === 0) {
+                $('tbody').append('<tr id="noDataRow"><td colspan="14" class="text-center py-5 text-muted">No goods receiving items matching your filters.</td></tr>');
+            }
+        } else {
+            $('#noDataRow').remove();
+        }
+    }
+
+    grSearch.on('keyup', performFilter);
+    categoryFilter.on('change', performFilter);
+    brandFilter.on('change', performFilter);
+    supplierFilter.on('change', performFilter);
+    statusFilter.on('change', performFilter);
+
     // Auto-sync quantities logic
     $(document).on('input', '.accept-input', function() {
         let id = $(this).data('id');

@@ -1,5 +1,18 @@
 @extends('backend.layouts.master')
 @section('title', 'Stock Categorys | Wholesale MGM')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+<style>
+   .select2-container--bootstrap4 .select2-selection--single {
+      height: calc(2.25rem + 2px) !important;
+   }
+   .hover-shadow:hover {
+      box-shadow: 0 .5rem 1rem rgba(0,0,0,.15)!important;
+      transition: box-shadow .3s ease-in-out;
+   }
+</style>
+@endpush
 @section('main-content')
 
 <div class="content-wrapper">
@@ -92,13 +105,13 @@
 <form action="{{ route('stock_categorys.index') }}" method="GET">
 <div class="row">
 
-    <div class="col-md-4 mb-2">
-        <input type="text" name="search" class="form-control"
+    <div class="col-md-3">
+        <input type="text" id="stockSearch" name="search" class="form-control"
                placeholder="Search Product / SKU" value="{{ request('search') }}">
     </div>
 
-     <div class="col-md-2 mb-2">
-        <select name="category_id" class="form-control" onchange="this.form.submit()">
+    <div class="col-md-3">
+        <select id="categoryFilter" name="category_id" class="form-control select2">
             <option value="">All Categories</option>
             @foreach($allCategories as $cat)
                 <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>
@@ -108,28 +121,25 @@
         </select>
     </div>
 
-    <div class="col-md-2 mb-2">
-        <select name="brand_id" class="form-control" onchange="this.form.submit()">
+    <div class="col-md-3">
+        <select id="brandFilter" name="brand_id" class="form-control select2">
             <option value="">All Brands</option>
             @foreach($brands as $brand)
-                <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>
+                <option value="{{ $brand->id }}" 
+                        data-category="{{ $brand->category_id }}"
+                        {{ request('brand_id') == $brand->id ? 'selected' : '' }}>
                     {{ $brand->name }}
                 </option>
             @endforeach
         </select>
     </div>
 
-
-    <div class="col-md-2 mb-2">
-        <select name="status" class="form-control" onchange="this.form.submit()">
+    <div class="col-md-3">
+        <select id="statusFilter" name="status" class="form-control select2">
             <option value="">All Status</option>
             <option value="normal" {{ request('status') == 'normal' ? 'selected' : '' }}>Normal</option>
             <option value="low_stock" {{ request('status') == 'low_stock' ? 'selected' : '' }}>Low Stock</option>
         </select>
-    </div>
-
-    <div class="col-md-2 mb-2">
-        <button type="submit" class="btn btn-primary btn-block">Search</button>
     </div>
 
 </div>
@@ -141,7 +151,7 @@
 <!-- DYNAMIC CATEGORY LOOP -->
 <!-- ===================================================== -->
 @forelse($categories as $category)
-<div class="card mb-4 shadow-sm">
+<div class="card mb-4 shadow-sm category-card" data-category="{{ $category->id }}">
 
 <a href="#category{{ $category->id }}" data-toggle="collapse"
    class="text-dark text-decoration-none">
@@ -159,7 +169,12 @@
 
     @foreach($category->brands_stock as $brand)
     <!-- ================= {{ strtoupper($brand->name) }} ================= -->
-    <a href="#brand{{ $category->id }}_{{ $brand->id }}Stock" class="text-dark text-decoration-none" data-toggle="collapse">
+    <a href="#brand{{ $category->id }}_{{ $brand->id }}Stock" 
+       class="text-dark text-decoration-none brand-card" 
+       data-toggle="collapse"
+       data-brand="{{ $brand->id }}"
+       data-category="{{ $category->id }}"
+       data-status="{{ $brand->has_low_stock ? 'low_stock' : 'normal' }}">
     <div class="card-body border-bottom bg-white hover-shadow">
     <div class="row align-items-center">
     <div class="col-md-1 text-center">
@@ -260,7 +275,122 @@
 </div>
 @endforelse
 
+<!-- ===================================================== -->
+<!-- PAGINATION -->
+<!-- ===================================================== -->
+<div class="mt-4">
+    <x-pagination :data="$categories" />
+</div>
+
 </section>
 </div>
 
+@endsection
+
+@section('scripts')
+<script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+    // Initialize Select2
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: '100%'
+    });
+
+    const stockSearch = $('#stockSearch');
+    const categoryFilter = $('#categoryFilter');
+    const brandFilter = $('#brandFilter');
+    const statusFilter = $('#statusFilter');
+    
+    const categoryCards = $('.category-card');
+    const brandCards = $('.brand-card');
+
+    function performFilter() {
+        const searchText = stockSearch.val().toLowerCase();
+        const selectedCat = categoryFilter.val();
+        const selectedBrand = brandFilter.val();
+        const selectedStatus = statusFilter.val();
+
+        categoryCards.each(function() {
+            const catCard = $(this);
+            const catId = catCard.data('category').toString();
+            let hasVisibleBrands = false;
+
+            // Filter brands within this category
+            const brandsInCat = catCard.find('.brand-card');
+            
+            brandsInCat.each(function() {
+                const bCard = $(this);
+                const bText = bCard.text().toLowerCase();
+                const bId = bCard.data('brand').toString();
+                const bCatId = bCard.data('category').toString();
+                const bStatus = bCard.data('status');
+
+                const matchesSearch = searchText === '' || bText.includes(searchText);
+                const matchesCat = selectedCat === '' || bCatId === selectedCat;
+                const matchesBrand = selectedBrand === '' || bId === selectedBrand;
+                const matchesStatus = selectedStatus === '' || bStatus === selectedStatus;
+
+                if (matchesSearch && matchesCat && matchesBrand && matchesStatus) {
+                    bCard.show();
+                    // Also show the table associated with the brand if it was open
+                    // Or keep it hidden until clicked - standard collapse behavior
+                    hasVisibleBrands = true;
+                } else {
+                    bCard.hide();
+                    $(`#brand${bCatId}_${bId}Stock`).collapse('hide');
+                }
+            });
+
+            // Show/Hide the whole category card based on whether it has visible brands
+            if (hasVisibleBrands) {
+                catCard.show();
+            } else {
+                catCard.hide();
+            }
+        });
+
+        // Show "No data found" if all category cards are hidden
+        if (categoryCards.filter(':visible').length === 0) {
+            if ($('#noDataAlert').length === 0) {
+                $('.content').append('<div id="noDataAlert" class="alert alert-info"><i class="fas fa-info-circle mr-2"></i> No stock matching your filters.</div>');
+            }
+        } else {
+            $('#noDataAlert').remove();
+        }
+    }
+
+    stockSearch.on('keyup', performFilter);
+    
+    categoryFilter.on('change', function() {
+        const catId = $(this).val();
+        
+        // Synchronize Brand Dropdown
+        brandFilter.val(''); 
+        
+        if (catId) {
+            brandFilter.find('option').each(function() {
+                const opt = $(this);
+                const optCat = opt.data('category');
+                if (opt.val() === '' || optCat == catId) {
+                    opt.show();
+                } else {
+                    opt.hide();
+                }
+            });
+        } else {
+            brandFilter.find('option').show();
+        }
+        
+        if (brandFilter.hasClass('select2-hidden-accessible')) {
+            brandFilter.trigger('change.select2');
+        }
+        
+        performFilter();
+    });
+
+    brandFilter.on('change', performFilter);
+    statusFilter.on('change', performFilter);
+});
+</script>
 @endsection

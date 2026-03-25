@@ -1,5 +1,14 @@
 @extends('backend.layouts.master')
 @section('title', 'Approved Goods | Wholesale MGM')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+<style>
+   .select2-container--bootstrap4 .select2-selection--single {
+      height: calc(2.25rem + 2px) !important;
+   }
+</style>
+@endpush
 @section('main-content')
 
 <div class="content-wrapper">
@@ -110,39 +119,41 @@
 <div class="row">
 
     <div class="col-md-2">
-        <input type="text" name="search" class="form-control"
+        <input type="text" id="brandSearch" name="search" class="form-control"
                placeholder="Search Product / SKU" value="{{ request('search') }}">
     </div>
 
-        <div class="col-md-2">
-        <select class="form-control" name="category">
+    <div class="col-md-2">
+        <select id="categoryFilter" class="form-control select2" name="category">
             <option value="">All Categories</option>
-            @foreach(\App\Models\Category::orderBy('name')->get() as $cat)
+            @foreach($categories as $cat)
                 <option value="{{ $cat->id }}" {{ request('category') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
             @endforeach
         </select>
     </div>
 
     <div class="col-md-2">
-        <select class="form-control" name="brand">
+        <select id="brandFilter" class="form-control select2" name="brand">
             <option value="">All Brands</option>
-            @foreach(\App\Models\Brand::orderBy('name')->get() as $brand)
-                <option value="{{ $brand->id }}" {{ request('brand') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+            @foreach($brands as $brand)
+                <option value="{{ $brand->id }}" 
+                        data-category="{{ $brand->category_id }}"
+                        {{ request('brand') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
             @endforeach
         </select>
     </div>
 
     <div class="col-md-2">
-        <select class="form-control" name="supplier">
+        <select id="supplierFilter" class="form-control select2" name="supplier">
             <option value="">All Suppliers</option>
-            @foreach(\App\Models\Supplier::orderBy('company_name')->get() as $sup)
+            @foreach($suppliers as $sup)
                 <option value="{{ $sup->id }}" {{ request('supplier') == $sup->id ? 'selected' : '' }}>{{ $sup->company_name }}</option>
             @endforeach
         </select>
     </div>
 
     <div class="col-md-2">
-        <select class="form-control" name="storage_location">
+        <select id="locationFilter" class="form-control select2" name="storage_location">
             <option value="">All Locations</option>
             @foreach($locations as $loc)
                 <option value="{{ $loc->id }}" {{ request('storage_location') == $loc->id ? 'selected' : '' }}>{{ $loc->name }}</option>
@@ -151,7 +162,7 @@
     </div>
 
     <div class="col-md-2">
-        <button type="submit" class="btn btn-primary btn-block">Filter</button>
+        <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-search mr-1"></i> Filter</button>
     </div>
 
 </div>
@@ -194,6 +205,10 @@
     $badgeClass = $item->is_stocked ? 'badge-success' : 'badge-warning';
     $inspectorName = $gr->approver->name ?? 'System';
     $inspectorIdentity = $inspectorName . " [" . ucfirst($gr->approver->role ?? 'Inspector') . "]";
+    
+    $category_id = $product->category_id ?? '';
+    $brand_id = $product->brand_id ?? '';
+    $supplier_id = $po->supplier_id ?? '';
 
     // Image logic
     $imageUrl = $product->image ?? '';
@@ -204,7 +219,7 @@
         $imageUrl = asset('assets/dist/img/default-150x150.png');
     }
 @endphp
-<tr>
+<tr class="stock-item-row" data-category="{{ $category_id }}" data-brand="{{ $brand_id }}" data-supplier="{{ $supplier_id }}">
     <td class="text-center">
         <img src="{{ $imageUrl }}" width="50" class="rounded border shadow-sm">
     </td>
@@ -261,9 +276,7 @@
 
 <!-- PAGINATION -->
 <div class="card-footer clearfix bg-white">
-    <div class="float-right">
-        {{ $items->appends(request()->query())->links() }}
-    </div>
+    <x-pagination :data="$items" />
 </div>
 
 </div>
@@ -412,6 +425,7 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
 <script>
 let activeItem = null;
 const allLocations = @json($locations);
@@ -486,6 +500,86 @@ function updateTotal() {
 }
 
 $(document).ready(function() {
+    // Initialize Select2
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: '100%'
+    });
+
+    const brandSearch = $('#brandSearch');
+    const categoryFilter = $('#categoryFilter');
+    const brandFilter = $('#brandFilter');
+    const supplierFilter = $('#supplierFilter');
+    const stockRows = $('.stock-item-row');
+
+    function performFilter() {
+        const searchText = brandSearch.val().toLowerCase();
+        const selectedCat = categoryFilter.val();
+        const selectedBrand = brandFilter.val();
+        const selectedSupplier = supplierFilter.val();
+        
+        stockRows.each(function() {
+            const row = $(this);
+            const rowText = row.text().toLowerCase();
+            const catId = row.data('category').toString();
+            const brandId = row.data('brand').toString();
+            const supplierId = row.data('supplier').toString();
+
+            const matchesSearch = searchText === '' || rowText.includes(searchText);
+            const matchesCat = selectedCat === '' || catId === selectedCat;
+            const matchesBrand = selectedBrand === '' || brandId === selectedBrand;
+            const matchesSupplier = selectedSupplier === '' || supplierId === selectedSupplier;
+
+            if (matchesSearch && matchesCat && matchesBrand && matchesSupplier) {
+                row.show();
+            } else {
+                row.hide();
+            }
+        });
+
+        // Show "No data found" if all rows are hidden
+        if (stockRows.filter(':visible').length === 0) {
+            if ($('#noDataRow').length === 0) {
+                $('tbody').append('<tr id="noDataRow"><td colspan="13" class="text-center py-5 text-muted">No approved items matching your filters.</td></tr>');
+            }
+        } else {
+            $('#noDataRow').remove();
+        }
+    }
+
+    brandSearch.on('keyup', performFilter);
+    
+    categoryFilter.on('change', function() {
+        const catId = $(this).val();
+        
+        // Synchronize Brand Dropdown: Show only brands in this category
+        brandFilter.val(''); // Reset brand selection when category changes
+        
+        if (catId) {
+            brandFilter.find('option').each(function() {
+                const opt = $(this);
+                const optCat = opt.data('category');
+                if (opt.val() === '' || optCat == catId) {
+                    opt.show();
+                } else {
+                    opt.hide();
+                }
+            });
+        } else {
+            brandFilter.find('option').show();
+        }
+        
+        // Trigger Select2 to update UI if it was initialized
+        if (brandFilter.hasClass('select2-hidden-accessible')) {
+            brandFilter.trigger('change.select2');
+        }
+        
+        performFilter();
+    });
+
+    brandFilter.on('change', performFilter);
+    supplierFilter.on('change', performFilter);
+
     // Check for success message after reload
     const successMsg = sessionStorage.getItem('stock_success_msg');
     if (successMsg) {

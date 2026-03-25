@@ -1,5 +1,14 @@
 @extends('backend.layouts.master')
 @section('title', 'Stock Lists | Wholesale MGM')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+<style>
+   .select2-container--bootstrap4 .select2-selection--single {
+      height: calc(2.25rem + 2px) !important;
+   }
+</style>
+@endpush
 @section('main-content')
 
 <div class="content-wrapper">
@@ -104,12 +113,12 @@
 <div class="row">
 
     <div class="col-md-3">
-        <input type="text" name="search" class="form-control"
+        <input type="text" id="stockSearch" name="search" class="form-control"
                placeholder="Search Product / SKU" value="{{ request('search') }}">
     </div>
 
     <div class="col-md-2">
-        <select name="category_id" class="form-control" onchange="this.form.submit()">
+        <select id="categoryFilter" name="category_id" class="form-control select2">
             <option value="">All Categories</option>
             @foreach($categories as $cat)
                 <option value="{{ $cat->id }}" {{ request('category_id') == $cat->id ? 'selected' : '' }}>{{ $cat->name }}</option>
@@ -118,24 +127,27 @@
     </div>
 
     <div class="col-md-2">
-        <select name="brand_id" class="form-control" onchange="this.form.submit()">
+        <select id="brandFilter" name="brand_id" class="form-control select2">
             <option value="">All Brands</option>
             @foreach($brands as $brand)
-                <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
+                <option value="{{ $brand->id }}" 
+                        data-category="{{ $brand->category_id }}"
+                        {{ request('brand_id') == $brand->id ? 'selected' : '' }}>{{ $brand->name }}</option>
             @endforeach
         </select>
     </div>
 
     <div class="col-md-2">
-        <select name="status" class="form-control" onchange="this.form.submit()">
+        <select id="statusFilter" name="status" class="form-control select2">
             <option value="">All Stock Status</option>
             <option value="normal" {{ request('status') == 'normal' ? 'selected' : '' }}>Normal Stock</option>
             <option value="low_stock" {{ request('status') == 'low_stock' ? 'selected' : '' }}>Low Stock</option>
+            <option value="out_of_stock" {{ request('status') == 'out_of_stock' ? 'selected' : '' }}>Out of Stock</option>
         </select>
     </div>
 
     <div class="col-md-2">
-        <select name="location_id" class="form-control" onchange="this.form.submit()">
+        <select id="locationFilter" name="location_id" class="form-control select2">
             <option value="">All Shelves</option>
             @foreach($locations as $loc)
                 <option value="{{ $loc->id }}" {{ request('location_id') == $loc->id ? 'selected' : '' }}>{{ $loc->name }}</option>
@@ -145,7 +157,7 @@
 
     <div class="col-md-1 text-right">
         <a href="{{ route('product_stock_list.index') }}" class="btn btn-outline-secondary w-100">
-            Reset
+            <i class="fas fa-undo mr-1"></i>Reset
         </a>
     </div>
 
@@ -192,15 +204,18 @@
     $statusLabel = 'Normal';
     $badgeClass = 'badge-success';
     $rowClass = '';
+    $dataStatus = 'normal';
     
     if ($qty <= 0) {
         $statusLabel = 'Out of Stock';
         $badgeClass = 'badge-danger';
         $rowClass = 'table-danger';
+        $dataStatus = 'out_of_stock';
     } elseif ($qty < 10) {
         $statusLabel = 'Low Stock';
         $badgeClass = 'badge-warning';
         $rowClass = 'table-warning';
+        $dataStatus = 'low_stock';
     }
 
     $imageUrl = $product->image ?? '';
@@ -210,8 +225,14 @@
     if (!$imageUrl) {
         $imageUrl = asset('assets/dist/img/default-150x150.png');
     }
+
+    $locationIds = $product->stocks->pluck('stock_location_id')->unique()->join(',');
 @endphp
-<tr class="{{ $rowClass }}">
+<tr class="product-stock-row {{ $rowClass }}" 
+    data-category="{{ $product->category_id }}" 
+    data-brand="{{ $product->brand_id }}" 
+    data-status="{{ $dataStatus }}" 
+    data-locations="{{ $locationIds }}">
     <td class="text-center">
         <img src="{{ $imageUrl }}" class="img-thumbnail" width="45" style="height:45px; object-fit:contain;">
     </td>
@@ -259,9 +280,7 @@
 </table>
 
 <div class="card-footer clearfix bg-white">
-    <div class="float-right">
-        {{ $products->appends(request()->query())->links() }}
-    </div>
+    <x-pagination :data="$products" />
 </div>
 </div>
 </div>
@@ -401,7 +420,94 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
 <script>
+$(document).ready(function() {
+    // Initialize Select2
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: '100%'
+    });
+
+    const stockSearch = $('#stockSearch');
+    const categoryFilter = $('#categoryFilter');
+    const brandFilter = $('#brandFilter');
+    const statusFilter = $('#statusFilter');
+    const locationFilter = $('#locationFilter');
+    const stockRows = $('.product-stock-row');
+
+    function performFilter() {
+        const searchText = stockSearch.val().toLowerCase();
+        const selectedCat = categoryFilter.val();
+        const selectedBrand = brandFilter.val();
+        const selectedStatus = statusFilter.val();
+        const selectedLocation = locationFilter.val();
+
+        stockRows.each(function() {
+            const row = $(this);
+            const rowText = row.text().toLowerCase();
+            const catId = row.data('category').toString();
+            const brandId = row.data('brand').toString();
+            const status = row.data('status');
+            const locations = row.data('locations').toString().split(',');
+
+            const matchesSearch = searchText === '' || rowText.includes(searchText);
+            const matchesCat = selectedCat === '' || catId === selectedCat;
+            const matchesBrand = selectedBrand === '' || brandId === selectedBrand;
+            const matchesStatus = selectedStatus === '' || status === selectedStatus;
+            const matchesLocation = selectedLocation === '' || locations.includes(selectedLocation);
+
+            if (matchesSearch && matchesCat && matchesBrand && matchesStatus && matchesLocation) {
+                row.show();
+            } else {
+                row.hide();
+            }
+        });
+
+        // Show "No data found" if all rows are hidden
+        if (stockRows.filter(':visible').length === 0) {
+            if ($('#noDataRow').length === 0) {
+                $('tbody').append('<tr id="noDataRow"><td colspan="12" class="text-center py-5 text-muted">No products matching your filters.</td></tr>');
+            }
+        } else {
+            $('#noDataRow').remove();
+        }
+    }
+
+    stockSearch.on('keyup', performFilter);
+    
+    categoryFilter.on('change', function() {
+        const catId = $(this).val();
+        
+        // Synchronize Brand Dropdown
+        brandFilter.val(''); 
+        
+        if (catId) {
+            brandFilter.find('option').each(function() {
+                const opt = $(this);
+                const optCat = opt.data('category');
+                if (opt.val() === '' || optCat == catId) {
+                    opt.show();
+                } else {
+                    opt.hide();
+                }
+            });
+        } else {
+            brandFilter.find('option').show();
+        }
+        
+        if (brandFilter.hasClass('select2-hidden-accessible')) {
+            brandFilter.trigger('change.select2');
+        }
+        
+        performFilter();
+    });
+
+    brandFilter.on('change', performFilter);
+    statusFilter.on('change', performFilter);
+    locationFilter.on('change', performFilter);
+});
+
 function openProductDetailModal(product, qty, avgCost, stockValue, statusLabel, badgeClass, imageUrl) {
     $('#m_image').attr('src', imageUrl);
     $('#m_name').text(product.name);

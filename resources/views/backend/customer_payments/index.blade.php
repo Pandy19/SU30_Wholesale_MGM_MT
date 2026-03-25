@@ -1,5 +1,14 @@
 @extends('backend.layouts.master')
 @section('title', 'Customer Payment | Wholesale MGM')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+<style>
+   .select2-container--bootstrap4 .select2-selection--single {
+      height: calc(2.25rem + 2px) !important;
+   }
+</style>
+@endpush
 @section('main-content')
 
 <div class="content-wrapper">
@@ -19,7 +28,7 @@
                 </div>
                 <div class="col-sm-6">
                     <ol class="breadcrumb float-sm-right">
-                        <li class="breadcrumb-item"><a href="#">Sale</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
                         <li class="breadcrumb-item active">Customer Payments</li>
                     </ol>
                 </div>
@@ -96,16 +105,16 @@
 <!-- ===================================================== -->
 <div class="card mb-3 border-0 shadow-sm">
 <div class="card-body">
-<form action="{{ route('customer_payments.index') }}" method="GET">
-    <div class="row">
+<form action="{{ route('customer_payments.index') }}" method="GET" id="filterForm">
+    <div class="row align-items-center">
         <div class="col-md-3">
-            <input type="text" name="search" class="form-control"
-                   placeholder="Invoice # or Customer..." value="{{ request('search') }}">
+            <input type="text" name="search" id="searchInput" class="form-control"
+                   placeholder="Search..." value="{{ request('search') }}">
         </div>
 
         <div class="col-md-2">
-            <select name="customer_id" class="form-control">
-                <option value="">All Customers</option>
+            <select name="customer_id" id="customerFilter" class="form-control select2">
+                <option value="">All Customer</option>
                 @foreach($customers as $cust)
                     <option value="{{ $cust->id }}" {{ request('customer_id') == $cust->id ? 'selected' : '' }}>{{ $cust->name }}</option>
                 @endforeach
@@ -113,16 +122,16 @@
         </div>
 
         <div class="col-md-2">
-            <select name="type" class="form-control">
-                <option value="">All Types</option>
+            <select name="type" id="typeFilter" class="form-control select2">
+                <option value="">All Type</option>
                 <option value="B2C" {{ request('type') == 'B2C' ? 'selected' : '' }}>Retail (B2C)</option>
                 <option value="B2B" {{ request('type') == 'B2B' ? 'selected' : '' }}>Wholesale (B2B)</option>
             </select>
         </div>
 
         <div class="col-md-2">
-            <select name="payment_status" class="form-control">
-                <option value="">All Status</option>
+            <select name="payment_status" id="statusFilter" class="form-control select2">
+                <option value="">All status</option>
                 <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
                 <option value="partial" {{ request('payment_status') == 'partial' ? 'selected' : '' }}>Partial</option>
                 <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>Unpaid</option>
@@ -131,11 +140,11 @@
         </div>
 
         <div class="col-md-2">
-            <input type="date" name="date" class="form-control" value="{{ request('date') }}">
+            <input type="date" name="date" id="dateFilter" class="form-control" value="{{ request('date') }}">
         </div>
 
         <div class="col-md-1 text-right">
-            <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-search"></i> Search</button>
+            <a href="{{ route('customer_payments.index') }}" class="btn btn-outline-secondary btn-block shadow-sm"><i class="fas fa-undo"></i></a>
         </div>
     </div>
 </form>
@@ -300,15 +309,8 @@
 </div>
 
 <!-- PAGINATION -->
-<div class="card-footer bg-white border-top py-3">
-    <div class="d-flex justify-content-between align-items-center">
-        <div class="text-muted small">
-            Showing {{ $sales_orders->firstItem() ?? 0 }} to {{ $sales_orders->lastItem() ?? 0 }} of {{ $sales_orders->total() }} total entries
-        </div>
-        <div>
-            {{ $sales_orders->appends(request()->query())->links('pagination::bootstrap-4') }}
-        </div>
-    </div>
+<div class="card-footer clearfix bg-white">
+    <x-pagination :data="$sales_orders" />
 </div>
 
 </div>
@@ -317,3 +319,39 @@
 </div>
 
 @endsection
+
+@push('scripts')
+<script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+    // Initialize Select2
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: '100%'
+    });
+
+    const filterForm = $('#filterForm');
+    const searchInput = $('#searchInput');
+    const customerFilter = $('#customerFilter');
+    const typeFilter = $('#typeFilter');
+    const statusFilter = $('#statusFilter');
+    const dateFilter = $('#dateFilter');
+
+    let timeout = null;
+
+    function submitForm() {
+        filterForm.submit();
+    }
+
+    searchInput.on('keyup', function() {
+        clearTimeout(timeout);
+        timeout = setTimeout(submitForm, 500);
+    });
+
+    customerFilter.on('change', submitForm);
+    typeFilter.on('change', submitForm);
+    statusFilter.on('change', submitForm);
+    dateFilter.on('change', submitForm);
+});
+</script>
+@endpush
