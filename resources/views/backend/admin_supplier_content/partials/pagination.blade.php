@@ -1,0 +1,1 @@
+<x-pagination :data="$suppliers" />

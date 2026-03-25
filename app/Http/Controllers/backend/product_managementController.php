@@ -36,7 +36,8 @@ class product_managementController extends Controller
                 'b.name as brand_name',
                 DB::raw('COUNT(DISTINCT sp.supplier_id) as supplier_count'),
                 DB::raw('MIN(sp.price) as best_price')
-            );
+            )
+            ->where('p.status', '!=', 'hidden');
 
         if (!empty($category_ids)) {
             $productsQuery->whereIn('p.category_id', (array)$category_ids);
