@@ -1,5 +1,14 @@
 @extends('backend.layouts.master')
 @section('title', 'Goods Return | Wholesale MGM')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+<style>
+   .select2-container--bootstrap4 .select2-selection--single {
+      height: calc(2.25rem + 2px) !important;
+   }
+</style>
+@endpush
 @section('main-content')
 
 <div class="content-wrapper">
@@ -83,11 +92,28 @@
 <form action="{{ route('supplier_returns.index') }}" method="GET">
 <div class="row">
     <div class="col-md-4">
-        <input type="text" name="search" class="form-control"
+        <input type="text" id="returnSearch" name="search" class="form-control"
                placeholder="Search PO / Product / SKU" value="{{ request('search') }}">
     </div>
-    <div class="col-md-2">
-        <button type="submit" class="btn btn-primary btn-block">Search</button>
+    <div class="col-md-4">
+        <select id="categoryFilter" name="category_id" class="form-control select2">
+            <option value="">All Categories</option>
+            @foreach($categories as $category)
+                <option value="{{ $category->id }}" {{ request('category_id') == $category->id ? 'selected' : '' }}>
+                    {{ $category->name }}
+                </option>
+            @endforeach
+        </select>
+    </div>
+    <div class="col-md-4">
+        <select id="brandFilter" name="brand_id" class="form-control select2">
+            <option value="">All Brands</option>
+            @foreach($brands as $brand)
+                <option value="{{ $brand->id }}" {{ request('brand_id') == $brand->id ? 'selected' : '' }}>
+                    {{ $brand->name }}
+                </option>
+            @endforeach
+        </select>
     </div>
 </div>
 </form>
@@ -124,6 +150,8 @@
     $po = $gr->purchaseOrder;
     $product = $item->product;
     $status = $item->resolution_status ?? 'Pending';
+    $category_id = $product->category_id ?? '';
+    $brand_id = $product->brand_id ?? '';
     
     // Format Inspector Identity: Name [Role]
     $inspectorName = $gr->approver->name ?? 'System';
@@ -147,7 +175,7 @@
         $imageUrl = asset('assets/dist/img/default-150x150.png');
     }
 @endphp
-<tr>
+<tr class="return-row" data-category="{{ $category_id }}" data-brand="{{ $brand_id }}">
     <td><small class="text-muted font-weight-bold">DSP-{{ str_pad($item->id, 4, '0', STR_PAD_LEFT) }}</small></td>
     <td><strong>{{ $po->po_number ?? 'N/A' }}</strong></td>
     <td>{{ $product->name ?? 'N/A' }}</td>
@@ -191,9 +219,7 @@
 <!-- PAGINATION -->
 <!-- ===================================================== -->
 <div class="card-footer clearfix bg-white">
-    <div class="float-right">
-        {{ $items->appends(request()->query())->links() }}
-    </div>
+    <x-pagination :data="$items" />
 </div>
 
 </div>
@@ -261,7 +287,58 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
 <script>
+$(document).ready(function() {
+    // Initialize Select2
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: '100%'
+    });
+
+    const returnSearch = $('#returnSearch');
+    const categoryFilter = $('#categoryFilter');
+    const brandFilter = $('#brandFilter');
+    const returnRows = $('.return-row');
+
+    function performFilter() {
+        const searchText = returnSearch.val().toLowerCase();
+        const selectedCat = categoryFilter.val();
+        const selectedBrand = brandFilter.val();
+
+        returnRows.each(function() {
+            const row = $(this);
+            const rowText = row.text().toLowerCase();
+            const catId = row.data('category').toString();
+            const brandId = row.data('brand').toString();
+
+            const matchesSearch = searchText === '' || rowText.includes(searchText);
+            const matchesCat = selectedCat === '' || catId === selectedCat;
+            const matchesBrand = selectedBrand === '' || brandId === selectedBrand;
+
+            if (matchesSearch && matchesCat && matchesBrand) {
+                row.show();
+            } else {
+                row.hide();
+            }
+        });
+
+        // Show "No data found" if all rows are hidden
+        if (returnRows.filter(':visible').length === 0) {
+            if ($('#noDataRow').length === 0) {
+                $('tbody').append('<tr id="noDataRow"><td colspan="11" class="text-center py-4 text-muted">No rejected items matching your filters.</td></tr>');
+            }
+        } else {
+            $('#noDataRow').remove();
+        }
+    }
+
+    // Trigger filtering on input change
+    returnSearch.on('keyup', performFilter);
+    categoryFilter.on('change', performFilter);
+    brandFilter.on('change', performFilter);
+});
+
 function viewDispute(id, product, qty, reason, status, notes, imageUrl, inspector, rejectDate, resolveDate) {
     document.getElementById('v_product').innerText = product;
     document.getElementById('v_qty').innerText = qty;

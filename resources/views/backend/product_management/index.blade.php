@@ -22,7 +22,7 @@
             </div>
             <div class="col-sm-6">
                <ol class="breadcrumb float-sm-right">
-                  <li class="breadcrumb-item"><a href="#">Suppliers</a></li>
+                  <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
                   <li class="breadcrumb-item active">Product Management</li>
                </ol>
             </div>
@@ -34,16 +34,17 @@
          <!-- ===================================================== -->
          <!-- FILTERS -->
          <!-- ===================================================== -->
-         <div class="card mb-3">
+         <div class="card mb-3 shadow-sm border-0">
             <div class="card-body">
-               <div class="row">
+               <div class="row align-items-center">
                   <div class="col-md-3">
-                     <input type="text" id="productSearch" class="form-control shadow-sm"
+                     <input type="text" id="productSearch" class="form-control"
                         placeholder="Search product name or SKU...">
                   </div>
 
                   <div class="col-md-3">
-                     <select id="categoryFilter" class="form-control select2 shadow-xs" multiple="multiple" data-placeholder="All Categories">
+                     <select id="categoryFilter" class="form-control select2">
+                        <option value="">All Categories</option>
                         @foreach($categories as $cat)
                            <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                         @endforeach
@@ -51,7 +52,8 @@
                   </div>
 
                   <div class="col-md-3">
-                     <select id="brandFilter" class="form-control select2 shadow-xs" multiple="multiple" data-placeholder="All Brands">
+                     <select id="brandFilter" class="form-control select2">
+                        <option value="">All Brands</option>
                         @foreach($brands as $brand)
                            <option value="{{ $brand->id }}" data-category="{{ $brand->category_id }}">
                               {{ $brand->name }}
@@ -60,9 +62,9 @@
                      </select>
                   </div>
 
-                  <div class="col-md-3">
-                     <button type="button" class="btn btn-warning btn-block position-relative shadow-sm" data-toggle="modal" data-target="#cartModal">
-                        <i class="fas fa-shopping-cart mr-1"></i> View Cart
+                  <div class="col-md-3 text-right">
+                     <button type="button" class="btn btn-warning btn-block position-relative shadow-sm font-weight-bold" data-toggle="modal" data-target="#cartModal">
+                        <i class="fas fa-shopping-cart mr-1"></i> VIEW CART
                         <span class="badge badge-danger navbar-badge" style="position: absolute; top: -5px; right: -5px;">0</span>
                      </button>
                   </div>
@@ -212,20 +214,19 @@ $(document).ready(function() {
 
     function performFilter() {
         const searchText = productSearch.val().toLowerCase();
-        const selectedCats = categoryFilter.val(); // Returns array or null
-        const selectedBrands = brandFilter.val(); // Returns array or null
+        const selectedCat = categoryFilter.val(); 
+        const selectedBrand = brandFilter.val(); 
 
         productRows.each(function() {
             const row = $(this);
             const rowText = row.text().toLowerCase();
-            const rowCatId = row.data('category');
-            const rowBrandId = row.data('brand');
+            const rowCatId = row.data('category').toString();
+            const rowBrandId = row.data('brand').toString();
 
             const matchesSearch = searchText === '' || rowText.includes(searchText);
             
-            // For multiple select, check if the ID is in the selected array
-            const matchesCat = !selectedCats || selectedCats.length === 0 || selectedCats.includes(rowCatId.toString());
-            const matchesBrand = !selectedBrands || selectedBrands.length === 0 || selectedBrands.includes(rowBrandId.toString());
+            const matchesCat = !selectedCat || selectedCat === "" || rowCatId === selectedCat;
+            const matchesBrand = !selectedBrand || selectedBrand === "" || rowBrandId === selectedBrand;
 
             if (matchesSearch && matchesCat && matchesBrand) {
                 row.show();
@@ -237,7 +238,7 @@ $(document).ready(function() {
         // Show "No data found" if all rows are hidden
         if (productRows.filter(':visible').length === 0) {
             if ($('#noDataRow').length === 0) {
-                tableBody.append('<tr id="noDataRow"><td colspan="8" class="text-center py-4 text-muted">No products matching your filters.</td></tr>');
+                tableBody.append('<tr id="noDataRow"><td colspan="8" class="text-center py-4 text-muted"><i class="fas fa-search mr-2"></i>No products matching your filters.</td></tr>');
             }
         } else {
             $('#noDataRow').remove();
@@ -247,23 +248,25 @@ $(document).ready(function() {
     productSearch.on('keyup', performFilter);
     
     categoryFilter.on('change', function() {
-        const catIds = $(this).val();
+        const catId = $(this).val();
         
-        // Update brand filter options based on selected categories (UI only)
-        if (catIds && catIds.length > 0) {
-            brandFilter.find('option').each(function() {
-                const opt = $(this);
-                const optCat = opt.data('category');
-                if (optCat && catIds.includes(optCat.toString())) {
-                    opt.prop('disabled', false);
-                } else {
-                    opt.prop('disabled', true);
-                }
-            });
-        } else {
-            brandFilter.find('option').prop('disabled', false);
+        // Update brand filter options based on selected category
+        brandFilter.val(''); // Reset selection
+        
+        brandFilter.find('option').each(function() {
+            const opt = $(this);
+            const optCat = opt.data('category');
+            
+            if (!optCat || !catId || optCat.toString() === catId) {
+                opt.show();
+            } else {
+                opt.hide();
+            }
+        });
+
+        if (brandFilter.hasClass('select2-hidden-accessible')) {
+            brandFilter.trigger('change.select2');
         }
-        brandFilter.trigger('change.select2');
         
         performFilter();
     });

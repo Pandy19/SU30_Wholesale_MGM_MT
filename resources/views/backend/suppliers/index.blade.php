@@ -1,5 +1,14 @@
 @extends('backend.layouts.master')
 @section('title', 'Suppliers | Wholesale MGM')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+<style>
+   .select2-container--bootstrap4 .select2-selection--single {
+      height: calc(2.25rem + 2px) !important;
+   }
+</style>
+@endpush
 @section('main-content')
 <!-- Content Wrapper. Contains page content -->
 <div class="content-wrapper">
@@ -8,7 +17,7 @@
       <div class="container-fluid">
          <div class="row mb-2">
             <div class="col-sm-6">
-               <h1 class="m-0">Electronics – Brand & Supplier Overview</h1>
+               <h1 class="m-0 font-weight-bold text-dark">Electronics – Brand & Supplier Overview</h1>
                <p class="text-muted mb-0">
                   Click a brand row to view suppliers for each electronic brand.
                </p>
@@ -16,7 +25,7 @@
             <!-- /.col -->
             <div class="col-sm-6">
                <ol class="breadcrumb float-sm-right">
-                  <li class="breadcrumb-item"><a href="#">Supliers</a></li>
+                  <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
                   <li class="breadcrumb-item active">Brand Supplier</li>
                </ol>
             </div>
@@ -34,19 +43,19 @@
             <div class="col-md-4">
                <input type="text" id="brandSearch"
                   class="form-control"
-                  placeholder="Search...">
+                  placeholder="Search brand name...">
             </div>
             <div class="col-md-2">
-               <select id="categoryFilter" class="form-control shadow-xs">
-                  <option value="">All Categories (Default)</option>
+               <select id="categoryFilter" class="form-control select2">
+                  <option value="">All Categories</option>
                   @foreach($categories as $cat)
                      <option value="{{ $cat->id }}">{{ $cat->name }}</option>
                   @endforeach
                </select>
             </div>
             <div class="col-md-2">
-               <select id="brandFilter" class="form-control shadow-xs">
-                  <option value="">All Brands (Default)</option>
+               <select id="brandFilter" class="form-control select2">
+                  <option value="">All Brands</option>
                   @foreach($allBrands as $brand)
                      <option value="{{ $brand->id }}" data-category="{{ $brand->category_id }}">
                         {{ $brand->name }}
@@ -390,11 +399,19 @@
 @endsection
 
 @push('scripts')
+<script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
 <script>
 $(document).ready(function() {
+    // Initialize Select2
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: '100%'
+    });
+
     const brandSearch = $('#brandSearch');
     const categoryFilter = $('#categoryFilter');
     const brandFilter = $('#brandFilter');
+    const brandAccordion = $('#brandAccordion');
     const brandCards = $('.brand-card');
 
     function performFilter() {
@@ -405,22 +422,31 @@ $(document).ready(function() {
         brandCards.each(function() {
             const card = $(this);
             const cardText = card.text().toLowerCase();
-            const cardCatId = card.data('category');
+            const cardCatId = card.data('category').toString();
             
-            // Extract Brand ID from collapse link or similar
+            // Extract Brand ID from collapse link
             const brandLink = card.find('a[data-toggle="collapse"]').attr('href');
             const cardBrandId = brandLink ? brandLink.replace('#brandCollapse', '') : null;
 
             const matchesSearch = searchText === '' || cardText.includes(searchText);
-            const matchesCat = selectedCat === '' || cardCatId == selectedCat;
-            const matchesBrand = selectedBrandId === '' || cardBrandId == selectedBrandId;
+            const matchesCat = selectedCat === '' || cardCatId === selectedCat;
+            const matchesBrand = selectedBrandId === '' || (cardBrandId && cardBrandId === selectedBrandId);
 
             if (matchesSearch && matchesCat && matchesBrand) {
-                card.fadeIn(200);
+                card.show();
             } else {
                 card.hide();
             }
         });
+
+        // Show "No data found" if all cards are hidden
+        if (brandCards.filter(':visible').length === 0) {
+            if ($('#noDataAlert').length === 0) {
+                brandAccordion.append('<div id="noDataAlert" class="alert alert-info py-4 text-center"><i class="fas fa-search mr-2"></i>No brands or suppliers matching your current filters.</div>');
+            }
+        } else {
+            $('#noDataAlert').remove();
+        }
     }
 
     // Filter Logic
@@ -430,7 +456,7 @@ $(document).ready(function() {
         const catId = $(this).val();
         
         // Synchronize Brand Dropdown: Show only brands in this category
-        brandFilter.val(''); // Reset brand selection when category changes
+        brandFilter.val(''); 
         
         if (catId) {
             brandFilter.find('option').each(function() {
@@ -444,6 +470,10 @@ $(document).ready(function() {
             });
         } else {
             brandFilter.find('option').show();
+        }
+
+        if (brandFilter.hasClass('select2-hidden-accessible')) {
+            brandFilter.trigger('change.select2');
         }
         
         performFilter();

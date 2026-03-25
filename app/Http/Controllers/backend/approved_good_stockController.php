@@ -12,10 +12,18 @@ use App\Models\StockMovement;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
+use App\Models\Brand;
+use App\Models\Category;
+use App\Models\Supplier;
+
 class approved_good_stockController extends Controller
 {
     public function index(Request $request)
     {
+        $brands = Brand::where('status', 'active')->orderBy('name')->get();
+        $categories = Category::where('status', 'active')->orderBy('name')->get();
+        $suppliers = Supplier::where('status', 'active')->orderBy('company_name')->get();
+
         // Fetch items where accepted_qty > stocked_qty
         $query = GoodsReceivingItem::whereColumn('accepted_qty', '>', 'stocked_qty')
             ->where('is_stocked', false)
@@ -85,7 +93,7 @@ class approved_good_stockController extends Controller
             $item->total_value = $item->pending_qty * $unit_cost;
         }
 
-        return view('backend.approved_good_stock.index', compact('items', 'locations'));
+        return view('backend.approved_good_stock.index', compact('items', 'locations', 'brands', 'categories', 'suppliers'));
     }
 
     public function addToStock(Request $request)

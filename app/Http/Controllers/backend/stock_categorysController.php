@@ -28,58 +28,82 @@ class stock_categorysController extends Controller
         $categoryId = $request->category_id;
         $status = $request->status;
 
-        // Fetch categories that have products, and brands for those products
+        // Fetch categories that have products with stock matching filters
         $categoriesQuery = Category::query();
         
         if ($categoryId) {
             $categoriesQuery->where('id', $categoryId);
         }
 
-        $categories = $categoriesQuery->orderBy('name')->get()->map(function($category) use ($search, $brandId, $status) {
-            $brands = Brand::whereHas('products', function($q) use ($category, $search, $brandId, $status) {
-                $q->where('category_id', $category->id);
-                if ($search) {
-                    $q->where('name', 'like', "%{$search}%")->orWhere('sku', 'like', "%{$search}%");
-                }
-                if ($brandId) {
-                    $q->where('brand_id', $brandId);
-                }
-                // Status filtering (Normal vs Low Stock)
+        // Only show categories that have products in stock matching filters
+        $categoriesQuery->whereHas('brands.products', function($q) use ($search, $brandId, $status) {
+            if ($search) {
+                $q->where(function($sq) use ($search) {
+                    $sq->where('name', 'like', "%{$search}%")->orWhere('sku', 'like', "%{$search}%");
+                });
+            }
+            if ($brandId) {
+                $q->where('brand_id', $brandId);
+            }
+            // Status filtering (Normal vs Low Stock)
+            $q->whereHas('stocks', function($sq) use ($status) {
                 if ($status == 'low_stock') {
-                    $q->whereHas('stocks', function($sq) { $sq->where('quantity', '<', 5); });
+                    $sq->where('quantity', '<', 5);
                 } elseif ($status == 'normal') {
-                    $q->whereHas('stocks', function($sq) { $sq->where('quantity', '>=', 5); });
+                    $sq->where('quantity', '>=', 5);
                 }
-                $q->whereHas('stocks');
-            })->get()->map(function($brand) use ($category, $search, $status) {
-                $products = Product::where('brand_id', $brand->id)
-                    ->where('category_id', $category->id)
-                    ->whereHas('stocks')
-                    ->with(['stocks.location.category', 'stocks.location.brand'])
-                    ->when($search, function($q) use ($search) {
-                        $q->where('name', 'like', "%{$search}%")->orWhere('sku', 'like', "%{$search}%");
-                    })
-                    ->when($status == 'low_stock', function($q) {
-                        $q->whereHas('stocks', function($sq) { $sq->where('quantity', '<', 5); });
-                    })
-                    ->when($status == 'normal', function($q) {
-                        $q->whereHas('stocks', function($sq) { $sq->where('quantity', '>=', 5); });
-                    })
-                    ->get();
+            });
+        });
+
+        $perPage = $request->input('per_page', 10);
+        $categories = $categoriesQuery->orderBy('name')->paginate($perPage);
+
+        // Map data for display
+        $categories->getCollection()->transform(function($category) use ($search, $brandId, $status) {
+            $brands = Brand::where('category_id', $category->id)
+                ->whereHas('products', function($q) use ($search, $brandId, $status) {
+                    if ($search) {
+                        $q->where(function($sq) use ($search) {
+                            $sq->where('name', 'like', "%{$search}%")->orWhere('sku', 'like', "%{$search}%");
+                        });
+                    }
+                    if ($brandId) {
+                        $q->where('brand_id', $brandId);
+                    }
+                    $q->whereHas('stocks', function($sq) use ($status) {
+                        if ($status == 'low_stock') {
+                            $sq->where('quantity', '<', 5);
+                        } elseif ($status == 'normal') {
+                            $sq->where('quantity', '>=', 5);
+                        }
+                    });
+                })->get()->map(function($brand) use ($category, $search, $status) {
+                    $products = Product::where('brand_id', $brand->id)
+                        ->where('category_id', $category->id)
+                        ->whereHas('stocks', function($q) use ($status) {
+                            if ($status == 'low_stock') {
+                                $q->where('quantity', '<', 5);
+                            } elseif ($status == 'normal') {
+                                $q->where('quantity', '>=', 5);
+                            }
+                        })
+                        ->with(['stocks.location.category', 'stocks.location.brand'])
+                        ->when($search, function($q) use ($search) {
+                            $q->where(function($sq) use ($search) {
+                                $sq->where('name', 'like', "%{$search}%")->orWhere('sku', 'like', "%{$search}%");
+                            });
+                        })
+                        ->get();
                 
                 $brand->products = $products;
                 $brand->total_qty = $products->sum(function($p) { return $p->stocks->sum('quantity'); });
                 $brand->has_low_stock = $products->contains(function($p) { return $p->stocks->sum('quantity') < 5; });
                 return $brand;
-            })->filter(function($brand) {
-                return $brand->products->count() > 0;
             });
 
             $category->brands_stock = $brands;
             $category->total_qty = $brands->sum('total_qty');
             return $category;
-        })->filter(function($category) {
-            return $category->brands_stock->count() > 0;
         });
 
         $brands = Brand::orderBy('name')->get();

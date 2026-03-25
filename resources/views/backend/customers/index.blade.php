@@ -1,5 +1,14 @@
 @extends('backend.layouts.master')
 @section('title', 'Customer Lists | Wholesale MGM')
+@push('styles')
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2/css/select2.min.css') }}">
+<link rel="stylesheet" href="{{ asset('assets/plugins/select2-bootstrap4-theme/select2-bootstrap4.min.css') }}">
+<style>
+   .select2-container--bootstrap4 .select2-selection--single {
+      height: calc(2.25rem + 2px) !important;
+   }
+</style>
+@endpush
 @section('main-content')
 <div class="content-wrapper">
    <section class="content">
@@ -72,34 +81,28 @@
                   <div class="col-md-4">
                      <div class="form-group">
                         <label>Search</label>
-                        <input type="text" name="search" class="form-control" placeholder="Search by name, code, or phone..." value="{{ request('search') }}">
+                        <input type="text" id="customerSearch" name="search" class="form-control" placeholder="Search by name, code, or phone..." value="{{ request('search') }}">
                      </div>
                   </div>
-                  <div class="col-md-3">
+                  <div class="col-md-4">
                      <div class="form-group">
                         <label>Type</label>
-                        <select name="type" class="form-control">
+                        <select id="typeFilter" name="type" class="form-control select2">
                            <option value="">All Types</option>
                            <option value="B2B" {{ request('type') == 'B2B' ? 'selected' : '' }}>B2B (Wholesale)</option>
                            <option value="B2C" {{ request('type') == 'B2C' ? 'selected' : '' }}>B2C (Retail)</option>
                         </select>
                      </div>
                   </div>
-                  <div class="col-md-3">
+                  <div class="col-md-4">
                      <div class="form-group">
                         <label>Status</label>
-                        <select name="status" class="form-control">
+                        <select id="statusFilter" name="status" class="form-control select2">
                            <option value="">All Status</option>
                            <option value="active" {{ request('status') == 'active' ? 'selected' : '' }}>Active</option>
                            <option value="on_hold" {{ request('status') == 'on_hold' ? 'selected' : '' }}>On Hold</option>
                            <option value="blacklisted" {{ request('status') == 'blacklisted' ? 'selected' : '' }}>Blacklisted</option>
                         </select>
-                     </div>
-                  </div>
-                  <div class="col-md-2">
-                     <div class="form-group">
-                        <label>&nbsp;</label>
-                        <button type="submit" class="btn btn-primary btn-block"><i class="fas fa-search mr-1"></i> Search</button>
                      </div>
                   </div>
                </div>
@@ -124,7 +127,7 @@
                   </thead>
                   <tbody>
                      @forelse($customers as $customer)
-                     <tr>
+                     <tr class="customer-row" data-type="{{ $customer->type }}" data-status="{{ $customer->status }}">
                         <td class="px-4 font-weight-bold">{{ $customer->customer_code }}</td>
                         <td>
                            <div class="d-flex align-items-center">
@@ -255,12 +258,7 @@
             </div>
          </div>
          <div class="card-footer bg-white border-top">
-            <div class="d-flex justify-content-between align-items-center">
-               <p class="text-muted mb-0 small">Showing {{ $customers->firstItem() ?? 0 }} to {{ $customers->lastItem() ?? 0 }} of {{ $customers->total() }} entries</p>
-               <div>
-                  {{ $customers->appends(request()->query())->links('pagination::bootstrap-4') }}
-               </div>
-            </div>
+            <x-pagination :data="$customers" />
          </div>
       </div>
    </section>
@@ -268,4 +266,58 @@
 
 @include('backend.customers.add')
 
+@endsection
+
+@section('scripts')
+<script src="{{ asset('assets/plugins/select2/js/select2.full.min.js') }}"></script>
+<script>
+$(document).ready(function() {
+    // Initialize Select2
+    $('.select2').select2({
+        theme: 'bootstrap4',
+        width: '100%'
+    });
+
+    const customerSearch = $('#customerSearch');
+    const typeFilter = $('#typeFilter');
+    const statusFilter = $('#statusFilter');
+    const customerRows = $('.customer-row');
+
+    function performFilter() {
+        const searchText = customerSearch.val().toLowerCase();
+        const selectedType = typeFilter.val();
+        const selectedStatus = statusFilter.val();
+
+        customerRows.each(function() {
+            const row = $(this);
+            const rowText = row.text().toLowerCase();
+            const type = row.data('type');
+            const status = row.data('status');
+
+            const matchesSearch = searchText === '' || rowText.includes(searchText);
+            const matchesType = selectedType === '' || type === selectedType;
+            const matchesStatus = selectedStatus === '' || status === selectedStatus;
+
+            if (matchesSearch && matchesType && matchesStatus) {
+                row.show();
+            } else {
+                row.hide();
+            }
+        });
+
+        // Show "No data found" if all rows are hidden
+        if (customerRows.filter(':visible').length === 0) {
+            if ($('#noDataRow').length === 0) {
+                $('tbody').append('<tr id="noDataRow"><td colspan="7" class="text-center py-5 text-muted">No customers matching your filters.</td></tr>');
+            }
+        } else {
+            $('#noDataRow').remove();
+        }
+    }
+
+    customerSearch.on('keyup', performFilter);
+    typeFilter.on('change', performFilter);
+    statusFilter.on('change', performFilter);
+});
+</script>
 @endsection
