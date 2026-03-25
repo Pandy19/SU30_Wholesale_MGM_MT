@@ -27,4 +27,9 @@ class Supplier extends Model
                     ->withPivot('price', 'available_qty')
                     ->withTimestamps();
     }
+
+    public function supplierProducts()
+    {
+        return $this->hasMany(SupplierProduct::class);
+    }
 }

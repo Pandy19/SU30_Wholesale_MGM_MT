@@ -22,6 +22,7 @@ use App\Http\Controllers\backend\profit_reportController;
 use App\Http\Controllers\backend\admin_loginController;
 use App\Http\Controllers\backend\admin_registerController;
 use App\Http\Controllers\backend\UserManagementController;
+use App\Http\Controllers\backend\AdminSupplierContentController;
 use App\Http\Controllers\backend\supplier_dashboardController;
 use App\Http\Controllers\backend\StockController;
 use App\Http\Controllers\backend\SettingController;
@@ -50,6 +51,16 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/user_management', 'store')->name('user_management.store');
             Route::put('/user_management/{id}', 'update')->name('user_management.update');
             Route::delete('/user_management/{id}', 'destroy')->name('user_management.destroy');
+        });
+
+        // Supplier Content Moderation
+        Route::controller(AdminSupplierContentController::class)->group(function () {
+            Route::get('/admin/supplier_content', 'index')->name('admin.supplier_content.index');
+            Route::get('/admin/supplier_content/products/{id}', 'getProducts')->name('admin.supplier_content.get_products');
+            Route::get('/admin/supplier_content/{id}/edit', 'edit')->name('admin.supplier_content.edit');
+            Route::put('/admin/supplier_content/{id}', 'update')->name('admin.supplier_content.update');
+            Route::delete('/admin/supplier_content/{id}', 'destroy')->name('admin.supplier_content.destroy');
+            Route::post('/admin/supplier_content/{id}/toggle-visibility', 'toggleVisibility')->name('admin.supplier_content.toggle_visibility');
         });
 
         // Sensitive Deletions (Only Admin/Owner)

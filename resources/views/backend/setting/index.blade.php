@@ -68,8 +68,8 @@
                                     <small class="text-muted text-uppercase smaller">Status</small>
                                 </div>
                                 <div class="text-center">
-                                    <h6 class="font-weight-bold mb-0 text-info">{{ $user->created_at->diffInMonths() }}m</h6>
-                                    <small class="text-muted text-uppercase smaller">Age</small>
+                                    <h6 class="font-weight-bold mb-0 text-info">{{ $user->created_at->format('M Y') }}</h6>
+                                    <small class="text-muted text-uppercase smaller">Joined</small>
                                 </div>
                             </div>
 

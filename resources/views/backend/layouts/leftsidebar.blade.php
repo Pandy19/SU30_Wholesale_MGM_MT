@@ -117,6 +117,16 @@
         </li>
         @endif
 
+                @if(in_array(auth()->user()->role, ['owner', 'admin']))
+        <li class="nav-item">
+          <a href="{{ route('admin.supplier_content.index') }}"
+             class="nav-link {{ request()->routeIs('admin.supplier_content.*') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-edit"></i>
+            <p>Supplier Moderation</p>
+          </a>
+        </li>
+        @endif
+
         <!-- STOCKS -->
         <li class="nav-header">INVENTORY</li>
 
