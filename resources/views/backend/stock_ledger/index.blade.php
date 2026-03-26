@@ -23,17 +23,6 @@
                     </p>
                 </div>
                 <div class="col-sm-6 text-right">
-                    <div class="btn-group">
-                        <button class="btn btn-outline-secondary" onclick="window.print()">
-                            <i class="fas fa-print"></i>
-                        </button>
-                        <button class="btn btn-outline-danger">
-                            <i class="fas fa-file-pdf"></i>
-                        </button>
-                        <button class="btn btn-outline-success">
-                            <i class="fas fa-file-excel"></i>
-                        </button>
-                    </div>
                     <ol class="breadcrumb float-sm-right mt-2">
                         <li class="breadcrumb-item"><a href="{{ url('/') }}">Home</a></li>
                         <li class="breadcrumb-item active">Stock Ledger</li>

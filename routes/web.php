@@ -53,6 +53,8 @@ Route::middleware(['auth'])->group(function () {
             Route::post('/user_management', 'store')->name('user_management.store');
             Route::put('/user_management/{id}', 'update')->name('user_management.update');
             Route::delete('/user_management/{id}', 'destroy')->name('user_management.destroy');
+            Route::get('/user_management/import/template', 'downloadTemplate')->name('user_management.import.template');
+            Route::post('/user_management/import', 'import')->name('user_management.import');
         });
 
         // Supplier Content Moderation

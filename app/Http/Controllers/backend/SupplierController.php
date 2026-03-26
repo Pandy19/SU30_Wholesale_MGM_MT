@@ -147,8 +147,10 @@ class SupplierController extends Controller
             'email'           => $request->email,
             'password'        => Hash::make($request->password),
             'status'          => $request->status, // active or inactive
+            'role'            => 'supplier',
             'role_id'         => $supplierRole->id,
             'profile_picture' => $profilePicturePath,
+            'user_code'       => $this->generateUserCode('supplier'),
         ]);
 
         // 2. Generate Supplier Code
@@ -179,6 +181,28 @@ class SupplierController extends Controller
         ]);
 
         return redirect()->route('suppliers.index')->with('success', 'Supplier and User Account created successfully');
+    }
+
+    private function generateUserCode($roleSlug)
+    {
+        // Generate User Code: RoleName-001-MMO
+        $roleName = ucfirst($roleSlug);
+        $prefix = $roleName . '-';
+        
+        // Find the highest existing number for this prefix across ALL users
+        $lastUserWithPrefix = User::where('user_code', 'LIKE', "{$prefix}%")
+            ->orderBy('user_code', 'desc')
+            ->first();
+        
+        $nextNumber = 1;
+        if ($lastUserWithPrefix && $lastUserWithPrefix->user_code) {
+            // Extract the number from prefix-XXX-MMO
+            $parts = explode('-', $lastUserWithPrefix->user_code);
+            if (count($parts) >= 2 && is_numeric($parts[1])) {
+                $nextNumber = intval($parts[1]) + 1;
+            }
+        }
+        return $prefix . str_pad($nextNumber, 3, '0', STR_PAD_LEFT) . '-MMO';
     }
 
     public function storeCategory(Request $request)

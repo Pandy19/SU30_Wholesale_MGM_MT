@@ -1,24 +1,30 @@
 <!-- AVATAR -->
 <div class="form-group text-center mb-3">
     <label class="d-block font-weight-bold mb-2">Profile Avatar</label>
-    <div class="avatar-wrapper mx-auto" style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; border: 3px solid #007bff; position: relative; cursor: pointer;">
+    <div class="avatar-wrapper mx-auto @error('avatar') is-invalid @enderror" style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; border: 3px solid #007bff; position: relative; cursor: pointer;">
         <label for="avatarInputEdit" class="avatar-label mb-0">
             <img src="{{ asset('assets/dist/img/MMOLOGO.png') }}" id="avatarPreviewEdit" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover;">
         </label>
         <input type="file" id="avatarInputEdit" name="avatar" accept="image/*" hidden>
     </div>
-    <small class="text-muted d-block mt-2">Click to change (Optional)</small>
+    @error('avatar')
+        <span class="text-danger small d-block mt-1">{{ $message }}</span>
+    @else
+        <small class="text-muted d-block mt-2">Click to change (Optional)</small>
+    @enderror
 </div>
 
 <!-- BASIC INFO -->
 <div class="form-row">
     <div class="form-group col-md-6">
         <label>Full Name</label>
-        <input type="text" name="name" id="edit_name" class="form-control" placeholder="Enter full name" required>
+        <input type="text" name="name" id="edit_name" class="form-control @error('name') is-invalid @enderror" placeholder="Enter full name" required>
+        @error('name') <span class="invalid-feedback">{{ $message }}</span> @enderror
     </div>
     <div class="form-group col-md-6">
         <label>Email Address</label>
-        <input type="email" name="email" id="edit_email" class="form-control" placeholder="Enter email" required>
+        <input type="email" name="email" id="edit_email" class="form-control @error('email') is-invalid @enderror" placeholder="Enter email" required>
+        @error('email') <span class="invalid-feedback">{{ $message }}</span> @enderror
     </div>
 </div>
 

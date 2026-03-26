@@ -14,6 +14,7 @@ class ShelfControlController extends Controller
     public function index()
     {
         $shelves = StockLocation::with(['brand', 'category', 'stocks.product'])
+            ->where('status', 'active')
             ->orderBy('created_at', 'desc')
             ->get()
             ->map(function($shelf) {

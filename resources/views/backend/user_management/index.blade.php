@@ -11,6 +11,9 @@
                     <h1>User Management</h1>
                 </div>
                 <div class="col-sm-6 text-right">
+                    <button type="button" class="btn btn-info mr-2" data-toggle="modal" data-target="#importUserModal">
+                        <i class="fas fa-file-import mr-1"></i> Import User
+                    </button>
                     <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#createUserModal">
                         <i class="fas fa-plus mr-1"></i> Create New User
                     </button>
@@ -21,7 +24,80 @@
 
     <section class="content">
         <div class="container-fluid">
+            {{-- User Statistics --}}
+            <div class="row">
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-info">
+                        <div class="inner">
+                            <h3>{{ number_format($stats['total']) }}</h3>
+                            <p>Total User</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-warning">
+                        <div class="inner">
+                            <h3>{{ number_format($stats['pending']) }}</h3>
+                            <p>Pending User</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-user-clock text-white"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-success">
+                        <div class="inner">
+                            <h3>{{ number_format($stats['active']) }}</h3>
+                            <p>Active User</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-user-check"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-6">
+                    <div class="small-box bg-secondary">
+                        <div class="inner">
+                            <h3>{{ number_format($stats['inactive']) }}</h3>
+                            <p>Inactive User</p>
+                        </div>
+                        <div class="icon">
+                            <i class="fas fa-user-slash"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             {{-- Alerts are handled by SweetAlert2 in master layout --}}
+
+            {{-- General Validation Errors --}}
+            @if($errors->any())
+                <div class="alert alert-danger alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h5><i class="icon fas fa-ban"></i> Validation Errors!</h5>
+                    <ul class="mb-0">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            @if(session('import_errors'))
+                <div class="alert alert-danger alert-dismissible">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <h5><i class="icon fas fa-ban"></i> Import Errors!</h5>
+                    <ul class="mb-0">
+                        @foreach(session('import_errors') as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
             <div class="card card-outline card-primary">
                 <div class="card-header">
@@ -121,11 +197,56 @@
     </div>
 </div>
 
+<!-- IMPORT USER MODAL -->
+<div class="modal fade" id="importUserModal" tabindex="-1" role="dialog" aria-labelledby="importUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title text-white" id="importUserModalLabel">Import Users from CSV</h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <form action="{{ route('user_management.import') }}" method="POST" enctype="multipart/form-data">
+                @csrf
+                <div class="modal-body">
+                    <div class="alert alert-info">
+                        <p class="mb-1"><i class="fas fa-info-circle mr-1"></i> <strong>Instructions:</strong></p>
+                        <ul class="mb-0 pl-3">
+                            <li>Download the template file first.</li>
+                            <li>Fill in the user details (name, email, role, password).</li>
+                            <li>The <strong>role</strong> column must match an existing role (e.g., admin, staff, accountant).</li>
+                            <li>The password must be at least 8 characters.</li>
+                        </ul>
+                    </div>
+                    <div class="form-group">
+                        <label for="csv_file">Select CSV File</label>
+                        <div class="custom-file">
+                            <input type="file" name="csv_file" class="custom-file-input" id="csv_file" accept=".csv" required>
+                            <label class="custom-file-label" for="csv_file">Choose file...</label>
+                        </div>
+                    </div>
+                    <div class="text-center mt-3">
+                        <a href="{{ route('user_management.import.template') }}" class="btn btn-sm btn-link">
+                            <i class="fas fa-download mr-1"></i> Download CSV Template
+                        </a>
+                    </div>
+                </div>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button type="submit" class="btn btn-info text-white">Import Users</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
 $(document).ready(function() {
     const currentUserRole = "{{ auth()->user()->role }}";
     
+<<<<<<< Updated upstream
     // AJAX FETCH FUNCTION
     function fetchUsers(targetUrl = null) {
         const url = targetUrl || "{{ route('user_management.index') }}";
@@ -148,6 +269,23 @@ $(document).ready(function() {
                 ajaxData.per_page = perPage;
             }
         }
+=======
+    // Custom File Input
+    $('.custom-file-input').on('change', function() {
+        let fileName = $(this).val().split('\\').pop();
+        $(this).next('.custom-file-label').addClass("selected").html(fileName);
+    });
+
+    // AJAX SEARCH
+    let searchTimer;
+    $('#userSearchInput').on('keyup', function() {
+        clearTimeout(searchTimer);
+        let query = $(this).val();
+        searchTimer = setTimeout(function() {
+            fetchUsers(1, query);
+        }, 500);
+    });
+>>>>>>> Stashed changes
 
         $.ajax({
             url: url,
