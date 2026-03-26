@@ -126,40 +126,70 @@
 $(document).ready(function() {
     const currentUserRole = "{{ auth()->user()->role }}";
     
-    // AJAX SEARCH
-    let searchTimer;
-    $('#userSearchInput').on('keyup', function() {
-        clearTimeout(searchTimer);
-        let query = $(this).val();
-        searchTimer = setTimeout(function() {
-            fetchUsers(1, query);
-        }, 500);
-    });
+    // AJAX FETCH FUNCTION
+    function fetchUsers(targetUrl = null) {
+        const url = targetUrl || "{{ route('user_management.index') }}";
+        const query = $('#userSearchInput').val();
+        const perPage = $('select[name="per_page"]').val() || 10;
+        
+        let ajaxData = {};
+        // If we're not using a specific pagination URL, we need to pass search/perPage
+        if (!targetUrl) {
+            ajaxData = {
+                search: query,
+                per_page: perPage,
+                page: 1
+            };
+        } else {
+            // If targetUrl is from pagination, it already contains page and potentially search/per_page.
+            // However, we want to ensure per_page remains consistent with the current selection
+            // if it's not already in the URL.
+            if (targetUrl.indexOf('per_page=') === -1) {
+                ajaxData.per_page = perPage;
+            }
+        }
 
-    // PAGINATION AJAX
-    $(document).on('click', '.pagination a', function(e) {
-        e.preventDefault();
-        let page = $(this).attr('href').split('page=')[1];
-        let query = $('#userSearchInput').val();
-        fetchUsers(page, query);
-    });
-
-    // ROWS PER PAGE AJAX
-    $(document).on('change', 'select[name="per_page"]', function(e) {
-        e.preventDefault();
-        let query = $('#userSearchInput').val();
-        fetchUsers(1, query, $(this).val());
-    });
-
-    function fetchUsers(page, query = '', perPage = '') {
-        perPage = perPage || $('select[name="per_page"]').val() || 10;
         $.ajax({
-            url: "{{ route('user_management.index') }}?page=" + page + "&search=" + query + "&per_page=" + perPage,
+            url: url,
+            method: 'GET',
+            data: ajaxData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            },
             success: function(data) {
                 $('#userTableContainer').html(data);
+                // Maintain focus or cursor position if needed, though usually not for pagination
+            },
+            error: function(xhr) {
+                console.error("Error fetching users:", xhr);
+                // Optionally show a toast/alert if it fails
             }
         });
     }
+
+    // SEARCH INPUT
+    let searchTimer;
+    $('#userSearchInput').on('keyup', function() {
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function() {
+            fetchUsers();
+        }, 500);
+    });
+
+    // PAGINATION LINKS
+    $(document).on('click', '.pagination a', function(e) {
+        e.preventDefault();
+        const url = $(this).attr('href');
+        if (url && url !== '#') {
+            fetchUsers(url);
+        }
+    });
+
+    // ROWS PER PAGE
+    $(document).on('change', 'select[name="per_page"]', function(e) {
+        e.preventDefault();
+        fetchUsers();
+    });
 
     // EDIT MODAL POPULATE
     $(document).on('click', '.edit-user-btn', function() {
