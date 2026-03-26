@@ -138,11 +138,11 @@
                                     </div>
                                     <div class="col-12 form-group">
                                         <label>Product Description</label>
-                                        <textarea class="form-control" name="description">{{ old('description', $offer->description) }}</textarea>
+                                        <textarea class="form-control" name="description">{{ old('description', $offer->product_description) }}</textarea>
                                     </div>
                                     <div class="col-12 form-group">
                                         <label>Technical Specifications</label>
-                                        <textarea class="form-control" name="specs">{{ old('specs', $offer->specs) }}</textarea>
+                                        <textarea class="form-control" name="specs">{{ old('specs', $offer->product_specs) }}</textarea>
                                     </div>
                                 </div>
                             </div>

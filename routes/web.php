@@ -28,6 +28,8 @@ use App\Http\Controllers\backend\StockController;
 use App\Http\Controllers\backend\SettingController;
 use App\Http\Controllers\backend\AuditLogExportController;
 
+use App\Http\Controllers\backend\ShelfControlController;
+
 // Auth Routes (Public)
 Route::controller(admin_loginController::class)->group(function () {
     Route::get('/admin_login', 'index')->name('admin_login.index');
@@ -110,6 +112,12 @@ Route::middleware(['auth'])->group(function () {
         Route::controller(stock_ledgerController::class)->group(function () {
             Route::get('/stock_ledger', 'index')->name('stock_ledger.index');
         });
+
+        Route::controller(ShelfControlController::class)->group(function () {
+            Route::get('/shelf_control', 'index')->name('shelf_control.index');
+            Route::post('/shelf_control', 'store')->name('shelf_control.store');
+            Route::delete('/shelf_control/{id}', 'destroy')->name('shelf_control.destroy');
+        });
     });
 
     // Staff & Accountant (Buying Side View)
@@ -137,7 +145,7 @@ Route::middleware(['auth'])->group(function () {
     });
 
     // Shared View Access (Buying/Procurement View)
-    Route::middleware(['role:admin,staff,accountant,supplier'])->group(function () {
+    Route::middleware(['role:admin,staff,accountant,supplier,inspector'])->group(function () {
         Route::controller(purchase_ordersController::class)->group(function () {
             Route::get('/purchase_orders/confirm_payment', 'confirmPayment')->name('purchase_orders.confirm_payment');
         });
@@ -172,6 +180,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin,inspector'])->group(function () {
         Route::controller(goods_receivingController::class)->group(function () {
             Route::get('/goods_receiving', 'index')->name('goods_receiving.index');
+            Route::get('/goods_receiving/export', 'exportExcel')->name('goods_receiving.export');
             Route::post('/goods_receiving/{id}/approve', 'approve')->name('goods_receiving.approve');
             Route::post('/goods_receiving/{id}/reject', 'reject')->name('goods_receiving.reject');
             Route::post('/goods_receiving/store-location', 'storeLocation')->name('goods_receiving.store_location');
@@ -203,6 +212,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:supplier'])->group(function () {
         Route::controller(supplier_dashboardController::class)->group(function () {
             Route::get('/Supplier_Dashboard', 'index')->name('Supplier_Dashboard.index');
+            Route::get('/Supplier_Dashboard/{id}/details', 'details')->name('Supplier_Dashboard.details');
             Route::get('/Supplier_Dashboard/create', 'create')->name('Supplier_Dashboard.create');
             Route::get('/Supplier_Dashboard/{id}/edit', 'edit')->name('Supplier_Dashboard.edit');
             Route::post('/Supplier_Dashboard/offer', 'storeOffer')->name('Supplier_Dashboard.offer.store');

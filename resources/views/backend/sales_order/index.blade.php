@@ -40,7 +40,9 @@
                             @foreach($customers as $customer)
                                 <option value="{{ $customer->id }}" 
                                         data-type="{{ $customer->type }}" 
-                                        data-limit="{{ $customer->credit_limit }}">
+                                        data-limit="{{ $customer->credit_limit }}"
+                                        data-email="{{ $customer->email }}"
+                                        data-phone="{{ $customer->phone }}">
                                     {{ $customer->name }} ({{ $customer->type }})
                                 </option>
                             @endforeach
@@ -109,93 +111,164 @@
 
             <!-- STEP 4: PAYMENT & TOTAL -->
             <div class="row">
-                <div class="col-md-6">
-                    <div class="card border-0 shadow-sm h-100" style="border-radius: 15px;">
-                        <div class="card-header bg-white border-bottom-0 pt-3 d-flex justify-content-between align-items-center">
-                            <h6 class="font-weight-bold text-muted text-uppercase mb-0">Payment Details</h6>
-                            <div>
-                                <img src="{{ asset('assets/dist/img/credit/visa.png') }}" height="20" class="mr-1 opacity-75">
-                                <img src="{{ asset('assets/dist/img/credit/mastercard.png') }}" height="20" class="mr-1 opacity-75">
-                                <img src="{{ asset('assets/dist/img/credit/paypal2.png') }}" height="20" class="mr-1 opacity-75">
-                                <img src="{{ asset('assets/dist/img/credit/american-express.png') }}" height="20" class="opacity-75">
+                <div class="col-md-7">
+                    <div class="card border-0 shadow-sm h-100" style="border-radius: 15px; background: #fff;">
+                        <div class="card-header bg-white border-bottom-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+                            <h5 class="font-weight-bold text-dark mb-0">
+                                <i class="fas fa-credit-card mr-2 text-primary"></i> Payment & Shipping
+                            </h5>
+                            <div class="payment-icons opacity-50">
+                                <i class="fab fa-cc-visa fa-2x mr-1"></i>
+                                <i class="fab fa-cc-mastercard fa-2x mr-1"></i>
+                                <i class="fab fa-cc-paypal fa-2x"></i>
                             </div>
                         </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="small font-weight-bold">Payment Method</label>
-                                        <div class="input-group shadow-sm">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text bg-light border-0"><i class="fas fa-wallet text-muted"></i></span>
+                        <div class="card-body px-4 pb-4">
+                            
+                            <!-- Section 1: Contact -->
+                            <div class="mb-4">
+                                <h6 class="text-uppercase small font-weight-bold text-primary mb-3" style="letter-spacing: 1px;">
+                                    <i class="fas fa-user-tag mr-1"></i> Customer Contact Info
+                                </h6>
+                                <div class="row">
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-group mb-0">
+                                            <label class="small font-weight-bold text-muted">Contact Email</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend"><span class="input-group-text border-0 bg-light"><i class="fas fa-envelope text-muted"></i></span></div>
+                                                <input type="email" class="form-control border-0 bg-light" id="customer_email" placeholder="customer@email.com" style="border-radius: 0 8px 8px 0;">
                                             </div>
-                                            <select class="form-control border-0 bg-light" id="pay_method">
-                                                <option value="cash">Cash</option>
-                                                <option value="bank_transfer">Bank Transfer</option>
-                                                <option value="card">Credit/Debit Card</option>
-                                                <option value="digital_wallet">Digital Wallet (ABA/KHQR)</option>
-                                            </select>
                                         </div>
                                     </div>
-                                </div>
-                                <div class="col-md-6">
-                                    <div class="form-group">
-                                        <label class="small font-weight-bold">Payment Status</label>
-                                        <div class="input-group shadow-sm">
-                                            <div class="input-group-prepend">
-                                                <span class="input-group-text bg-light border-0"><i class="fas fa-info-circle text-muted"></i></span>
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-group mb-0">
+                                            <label class="small font-weight-bold text-muted">Contact Phone</label>
+                                            <div class="input-group">
+                                                <div class="input-group-prepend"><span class="input-group-text border-0 bg-light"><i class="fas fa-phone text-muted"></i></span></div>
+                                                <input type="text" class="form-control border-0 bg-light" id="customer_phone" placeholder="012 345 678" style="border-radius: 0 8px 8px 0;">
                                             </div>
-                                            <select class="form-control border-0 bg-light" id="pay_status">
-                                                <option value="unpaid">Unpaid / Credit</option>
-                                                <option value="partial">Partial Payment</option>
-                                                <option value="paid">Fully Paid</option>
-                                            </select>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Dynamic Payment Fields -->
+                            <hr class="my-4 opacity-50">
+
+                            <!-- Section 2: Address & Payment Info -->
                             <div class="row">
+                                <div class="col-md-6 mb-4">
+                                     <h6 class="text-uppercase small font-weight-bold text-primary mb-3" style="letter-spacing: 1px;">
+                                        <i class="fas fa-truck mr-1"></i> Shipping Address
+                                    </h6>
+                                    <textarea class="form-control border-0 bg-light shadow-none" id="shipping_address" rows="5" 
+                                        placeholder="Enter full delivery address..."
+                                        style="border-radius: 12px; resize: none;"></textarea>
+                                </div>
+                                
+                                <div class="col-md-6 mb-4">
+                                     <h6 class="text-uppercase small font-weight-bold text-primary mb-3" style="letter-spacing: 1px;">
+                                        <i class="fas fa-file-invoice-dollar mr-1"></i> Payment Terms
+                                    </h6>
+                                    <div class="form-group mb-3">
+                                        <label class="small font-weight-bold text-muted">Payment Method</label>
+                                        <select class="form-control border-0 bg-light shadow-none" id="pay_method" style="border-radius: 10px; height: 45px;">
+                                            <option value="cash">Cash</option>
+                                            <option value="bank_transfer">Bank Transfer</option>
+                                            <option value="card">Credit/Debit Card</option>
+                                            <option value="digital_wallet">Digital Wallet (ABA/KHQR)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group mb-0">
+                                        <label class="small font-weight-bold text-muted">Payment Status</label>
+                                        <select class="form-control border-0 bg-light shadow-none" id="pay_status" style="border-radius: 10px; height: 45px;">
+                                            <option value="unpaid">Unpaid / Credit</option>
+                                            <option value="partial">Partial Payment</option>
+                                            <option value="paid">Fully Paid</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Section 3: Dynamic Pricing & Notes -->
+                            <div class="row mb-3">
                                 <div class="col-md-6" id="paid_amount_col" style="display: none;">
                                     <div class="form-group">
-                                        <label class="small font-weight-bold">Amount Paid ($)</label>
-                                        <input type="number" step="0.01" class="form-control shadow-sm border-0 bg-light" id="paid_amount" placeholder="0.00">
+                                        <label class="font-weight-bold text-muted"><i class="fas fa-money-bill-wave mr-1 text-success"></i> Amount Paid ($)</label>
+                                        <div class="input-group">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-white"><i class="fas fa-dollar-sign"></i></span>
+                                            </div>
+                                            <input type="number" step="0.01" class="form-control form-control-lg font-weight-bold text-success" id="paid_amount" placeholder="0.00">
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="col-md-6" id="due_date_col">
                                     <div class="form-group">
-                                        <label class="small font-weight-bold">Due Date</label>
-                                        <input type="date" class="form-control shadow-sm border-0 bg-light" id="due_date" value="{{ date('Y-m-d', strtotime('+30 days')) }}">
+                                        <label class="font-weight-bold text-muted d-flex justify-content-between">
+                                            <span><i class="fas fa-calendar-alt mr-1 text-info"></i> Due Date</span>
+                                            <span id="due_date_countdown" class="badge badge-info font-weight-normal px-2">30 days from now</span>
+                                        </label>
+                                        <div class="input-group mb-2">
+                                            <div class="input-group-prepend">
+                                                <span class="input-group-text bg-white"><i class="fas fa-history"></i></span>
+                                            </div>
+                                            <input type="date" class="form-control form-control-lg" id="due_date" value="{{ date('Y-m-d', strtotime('+30 days')) }}">
+                                        </div>
+                                        <div class="d-flex flex-wrap">
+                                            <button type="button" class="btn btn-xs btn-outline-secondary mr-1 mb-1 set-due-date" data-days="0">Today</button>
+                                            <button type="button" class="btn btn-xs btn-outline-info mr-1 mb-1 set-due-date" data-days="7">Net 7</button>
+                                            <button type="button" class="btn btn-xs btn-outline-info mr-1 mb-1 set-due-date" data-days="15">Net 15</button>
+                                            <button type="button" class="btn btn-xs btn-outline-primary mr-1 mb-1 set-due-date" data-days="30">Net 30</button>
+                                            <button type="button" class="btn btn-xs btn-outline-primary mb-1 set-due-date" data-days="60">Net 60</button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="form-group mb-0">
-                                <label class="small font-weight-bold">Transaction Reference / Notes</label>
-                                <textarea class="form-control shadow-sm border-0 bg-light" id="payment_note" rows="2" placeholder="Enter transaction ID or payment notes..."></textarea>
+                                <label class="small font-weight-bold text-muted">Order Notes / References</label>
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text bg-light border-0"><i class="fas fa-sticky-note text-muted"></i></span>
+                                    </div>
+                                    <input type="text" class="form-control border-0 bg-light shadow-none" id="payment_note" 
+                                           placeholder="Transaction ID, specific delivery notes, or references..."
+                                           style="border-radius: 0 10px 10px 0; height: 45px;">
+                                </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
 
-                <div class="col-md-6">
-                    <div class="card border-0 shadow-sm overflow-hidden h-100" style="border-radius: 15px;">
+                <div class="col-md-5">
+                    <div class="card border-0 shadow-sm overflow-hidden h-100" style="border-radius: 15px; background: #2c3e50; color: white;">
                         <div class="card-body p-0">
-                            <table class="table mb-0">
+                            <div class="p-4 bg-dark text-white text-center">
+                                <h6 class="text-uppercase small mb-1 opacity-75">Order Summary</h6>
+                                <h3 class="font-weight-bold mb-0" id="summary_total_header">$0.00</h3>
+                            </div>
+                            <table class="table table-dark mb-0" style="background: transparent;">
                                 <tr>
-                                    <th class="px-4 py-4 border-0" style="width:50%">Subtotal Amount</th>
+                                    <th class="px-4 py-4 border-0 font-weight-normal opacity-75" style="width:50%">Subtotal</th>
                                     <td class="text-right px-4 py-4 border-0 h5 mb-0" id="summary_subtotal">$0.00</td>
                                 </tr>
                                 <tr>
-                                    <th class="px-4 py-2 border-0 text-muted font-weight-normal">Tax (0%)</th>
-                                    <td class="text-right px-4 py-2 border-0 text-muted">$0.00</td>
+                                    <th class="px-4 py-2 border-0 opacity-75 font-weight-normal">VAT (0%)</th>
+                                    <td class="text-right px-4 py-2 border-0">$0.00</td>
                                 </tr>
-                                <tr class="bg-light">
-                                    <th class="px-4 py-4 border-0 h4 font-weight-bold">Grand Total</th>
-                                    <td class="text-right px-4 py-4 border-0 h3 font-weight-bold text-success" id="summary_total">$0.00</td>
+                                <tr>
+                                    <th class="px-4 py-2 border-0 opacity-75 font-weight-normal">Discount (<span id="summary_discount_percent">0</span>%)</th>
+                                    <td class="text-right px-4 py-2 border-0 text-success" id="summary_discount">-$0.00</td>
+                                </tr>
+                                <tr style="background: rgba(255,255,255,0.05);">
+                                    <th class="px-4 py-5 border-0 h4 font-weight-bold">Grand Total</th>
+                                    <td class="text-right px-4 py-5 border-0 h2 font-weight-bold text-warning" id="summary_total">$0.00</td>
                                 </tr>
                             </table>
+                            <div class="p-4 text-center">
+                                <p class="small mb-0 opacity-50">Please review items and customer details before finalizing the sale.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -306,6 +379,7 @@
                                         data-image="{{ $product->image ? asset('storage/' . $product->image) : asset('assets/dist/img/MMOLOGO1.png') }}"
                                         data-retail="{{ $product->display_price }}" 
                                         data-wholesale="{{ $product->b2b_price }}"
+                                        data-max-cost="{{ $product->max_unit_cost }}"
                                         {{ $product->total_stock <= 0 ? 'disabled' : '' }}>
                                     <i class="fas fa-cart-plus mr-1"></i> Add
                                 </button>
@@ -351,6 +425,10 @@ $(document).ready(function() {
         if (selected.val()) {
             customerType = selected.data('type');
             $('#customer_type_display').val(customerType === 'B2B' ? 'Wholesale (B2B)' : 'Retail (B2C)');
+            
+            // Set extra info
+            $('#customer_email').val(selected.data('email') || '');
+            $('#customer_phone').val(selected.data('phone') || '');
             
             if(customerType === 'B2B') {
                 $('#payment_rule_display').val('Credit Allowed | Limit: $' + parseFloat(selected.data('limit')).toLocaleString());
@@ -413,6 +491,7 @@ $(document).ready(function() {
         const card = btn.closest('.product-card');
         const id = btn.data('id');
         const qty = parseInt(card.find('.qty-modal-input').val());
+        const maxStock = parseInt(card.find('.qty-modal-input').attr('max'));
         
         if (isNaN(qty) || qty < 1) return;
 
@@ -421,6 +500,24 @@ $(document).ready(function() {
         const img = btn.data('image');
 
         const existingIdx = cart.findIndex(i => i.product_id === id);
+        let totalQtyInCart = qty;
+        
+        if (existingIdx > -1) {
+            totalQtyInCart += cart[existingIdx].quantity;
+        }
+
+        // --- STOCK CHECK ---
+        if (totalQtyInCart > maxStock) {
+            const availableToAdd = maxStock - (existingIdx > -1 ? cart[existingIdx].quantity : 0);
+            Swal.fire({
+                icon: 'warning',
+                title: 'Insufficient Stock',
+                text: `You already have ${existingIdx > -1 ? cart[existingIdx].quantity : 0} in cart. Only ${availableToAdd} more can be added.`,
+                confirmButtonColor: '#3085d6'
+            });
+            return;
+        }
+
         if (existingIdx > -1) {
             cart[existingIdx].quantity += qty;
         } else {
@@ -431,7 +528,9 @@ $(document).ready(function() {
                 image: img,
                 quantity: qty,
                 retail_price: retailPrice,
-                wholesale_price: wholesalePrice
+                wholesale_price: wholesalePrice,
+                max_stock: maxStock,
+                max_cost: btn.data('max-cost')
             });
         }
 
@@ -459,8 +558,26 @@ $(document).ready(function() {
             $('#cart_count').text(cart.length + ' Items');
 
             cart.forEach((item, index) => {
-                const price = customerType === 'B2B' ? item.wholesale_price : item.retail_price;
-                const subtotal = price * item.quantity;
+                let basePrice = customerType === 'B2B' ? item.wholesale_price : item.retail_price;
+                let discountPercent = 0;
+                let discountBadge = '';
+
+                if (customerType === 'B2B') {
+                    if (item.max_cost < 1000) {
+                        if (item.quantity >= 100) discountPercent = 5;
+                        else if (item.quantity >= 50) discountPercent = 2;
+                    } else { // >= 1000
+                        if (item.quantity >= 100) discountPercent = 9;
+                        else if (item.quantity >= 50) discountPercent = 4;
+                    }
+                }
+
+                if (discountPercent > 0) {
+                    discountBadge = `<span class="badge badge-success ml-1">-${discountPercent}% Bulk</span>`;
+                }
+
+                const priceAfterDiscount = basePrice * (1 - (discountPercent / 100));
+                const subtotal = priceAfterDiscount * item.quantity;
                 
                 body.append(`
                     <tr>
@@ -469,16 +586,21 @@ $(document).ready(function() {
                         </td>
                         <td class="align-middle">
                             <div class="font-weight-bold text-dark">${item.name}</div>
-                            <div class="text-muted extra-small">SKU: ${item.sku} | Unit: $${parseFloat(price).toFixed(2)}</div>
+                            <div class="text-muted extra-small">SKU: ${item.sku} | Unit: $${parseFloat(priceAfterDiscount).toFixed(2)} ${discountBadge}</div>
                         </td>
                         <td class="text-center align-middle">
                             <div class="d-flex align-items-center justify-content-center">
                                 <button class="btn btn-xs btn-light shadow-none border qty-change" data-index="${index}" data-change="-1"><i class="fas fa-minus text-muted"></i></button>
-                                <span class="mx-3 font-weight-bold">${item.quantity}</span>
+                                <input type="number" class="form-control form-control-sm text-center mx-2 cart-qty-input" 
+                                       data-index="${index}" 
+                                       value="${item.quantity}" 
+                                       min="1" 
+                                       max="${item.max_stock}" 
+                                       style="width: 60px; border-radius: 5px;">
                                 <button class="btn btn-xs btn-light shadow-none border qty-change" data-index="${index}" data-change="1"><i class="fas fa-plus text-muted"></i></button>
                             </div>
                         </td>
-                        <td class="text-right align-middle font-weight-bold text-muted">$${parseFloat(price).toFixed(2)}</td>
+                        <td class="text-right align-middle font-weight-bold text-muted">$${parseFloat(priceAfterDiscount).toFixed(2)}</td>
                         <td class="text-right align-middle pr-4">
                             <span class="h6 font-weight-bold text-primary mb-0">$${subtotal.toLocaleString(undefined, {minimumFractionDigits: 2})}</span>
                         </td>
@@ -497,9 +619,64 @@ $(document).ready(function() {
     $(document).on('click', '.qty-change', function() {
         const idx = $(this).data('index');
         const change = $(this).data('change');
+        const item = cart[idx];
+
+        if (change > 0 && item.quantity >= item.max_stock) {
+            toastr.error('Max stock reached for ' + item.name);
+            return;
+        }
+
         cart[idx].quantity += change;
         if (cart[idx].quantity < 1) cart.splice(idx, 1);
         updateCartUI();
+    });
+
+    $(document).on('change keyup', '.cart-qty-input', function() {
+        const idx = $(this).data('index');
+        let val = parseInt($(this).val()) || 0;
+        const item = cart[idx];
+
+        if (val > item.max_stock) {
+            toastr.error('Only ' + item.max_stock + ' available for ' + item.name);
+            val = item.max_stock;
+            $(this).val(val);
+        }
+        
+        if (val < 1) {
+            // Option: confirm removal? For now just keep 1 or remove if set to 0
+            val = 1;
+            $(this).val(val);
+        }
+
+        cart[idx].quantity = val;
+        
+        // Re-calculate discount for this item to show in the subtotal
+        let basePrice = customerType === 'B2B' ? item.wholesale_price : item.retail_price;
+        let discountPercent = 0;
+        if (customerType === 'B2B') {
+            if (item.max_cost < 1000) {
+                if (val >= 100) discountPercent = 5;
+                else if (val >= 50) discountPercent = 2;
+            } else {
+                if (val >= 100) discountPercent = 9;
+                else if (val >= 50) discountPercent = 4;
+            }
+        }
+        
+        const priceAfterDiscount = basePrice * (1 - (discountPercent / 100));
+        const subtotal = priceAfterDiscount * val;
+        
+        // Update subtotal in the row
+        $(this).closest('tr').find('.h6.font-weight-bold.text-primary').text('$' + subtotal.toLocaleString(undefined, {minimumFractionDigits: 2}));
+        
+        // Update unit price display with badge if needed
+        let discountBadge = '';
+        if (discountPercent > 0) {
+            discountBadge = `<span class="badge badge-success ml-1">-${discountPercent}% Bulk</span>`;
+        }
+        $(this).closest('tr').find('.text-muted.extra-small').html(`SKU: ${item.sku} | Unit: $${parseFloat(priceAfterDiscount).toFixed(2)} ${discountBadge}`);
+
+        updateCartSummary(); 
     });
 
     $(document).on('click', '.remove-item', function() {
@@ -509,14 +686,44 @@ $(document).ready(function() {
     });
 
     function updateCartSummary() {
-        let total = 0;
+        let subtotal = 0;
+        let totalDiscount = 0;
+        
         cart.forEach(item => {
-            const price = customerType === 'B2B' ? item.wholesale_price : item.retail_price;
-            total += price * item.quantity;
+            let basePrice = customerType === 'B2B' ? item.wholesale_price : item.retail_price;
+            let discountPercent = 0;
+
+            if (customerType === 'B2B') {
+                if (item.max_cost < 1000) {
+                    if (item.quantity >= 100) discountPercent = 5;
+                    else if (item.quantity >= 50) discountPercent = 2;
+                } else {
+                    if (item.quantity >= 100) discountPercent = 9;
+                    else if (item.quantity >= 50) discountPercent = 4;
+                }
+            }
+
+            const lineSubtotal = basePrice * item.quantity;
+            const lineDiscount = lineSubtotal * (discountPercent / 100);
+            
+            subtotal += lineSubtotal;
+            totalDiscount += lineDiscount;
         });
 
-        $('#summary_subtotal').text('$' + total.toLocaleString(undefined, {minimumFractionDigits: 2}));
-        $('#summary_total').text('$' + total.toLocaleString(undefined, {minimumFractionDigits: 2}));
+        const grandTotal = subtotal - totalDiscount;
+        const avgDiscountPercent = subtotal > 0 ? ((totalDiscount / subtotal) * 100).toFixed(1) : 0;
+
+        $('#summary_subtotal').text('$' + subtotal.toLocaleString(undefined, {minimumFractionDigits: 2}));
+        $('#summary_total').text('$' + grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2}));
+        $('#summary_total_header').text('$' + grandTotal.toLocaleString(undefined, {minimumFractionDigits: 2}));
+        $('#summary_discount_percent').text(avgDiscountPercent);
+        
+        // Show discount line in summary
+        if (totalDiscount > 0) {
+            $('#summary_discount').text('-$' + totalDiscount.toLocaleString(undefined, {minimumFractionDigits: 2})).closest('tr').show();
+        } else {
+            $('#summary_discount').closest('tr').hide();
+        }
     }
 
     function checkOrderReady() {
@@ -527,12 +734,27 @@ $(document).ready(function() {
 
     // 5. Submit Order
     $('#confirm_sale_btn').click(function() {
+        const selected = $('#customer_select').find(':selected');
         const customerId = $('#customer_select').val();
         const payMethod = $('#pay_method').val();
         const payStatus = $('#pay_status').val();
         const paidAmount = $('#paid_amount').val();
         const dueDate = $('#due_date').val();
         const note = $('#payment_note').val();
+        
+        // --- CREDIT LIMIT CHECK ---
+        const total = parseFloat($('#summary_total').text().replace('$', '').replace(',', ''));
+        const limit = parseFloat(selected.data('limit'));
+        
+        if (customerType === 'B2B' && total > limit) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Credit Limit Exceeded',
+                text: `Order total ($${total.toLocaleString()}) exceeds customer's credit limit ($${limit.toLocaleString()}).`,
+                confirmButtonColor: '#d33'
+            });
+            return;
+        }
 
         if (!customerId || cart.length === 0) return;
 
@@ -544,6 +766,9 @@ $(document).ready(function() {
             data: {
                 _token: "{{ csrf_token() }}",
                 customer_id: customerId,
+                customer_email: $('#customer_email').val(),
+                customer_phone: $('#customer_phone').val(),
+                shipping_address: $('#shipping_address').val(),
                 items: cart,
                 payment_method: payMethod,
                 payment_status: payStatus,
@@ -587,6 +812,37 @@ $(document).ready(function() {
             $('#paid_amount_col').hide();
             $('#due_date_col').hide();
             $('#paid_amount').val($('#summary_total').text().replace('$', '').replace(',', ''));
+        }
+    });
+
+    // 7. Due Date Quick Select & Countdown
+    $('.set-due-date').click(function() {
+        const days = parseInt($(this).data('days'));
+        const targetDate = new Date();
+        targetDate.setDate(targetDate.getDate() + days);
+        
+        const year = targetDate.getFullYear();
+        const month = String(targetDate.getMonth() + 1).padStart(2, '0');
+        const day = String(targetDate.getDate()).padStart(2, '0');
+        
+        $('#due_date').val(`${year}-${month}-${day}`).trigger('change');
+    });
+
+    $('#due_date').on('change', function() {
+        const selected = new Date($(this).val());
+        const today = new Date();
+        today.setHours(0,0,0,0);
+        
+        const diffTime = selected - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        const badge = $('#due_date_countdown');
+        if (diffDays < 0) {
+            badge.text('Overdue').removeClass('badge-info badge-success badge-secondary').addClass('badge-danger');
+        } else if (diffDays === 0) {
+            badge.text('Due Today').removeClass('badge-info badge-danger badge-secondary').addClass('badge-success');
+        } else {
+            badge.text(`${diffDays} days from now`).removeClass('badge-danger badge-success badge-secondary').addClass('badge-info');
         }
     });
 

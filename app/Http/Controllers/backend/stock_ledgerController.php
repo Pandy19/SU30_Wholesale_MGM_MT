@@ -51,8 +51,8 @@ class stock_ledgerController extends Controller
 
         // Summaries
         $totalRecords = StockMovement::count();
-        $totalStockIn = StockMovement::where('type', 'Stock In')->sum('quantity');
-        $totalStockOut = StockMovement::where('type', 'Stock Out')->sum('quantity');
+        $totalStockIn = StockMovement::whereIn('type', ['Stock In', 'Initial Stock'])->sum('quantity');
+        $totalStockOut = abs(StockMovement::where('type', 'Stock Out')->sum('quantity'));
 
         $products = Product::orderBy('name')->get();
         $users = User::whereIn('role', ['admin', 'staff'])->get();

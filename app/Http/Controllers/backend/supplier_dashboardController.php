@@ -51,8 +51,8 @@ class supplier_dashboardController extends Controller
                 'products.name as product_name',
                 'products.sku',
                 'products.image',
-                'products.specs',
-                'products.description',
+                'products.specs as product_specs',
+                'products.description as product_description',
                 'products.brand_id',
                 'products.category_id',
                 'products.status as product_status',
@@ -68,6 +68,31 @@ class supplier_dashboardController extends Controller
         return view('backend.Supplier_Dashboard.index', compact('offers', 'supplier', 'brands', 'categories'));
     }
 
+    public function details($id)
+    {
+        $offer = SupplierProduct::join('products', 'products.id', '=', 'supplier_products.product_id')
+            ->leftJoin('brands', 'brands.id', '=', 'products.brand_id')
+            ->leftJoin('categories', 'categories.id', '=', 'products.category_id')
+            ->select(
+                'supplier_products.*',
+                'products.name as product_name',
+                'products.sku',
+                'products.image',
+                'products.specs as product_specs',
+                'products.description as product_description',
+                'brands.name as brand_name',
+                'categories.name as category_name'
+            )
+            ->where('supplier_products.id', $id)
+            ->first();
+
+        if (!$offer) {
+            return response()->json(['message' => 'Product offer not found'], 404);
+        }
+
+        return response()->json($offer);
+    }
+
     public function create()
     {
         $brands = Brand::orderBy('name')->get();
@@ -78,7 +103,7 @@ class supplier_dashboardController extends Controller
     public function edit($id)
     {
         $offer = SupplierProduct::join('products', 'products.id', '=', 'supplier_products.product_id')
-            ->select('supplier_products.*', 'products.name as product_name', 'products.image', 'products.specs', 'products.description', 'products.brand_id', 'products.category_id', 'products.status as product_status')
+            ->select('supplier_products.*', 'products.name as product_name', 'products.image', 'products.specs as product_specs', 'products.description as product_description', 'products.brand_id', 'products.category_id', 'products.status as product_status')
             ->where('supplier_products.id', $id)
             ->firstOrFail();
 

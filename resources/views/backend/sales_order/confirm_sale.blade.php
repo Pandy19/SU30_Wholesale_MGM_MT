@@ -1,13 +1,14 @@
-@extends('backend.layouts.master')
+@extends(request()->has('no_layout') ? 'backend.layouts.blank' : 'backend.layouts.master')
 @section('title', 'Confirm Payment | Wholesale MGM')
 @section('main-content')
 
-<div class="content-wrapper">
-<section class="content p-4">
+<div class="{{ request()->has('no_layout') ? '' : 'content-wrapper' }}">
+<section class="content {{ request()->has('no_layout') ? 'p-0' : 'p-4' }}" style="{{ request()->has('no_layout') ? 'overflow-x: hidden;' : '' }}">
 
 <!-- ===================================================== -->
 <!-- CONFIRMATION MESSAGE -->
 <!-- ===================================================== -->
+@if(!request()->has('no_layout'))
 <div class="alert alert-success text-center border-0 shadow-sm">
     <h4 class="mb-1">
         <i class="fas fa-check-circle"></i>
@@ -18,6 +19,7 @@
         This invoice serves as official sales documentation.
     </p>
 </div>
+@endif
 
 <!-- ===================================================== -->
 <!-- INVOICE -->
@@ -141,6 +143,8 @@
 <!-- ===================================================== -->
 <!-- ACTIONS -->
 <!-- ===================================================== -->
+<!-- ACTIONS -->
+@if(!request()->has('no_layout'))
 <div class="row no-print mt-4 border-top pt-3">
 <div class="col-12">
 
@@ -159,7 +163,7 @@
 
 </div>
 </div>
-
+@endif
 </div>
 
 </section>

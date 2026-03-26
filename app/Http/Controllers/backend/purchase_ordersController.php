@@ -114,6 +114,12 @@ class purchase_ordersController extends Controller
                         'line_total' => $item['price'] * $item['qty'],
                         'received_qty' => 0
                     ]);
+
+                    // Deduct quantity from SupplierProduct
+                    DB::table('supplier_products')
+                        ->where('supplier_id', $supplier_id)
+                        ->where('product_id', $item['product_id'])
+                        ->decrement('available_qty', $item['qty']);
                 }
             }
 

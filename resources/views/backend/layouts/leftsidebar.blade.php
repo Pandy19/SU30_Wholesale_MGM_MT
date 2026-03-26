@@ -164,6 +164,14 @@
           </a>
         </li>
 
+        <li class="nav-item">
+          <a href="{{ url('/shelf_control') }}"
+             class="nav-link {{ request()->is('shelf_control') ? 'active' : '' }}">
+            <i class="nav-icon fas fa-th-large"></i>
+            <p>Shelf Control</p>
+          </a>
+        </li>
+
         @if(in_array(auth()->user()->role, ['owner', 'admin', 'staff', 'accountant']))
         <!-- CUSTOMERS -->
         <li class="nav-header">SALES</li>

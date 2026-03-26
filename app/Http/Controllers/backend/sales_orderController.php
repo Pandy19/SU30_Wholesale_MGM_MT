@@ -11,6 +11,7 @@ use App\Models\Product;
 use App\Models\Category;
 use App\Models\Brand;
 use App\Models\Stock;
+use App\Models\StockMovement;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -22,10 +23,9 @@ class sales_orderController extends Controller
         $categories = Category::where('status', 'active')->get();
         $brands = Brand::where('status', 'active')->get();
         
-        // Only show products that have actual stock in the stocks table and selling price > 0
+        // Only show products that have actual stock in the stocks table
         $query = Product::with(['category', 'brand', 'stocks'])
-            ->where('status', 'available')
-            ->where('selling_price', '>', 0)
+            ->whereIn('status', ['available', 'limited'])
             ->whereHas('stocks', function($q) {
                 $q->where('quantity', '>', 0);
             });
@@ -46,12 +46,16 @@ class sales_orderController extends Controller
 
         $products = $query->get()->map(function($product) {
             $product->total_stock = $product->stocks->sum('quantity');
-            // Use selling_price from products table. 
-            // If selling_price is 0 or null, we might want to skip or handle it.
             $product->display_price = $product->selling_price;
-            // Mock B2B price as 5% less than selling_price
-            $product->b2b_price = $product->selling_price * 0.95; 
+            
+            // Get the highest purchase cost for this product across all POs
+            $product->max_unit_cost = \App\Models\PurchaseOrderItem::where('product_id', $product->id)->max('unit_cost') ?? 0;
+            
+            // B2B base price is initially the same as selling price, discounts applied dynamically in JS
+            $product->b2b_price = $product->selling_price; 
             return $product;
+        })->filter(function($product) {
+            return $product->total_stock > 0;
         });
 
         return view('backend.sales_order.index', compact('customers', 'categories', 'brands', 'products'));
@@ -79,6 +83,9 @@ class sales_orderController extends Controller
             $salesOrder = SalesOrder::create([
                 'order_number' => $orderNumber,
                 'customer_id' => $request->customer_id,
+                'customer_email' => $request->customer_email,
+                'customer_phone' => $request->customer_phone,
+                'shipping_address' => $request->shipping_address,
                 'order_date' => now(),
                 'due_date' => $request->due_date,
                 'total_amount' => 0, // Will update after items
@@ -94,22 +101,74 @@ class sales_orderController extends Controller
             foreach ($request->items as $item) {
                 $product = Product::findOrFail($item['product_id']);
                 $customer = Customer::find($request->customer_id);
+                $qty = $item['quantity'];
+
+                // Get max cost to determine discount tier
+                $maxCost = \App\Models\PurchaseOrderItem::where('product_id', $product->id)->max('unit_cost') ?? 0;
                 
-                $unitPrice = ($customer->type == 'B2B') ? ($product->selling_price * 0.95) : $product->selling_price;
-                $lineTotal = $unitPrice * $item['quantity'];
+                $unitPrice = $product->selling_price;
+                $discountPercent = 0;
+
+                if ($customer->type == 'B2B') {
+                    if ($maxCost < 1000) {
+                        if ($qty >= 100) $discountPercent = 5;
+                        else if ($qty >= 50) $discountPercent = 2;
+                    } else { // Cost >= 1000
+                        if ($qty >= 100) $discountPercent = 9;
+                        else if ($qty >= 50) $discountPercent = 4;
+                    }
+                }
+                
+                if ($discountPercent > 0) {
+                    $unitPrice = $unitPrice * (1 - ($discountPercent / 100));
+                }
+
+                $lineTotal = $unitPrice * $qty;
                 
                 SalesOrderItem::create([
                     'sales_order_id' => $salesOrder->id,
                     'product_id' => $item['product_id'],
-                    'quantity' => $item['quantity'],
+                    'quantity' => $qty,
                     'unit_price' => $unitPrice,
                     'line_total' => $lineTotal,
                 ]);
 
                 $totalAmount += $lineTotal;
 
-                // Optional: Deduct stock here or on confirmation
-                // For now, we just track the sale
+                // --- DEDUCT STOCK & RECORD MOVEMENT ---
+                $remainingToDeduct = $item['quantity'];
+                
+                // Get all stock locations for this product that have stock, ordered by FIFO (created_at)
+                $productStocks = Stock::where('product_id', $item['product_id'])
+                    ->where('quantity', '>', 0)
+                    ->orderBy('created_at', 'asc')
+                    ->get();
+
+                foreach ($productStocks as $stockRecord) {
+                    if ($remainingToDeduct <= 0) break;
+
+                    $deductFromThis = min($stockRecord->quantity, $remainingToDeduct);
+                    
+                    // Deduct from stock table
+                    $stockRecord->decrement('quantity', $deductFromThis);
+                    $remainingToDeduct -= $deductFromThis;
+
+                    // Record Stock Movement (Ledger)
+                    StockMovement::create([
+                        'product_id' => $item['product_id'],
+                        'stock_location_id' => $stockRecord->stock_location_id,
+                        'type' => 'Stock Out',
+                        'quantity' => -$deductFromThis, // Negative for Stock Out
+                        'balance_after' => Stock::where('product_id', $item['product_id'])->sum('quantity'),
+                        'reference' => $orderNumber,
+                        'user_id' => Auth::id(),
+                        'notes' => 'Sale to customer: ' . $customer->name
+                    ]);
+                }
+
+                if ($remainingToDeduct > 0) {
+                    throw new \Exception("Insufficient stock for product: " . $product->name);
+                }
             }
 
             $salesOrder->update(['total_amount' => $totalAmount]);

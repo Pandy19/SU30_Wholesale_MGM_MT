@@ -11,9 +11,127 @@ use App\Models\Category;
 use App\Models\Supplier;
 use App\Models\PurchaseOrderItem;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class goods_receivingController extends Controller
 {
+    public function exportExcel(Request $request)
+    {
+        $query = GoodsReceivingItem::with([
+            'goodsReceiving.purchaseOrder.supplier',
+            'goodsReceiving.approver',
+            'product.brand',
+            'product.category'
+        ]);
+
+        // Filters (Consistent with index method)
+        if ($request->filled('start_date') && $request->filled('end_date')) {
+            $query->whereHas('goodsReceiving', function ($q) use ($request) {
+                $q->whereBetween('received_date', [$request->start_date, $request->end_date]);
+            });
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->whereHas('product', function ($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('sku', 'like', "%{$search}%");
+            })->orWhereHas('goodsReceiving.purchaseOrder', function ($q) use ($search) {
+                $q->where('po_number', 'like', "%{$search}%");
+            });
+        }
+
+        if ($request->filled('brand_id')) {
+            $query->whereHas('product', function ($q) use ($request) {
+                $q->where('brand_id', $request->brand_id);
+            });
+        }
+
+        if ($request->filled('category_id')) {
+            $query->whereHas('product', function ($q) use ($request) {
+                $q->where('category_id', $request->category_id);
+            });
+        }
+
+        if ($request->filled('supplier_id')) {
+            $query->whereHas('goodsReceiving.purchaseOrder', function ($q) use ($request) {
+                $q->where('supplier_id', $request->supplier_id);
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->whereHas('goodsReceiving', function ($q) use ($request) {
+                $q->where('status', $request->status);
+            });
+        }
+
+        $items = $query->orderBy('id', 'desc')->get();
+
+        $response = new StreamedResponse(function () use ($items) {
+            $handle = fopen('php://output', 'w');
+            
+            // BOM for Excel to recognize UTF-8
+            fprintf($handle, chr(0xEF).chr(0xBB).chr(0xBF));
+
+            // Table headers
+            fputcsv($handle, [
+                'Product Name',
+                'SKU',
+                'Brand',
+                'Supplier',
+                'Ordered Qty',
+                'Received Qty',
+                'Accepted Qty',
+                'Rejected Qty',
+                'Status',
+                'Approved By',
+                'Received Date'
+            ]);
+
+            // Data rows
+            foreach ($items as $item) {
+                $gr = $item->goodsReceiving;
+                
+                // Determine Status Label
+                $itemProcessed = ($item->accepted_qty > 0 || $item->rejected_qty > 0);
+                if (!$itemProcessed) {
+                    $statusLabel = 'Pending';
+                } else {
+                    if ($item->rejected_qty > 0 && $item->accepted_qty == 0) {
+                        $statusLabel = 'Rejected';
+                    } elseif ($item->accepted_qty > 0 && $item->rejected_qty == 0) {
+                        $statusLabel = 'Approved';
+                    } else {
+                        $statusLabel = 'Partially Approved';
+                    }
+                }
+
+                fputcsv($handle, [
+                    $item->product->name ?? 'N/A',
+                    $item->product->sku ?? 'N/A',
+                    $item->product->brand->name ?? 'N/A',
+                    $gr->purchaseOrder->supplier->company_name ?? 'N/A',
+                    $item->ordered_qty,
+                    $item->received_qty,
+                    $item->accepted_qty,
+                    $item->rejected_qty,
+                    $statusLabel,
+                    $gr->approver->name ?? '—',
+                    $gr->received_date ?? '—',
+                ]);
+            }
+
+            fclose($handle);
+        });
+
+        $filename = 'goods_receiving_report_' . date('Ymd_His') . '.csv';
+
+        $response->headers->set('Content-Type', 'text/csv; charset=utf-8');
+        $response->headers->set('Content-Disposition', 'attachment; filename="' . $filename . '"');
+
+        return $response;
+    }
+
     public function index(Request $request)
     {
         $brands = Brand::where('status', 'active')->get();

@@ -215,9 +215,6 @@
                                     <td class="text-right pr-3 align-middle font-weight-bold text-primary">${{ number_format($order->total_amount, 2) }}</td>
                                     <td class="text-center align-middle">
                                         <div class="btn-group">
-                                            <button class="btn btn-sm btn-light border shadow-none" data-toggle="modal" data-target="#invoiceDetailModal{{ $order->id }}" title="View Details">
-                                                <i class="fas fa-eye text-primary"></i>
-                                            </button>
                                             <a href="{{ route('sales_order.confirm_sale', $order->id) }}" class="btn btn-sm btn-light border shadow-none ml-1" target="_blank" title="Print Invoice">
                                                 <i class="fas fa-print text-secondary"></i>
                                             </a>
@@ -242,9 +239,44 @@
     </section>
 </div>
 
+<!-- INVOICE PREVIEW MODAL -->
+<div class="modal fade" id="invoiceModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px; overflow: hidden;">
+            <div class="modal-header bg-primary text-white border-0">
+                <h5 class="modal-title font-weight-bold">
+                    <i class="fas fa-file-invoice mr-2"></i> Sales Invoice Preview
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body p-0" style="height: 80vh; background: #f4f6f9; overflow-x: hidden;">
+                <iframe id="invoiceIframe" src="" frameborder="0" style="width: 100%; height: 100%; border: none; overflow-x: hidden;"></iframe>
+            </div>
+            <div class="modal-footer bg-white border-top py-3 px-4">
+                <button type="button" class="btn btn-secondary px-4 shadow-sm" data-dismiss="modal">Close Preview</button>
+                <button type="button" class="btn btn-primary px-4 shadow-sm" onclick="printInvoiceFromModal()">
+                    <i class="fas fa-print mr-1"></i> Print Invoice
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
 @push('scripts')
 <script src="{{ asset('assets/plugins/chart.js/Chart.min.js') }}"></script>
 <script>
+function viewInvoice(url) {
+    const iframe = document.getElementById('invoiceIframe');
+    iframe.src = url;
+    $('#invoiceModal').modal('show');
+}
+
+function printInvoiceFromModal() {
+    const iframe = document.getElementById('invoiceIframe');
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
+}
+
 $(document).ready(function() {
     // 1. Monthly Sales Trend
     const trendCtx = document.getElementById('salesTrendChart').getContext('2d');

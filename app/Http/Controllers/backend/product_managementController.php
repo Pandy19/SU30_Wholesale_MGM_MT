@@ -19,7 +19,10 @@ class product_managementController extends Controller
         $search       = $request->query('search');
 
         $productsQuery = DB::table('products as p')
-            ->leftJoin('supplier_products as sp', 'sp.product_id', '=', 'p.id')
+            ->leftJoin('supplier_products as sp', function($join) {
+                $join->on('sp.product_id', '=', 'p.id')
+                     ->where('sp.available_qty', '>', 0);
+            })
             ->leftJoin('categories as c', 'p.category_id', '=', 'c.id')
             ->leftJoin('brands as b', 'p.brand_id', '=', 'b.id')
             ->select(
@@ -111,17 +114,19 @@ class product_managementController extends Controller
         $suppliers = DB::table('supplier_products as sp')
             ->join('suppliers as s', 's.id', '=', 'sp.supplier_id')
             ->whereIn('sp.product_id', $productIds)
+            ->where('sp.available_qty', '>', 0)
             ->select(
                 's.id as supplier_id', 's.company_name', 's.code as supplier_code', 's.phone', 's.email',
                 'sp.price as cost_price', 'sp.available_qty', 'sp.product_id',
                 's.lead_time_days as lead_time', 's.status'
             )
             ->orderBy('sp.price', 'asc')
+            ->take(2)
             ->get();
 
-        // Flag the top 2 best prices
+        // Flag the top 2 best prices (they are already limited to 2)
         $suppliers->transform(function ($s, $index) {
-            $s->is_best_price = ($index < 2);
+            $s->is_best_price = true;
             return $s;
         });
 

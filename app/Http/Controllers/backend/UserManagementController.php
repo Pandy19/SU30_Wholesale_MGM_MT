@@ -17,8 +17,9 @@ class UserManagementController extends Controller
         $currentUser = auth()->user();
         $perPage = $request->get('per_page', 10);
 
-        // Hide Suppliers and Owners from the list
-        $query->whereNotIn('role', ['supplier', 'owner']);
+        // Hide Suppliers and Owners from the list, and hide inactive users
+        $query->whereNotIn('role', ['supplier', 'owner'])
+              ->where('status', '!=', 'inactive');
 
         if ($request->has('search')) {
             $search = $request->get('search');
@@ -34,6 +35,11 @@ class UserManagementController extends Controller
         // Roles for the dropdown - Exclude Supplier and Owner roles from internal management
         $rolesQuery = Role::query();
         $rolesQuery->whereNotIn('slug', ['supplier', 'owner']);
+        
+        // Security: Admins cannot create or assign Admin role to others
+        if ($currentUser->role === 'admin') {
+            $rolesQuery->where('slug', '!=', 'admin');
+        }
         
         $roles = $rolesQuery->orderBy('name')->get();
 
@@ -65,17 +71,23 @@ class UserManagementController extends Controller
 
         // Generate User Code: RoleName-001-MMO
         $roleName = ucfirst($roleSlug);
-        $lastUserWithRole = User::where('role', $roleSlug)->orderBy('id', 'desc')->first();
+        $prefix = $roleName . '-';
+        
+        // Find the highest existing number for this prefix across ALL users
+        $lastUserWithPrefix = User::where('user_code', 'LIKE', "{$prefix}%")
+            ->orderBy('user_code', 'desc')
+            ->first();
         
         $nextNumber = 1;
-        if ($lastUserWithRole && $lastUserWithRole->user_code) {
-            // Extract the number from Role-XXX-MMO
-            $parts = explode('-', $lastUserWithRole->user_code);
-            if (count($parts) >= 2) {
+        if ($lastUserWithPrefix && $lastUserWithPrefix->user_code) {
+            // Extract the number from prefix-XXX-MMO
+            // Example: Staff-001-MMO -> parts: [Staff, 001, MMO]
+            $parts = explode('-', $lastUserWithPrefix->user_code);
+            if (count($parts) >= 2 && is_numeric($parts[1])) {
                 $nextNumber = intval($parts[1]) + 1;
             }
         }
-        $userCode = $roleName . '-' . str_pad($nextNumber, 3, '0', STR_PAD_LEFT) . '-MMO';
+        $userCode = $prefix . str_pad($nextNumber, 3, '0', STR_PAD_LEFT) . '-MMO';
 
         $user = User::create([
             'name'      => $request->name,
@@ -160,16 +172,12 @@ class UserManagementController extends Controller
         $user = User::findOrFail($id);
 
         if ($user->id === auth()->id()) {
-            return back()->with('error', 'You cannot delete yourself!');
+            return back()->with('error', 'You cannot deactivate yourself!');
         }
 
-        // Delete profile picture if exists
-        if ($user->profile_picture) {
-            Storage::disk('public')->delete($user->profile_picture);
-        }
+        // Set status to inactive instead of deleting
+        $user->update(['status' => 'inactive']);
 
-        $user->delete();
-
-        return redirect()->route('user_management.index')->with('success', 'User deleted successfully!');
+        return redirect()->route('user_management.index')->with('success', 'User deactivated successfully!');
     }
 }

@@ -199,17 +199,9 @@
 @forelse($items as $item)
 @php
     $product = $item->product;
-    $gr = $item->goodsReceiving;
-    $po = $gr->purchaseOrder;
     $status = $item->is_stocked ? 'Added' : 'Pending';
     $badgeClass = $item->is_stocked ? 'badge-success' : 'badge-warning';
-    $inspectorName = $gr->approver->name ?? 'System';
-    $inspectorIdentity = $inspectorName . " [" . ucfirst($gr->approver->role ?? 'Inspector') . "]";
     
-    $category_id = $product->category_id ?? '';
-    $brand_id = $product->brand_id ?? '';
-    $supplier_id = $po->supplier_id ?? '';
-
     // Image logic
     $imageUrl = $product->image ?? '';
     if ($imageUrl && !filter_var($imageUrl, FILTER_VALIDATE_URL)) {
@@ -219,21 +211,25 @@
         $imageUrl = asset('assets/dist/img/default-150x150.png');
     }
 @endphp
-<tr class="stock-item-row" data-category="{{ $category_id }}" data-brand="{{ $brand_id }}" data-supplier="{{ $supplier_id }}">
+<tr class="stock-item-row" data-category="{{ $product->category_id }}" data-brand="{{ $product->brand_id }}">
     <td class="text-center">
         <img src="{{ $imageUrl }}" width="50" class="rounded border shadow-sm">
     </td>
     <td>{{ $product->name }}</td>
     <td><small class="text-muted font-weight-bold">{{ $product->sku }}</small></td>
     <td>{{ $product->brand->name ?? 'N/A' }}</td>
-    <td>{{ $po->supplier->company_name ?? 'N/A' }}</td>
+    <td><small class="text-muted">{{ $item->supplier_names }}</small></td>
     <td><strong>{{ $item->pending_qty }}</strong></td>
-    <td class="text-right">${{ number_format($item->unit_cost, 2) }}</td>
-    <td class="text-right font-weight-bold">${{ number_format($item->total_value, 2) }}</td>
-    <td><strong>{{ $po->po_number }}</strong></td>
+    <td class="text-right">
+        <span class="badge badge-light border">Max: ${{ number_format($item->max_unit_cost, 2) }}</span>
+    </td>
+    <td class="text-right font-weight-bold">
+        ${{ number_format($item->pending_qty * $item->max_unit_cost, 2) }}
+    </td>
+    <td><small class="text-muted text-truncate d-inline-block" style="max-width: 100px;">{{ $item->po_numbers }}</small></td>
 
-    <td><small>{{ $inspectorIdentity }}</small></td>
-    <td><small>{{ $gr->received_date ? date('Y-m-d', strtotime($gr->received_date)) : 'N/A' }}</small></td>
+    <td><small>System</small></td>
+    <td><small>{{ date('Y-m-d') }}</small></td>
     <td>
         <span class="badge {{ $badgeClass }}">{{ $status }}</span>
     </td>
@@ -241,17 +237,18 @@
         @if(!$item->is_stocked)
             <button class="btn btn-sm btn-success shadow-sm"
                 onclick="openAddToStockModal({
-                            id: {{ $item->id }},
+                            itemIds: '{{ $item->item_ids }}',
                             name: {{ json_encode($product->name) }},
                             sku: {{ json_encode($product->sku) }},
-                            po: {{ json_encode($po->po_number) }},
-                            supplier: {{ json_encode($po->supplier->company_name ?? 'N/A') }},
+                            po: {{ json_encode($item->po_numbers) }},
+                            supplier: {{ json_encode($item->supplier_names) }},
                             brand: {{ json_encode($product->brand->name ?? 'N/A') }},
                             brandId: {{ $product->brand_id ?? 'null' }},
                             categoryId: {{ $product->category_id ?? 'null' }},
                             productId: {{ $product->id }},
                             approvedQty: {{ $item->pending_qty }},
-                            unitCost: {{ $item->unit_cost }},
+                            unitCost: {{ $item->max_unit_cost }},
+                            maxUnitCost: {{ $item->max_unit_cost }},
                             sellingPrice: {{ $product->selling_price ?? 0 }},
                             image: {{ json_encode($imageUrl) }},
                             selectedLocation: '{{ request('storage_location') }}'
@@ -447,12 +444,15 @@ function openAddToStockModal(data) {
     $('#m_qtyMax').text(data.approvedQty);
     
     // Auto-calculate suggested selling price
-    // Rule: < $1000 -> +10%, >= $1000 -> +15%
+    // Use the maximum purchase price (data.maxUnitCost) to ensure consistent high pricing
+    // Rule: < $1000 -> +20%, >= $1000 -> +25%
     let suggestedPrice = 0;
-    if (data.unitCost < 1000) {
-        suggestedPrice = data.unitCost * 1.10;
+    let basePrice = data.maxUnitCost;
+
+    if (basePrice < 1000) {
+        suggestedPrice = basePrice * 1.20; // +20%
     } else {
-        suggestedPrice = data.unitCost * 1.15;
+        suggestedPrice = basePrice * 1.25; // +25%
     }
     $('#m_sellingPrice').val(suggestedPrice.toFixed(2));
     
@@ -471,15 +471,14 @@ function openAddToStockModal(data) {
             // If user filtered by a specific location, only show that one
             if (filterLocId && loc.id != filterLocId) return;
 
-            const isOccupiedByOther = (loc.current_product_id && loc.current_product_id != data.productId);
-            const hasNoSpace = (loc.remaining_space < 1); // We can still show it but disable it
+            // We now allow mixing products of same brand, so we only block if it is FULL
+            const hasNoSpace = (loc.remaining_space < 1);
             
-            const disabled = (isOccupiedByOther || hasNoSpace) ? 'disabled' : '';
+            const disabled = hasNoSpace ? 'disabled' : '';
             const selected = (filterLocId == loc.id || data.selectedLocation == loc.id) ? 'selected' : '';
             
             let label = `${loc.name} (${loc.remaining_space} left)`;
-            if (isOccupiedByOther) label += ' - Occupied';
-            else if (hasNoSpace) label += ' - Full';
+            if (hasNoSpace) label += ' - Full';
 
             locationSelect.append(`<option value="${loc.id}" ${disabled} ${selected}>${label}</option>`);
         }
@@ -635,16 +634,16 @@ $(document).ready(function() {
         $(this).prop('disabled', true);
 
         $.ajax({
-            url: "{{ route('approved_good_stock.add_to_stock') }}",
-            method: "POST",
-            data: {
-                _token: "{{ csrf_token() }}",
-                item_id: activeItem.id,
-                location_id: locId,
-                quantity: qty,
-                selling_price: sellingPrice,
-                notes: $('#m_notes').val()
-            },
+                url: "{{ route('approved_good_stock.add_to_stock') }}",
+                method: "POST",
+                data: {
+                    _token: "{{ csrf_token() }}",
+                    item_ids: activeItem.itemIds,
+                    location_id: locId,
+                    quantity: qty,
+                    selling_price: sellingPrice,
+                    notes: $('#m_notes').val()
+                },
             success: function(response) {
                 if (response.success) {
                     // Store message in session storage to show after reload

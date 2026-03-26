@@ -64,7 +64,7 @@
                         {{-- CLICKABLE AREA (DETAIL MODAL) --}}
                         <div class="product-click"
                              style="cursor:pointer;"
-                             onclick="openDetailModal(this)"
+                             onclick="openSupplierDetailModal(this)"
                              data-image="{{ $offer->image ? asset('storage/' . $offer->image) : 'https://via.placeholder.com/600' }}"
                              data-title="{{ $offer->product_name }}"
                              data-brand="{{ $offer->brand_name }}"
@@ -73,8 +73,8 @@
                              data-supplier="{{ $supplier->company_name }}"
                              data-cost="{{ $offer->price }}"
                              data-qty="{{ $offer->available_qty }}"
-                             data-specs="{{ e($offer->specs) }}"
-                             data-description="{{ e($offer->description) }}">
+                             data-specs="{{ e($offer->product_specs) }}"
+                             data-description="{{ e($offer->product_description) }}">
 
                             <img
                                 src="{{ $offer->image ? asset('storage/' . $offer->image) : 'https://via.placeholder.com/600' }}"
@@ -209,31 +209,31 @@
               </div>
             </div>
 
-            {{-- DESCRIPTION --}}
-            <div class="card shadow-sm mb-3">
-              <div class="card-header bg-white font-weight-bold p-2">
+        {{-- DESCRIPTION --}}
+        <div class="card shadow-sm mb-3">
+            <div class="card-header bg-white font-weight-bold p-2">
                 <i class="fas fa-align-left mr-1 text-primary"></i> Description
-              </div>
-              <div class="card-body p-2">
+            </div>
+            <div class="card-body p-2">
                 <div id="detailShortDesc" class="text-muted small">
-                  No description provided.
+                    {{-- Populated by JS --}}
                 </div>
-              </div>
             </div>
+        </div>
 
-            {{-- SPECIFICATIONS (LONG TEXT) --}}
-            <div class="card shadow-sm">
-              <div class="card-header bg-white font-weight-bold p-2">
+        {{-- SPECIFICATIONS (LONG TEXT) --}}
+        <div class="card shadow-sm">
+            <div class="card-header bg-white font-weight-bold p-2">
                 <i class="fas fa-list-ul mr-1 text-success"></i> Specifications
-              </div>
-              <div class="card-body p-0">
-                <div class="p-3" style="background:#f8f9fa; min-height: 100px;">
-                  <pre class="mb-0"
-                       style="white-space:pre-wrap;font-family:inherit;line-height:1.45; font-size: 0.9rem;"
-                       id="detailSpecs"></pre>
-                </div>
-              </div>
             </div>
+            <div class="card-body p-0">
+                <div class="p-3" style="background:#f8f9fa; min-height:100px;">
+                    <pre class="mb-0"
+                        style="white-space:pre-wrap;font-family:inherit;line-height:1.45;font-size:0.9rem;"
+                        id="detailSpecs">{{-- Populated by JS --}}</pre>
+                </div>
+            </div>
+        </div>
 
           </div>
         </div>
@@ -282,8 +282,8 @@
         $('#deleteModal').modal('show');
     }
 
-    function openDetailModal(element) {
-        console.log("Opening Detail Modal...");
+    function openSupplierDetailModal(element) {
+        console.log("Opening Supplier Detail Modal...");
         var btn = element;
         
         var image = btn.getAttribute('data-image');

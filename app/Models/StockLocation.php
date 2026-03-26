@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class StockLocation extends Model
 {
-    protected $fillable = ['name', 'code', 'category_id', 'brand_id', 'max_capacity', 'current_product_id'];
+    protected $fillable = ['name', 'code', 'category_id', 'brand_id', 'max_capacity', 'current_product_id', 'status'];
 
     public function category()
     {

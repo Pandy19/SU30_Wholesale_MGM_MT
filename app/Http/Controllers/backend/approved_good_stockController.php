@@ -24,7 +24,7 @@ class approved_good_stockController extends Controller
         $categories = Category::where('status', 'active')->orderBy('name')->get();
         $suppliers = Supplier::where('status', 'active')->orderBy('company_name')->get();
 
-        // Fetch items where accepted_qty > stocked_qty
+        // Fetch items and group them by product_id to merge different supplier prices/POs
         $query = GoodsReceivingItem::whereColumn('accepted_qty', '>', 'stocked_qty')
             ->where('is_stocked', false)
             ->with([
@@ -33,6 +33,7 @@ class approved_good_stockController extends Controller
                 'product.category'
             ]);
 
+        // Filters...
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('product', function ($q) use ($search) {
@@ -40,38 +41,67 @@ class approved_good_stockController extends Controller
                   ->orWhere('sku', 'like', "%{$search}%");
             });
         }
-
         if ($request->filled('brand')) {
             $query->whereHas('product', function ($q) use ($request) {
                 $q->where('brand_id', $request->brand);
             });
         }
-
         if ($request->filled('category')) {
             $query->whereHas('product', function ($q) use ($request) {
                 $q->where('category_id', $request->category);
             });
         }
-
         if ($request->filled('supplier')) {
             $query->whereHas('goodsReceiving.purchaseOrder', function ($q) use ($request) {
                 $q->where('supplier_id', $request->supplier);
             });
         }
 
-        if ($request->filled('storage_location')) {
-            $location = StockLocation::find($request->storage_location);
-            if ($location) {
-                $query->whereHas('product', function ($q) use ($location) {
-                    $q->where('brand_id', $location->brand_id)
-                      ->where('category_id', $location->category_id);
-                });
-            }
-        }
-
-        $items = $query->orderBy('id', 'desc')->paginate(10);
+        // Fetch all matching records and group them in PHP to handle complex aggregation
+        $rawItems = $query->get();
         
-        // Fetch locations with their associations
+        $items = $rawItems->groupBy('product_id')->map(function($group) {
+            $first = $group->first();
+            $product = $first->product;
+            
+            // Sum up pending quantities
+            $total_pending = $group->sum(function($item) {
+                return $item->accepted_qty - $item->stocked_qty;
+            });
+            
+            // Aggregate IDs for processing
+            $item_ids = $group->pluck('id')->implode(',');
+            
+            // Unique PO numbers and Suppliers
+            $po_numbers = $group->map(fn($i) => $i->goodsReceiving->purchaseOrder->po_number ?? 'N/A')->unique()->implode(', ');
+            $supplier_names = $group->map(fn($i) => $i->goodsReceiving->purchaseOrder->supplier->company_name ?? 'N/A')->unique()->implode(', ');
+
+            // Highest Unit Cost across ALL POs for this product
+            $max_unit_cost = PurchaseOrderItem::where('product_id', $product->id)->max('unit_cost') ?? 0;
+
+            return (object)[
+                'id' => $first->id, // reference ID
+                'item_ids' => $item_ids,
+                'product' => $product,
+                'pending_qty' => $total_pending,
+                'po_numbers' => $po_numbers,
+                'supplier_names' => $supplier_names,
+                'max_unit_cost' => $max_unit_cost,
+                'is_stocked' => false
+            ];
+        })->values();
+
+        // Manual pagination for grouped results
+        $page = $request->get('page', 1);
+        $perPage = 10;
+        $paginatedItems = new \Illuminate\Pagination\LengthAwarePaginator(
+            $items->forPage($page, $perPage),
+            $items->count(),
+            $perPage,
+            $page,
+            ['path' => $request->url(), 'query' => $request->query()]
+        );
+
         $locations = StockLocation::with(['category', 'brand', 'product'])->get()->map(function($loc) {
             $currentQty = \App\Models\Stock::where('stock_location_id', $loc->id)->sum('quantity');
             $loc->remaining_space = max(0, $loc->max_capacity - $currentQty);
@@ -79,27 +109,19 @@ class approved_good_stockController extends Controller
             return $loc;
         });
 
-        // Calculate total cost for display
-        foreach ($items as $item) {
-            $item->pending_qty = $item->accepted_qty - $item->stocked_qty;
-            $unit_cost = 0;
-            if ($item->goodsReceiving && $item->goodsReceiving->purchase_order_id) {
-                $poItem = PurchaseOrderItem::where('purchase_order_id', $item->goodsReceiving->purchase_order_id)
-                                            ->where('product_id', $item->product_id)
-                                            ->first();
-                $unit_cost = $poItem ? $poItem->unit_cost : 0;
-            }
-            $item->unit_cost = $unit_cost;
-            $item->total_value = $item->pending_qty * $unit_cost;
-        }
-
-        return view('backend.approved_good_stock.index', compact('items', 'locations', 'brands', 'categories', 'suppliers'));
+        return view('backend.approved_good_stock.index', [
+            'items' => $paginatedItems,
+            'locations' => $locations,
+            'brands' => $brands,
+            'categories' => $categories,
+            'suppliers' => $suppliers
+        ]);
     }
 
     public function addToStock(Request $request)
     {
         $request->validate([
-            'item_id' => 'required|exists:goods_receiving_items,id',
+            'item_ids' => 'required|string', // Comma separated IDs
             'location_id' => 'required|exists:stock_locations,id',
             'quantity' => 'required|integer|min:1',
             'selling_price' => 'required|numeric|min:0'
@@ -108,85 +130,89 @@ class approved_good_stockController extends Controller
         try {
             DB::beginTransaction();
 
-            $item = GoodsReceivingItem::findOrFail($request->item_id);
+            $ids = explode(',', $request->item_ids);
             $location = StockLocation::findOrFail($request->location_id);
-            $addQty = $request->quantity;
+            $totalToAdd = $request->quantity;
             $sellingPrice = $request->selling_price;
 
-            $pendingQty = $item->accepted_qty - $item->stocked_qty;
-
-            if ($item->is_stocked || $pendingQty <= 0) {
-                throw new \Exception("This item has already been fully added to stock.");
-            }
-
-            if ($addQty > $pendingQty) {
-                throw new \Exception("Cannot add more than pending quantity ({$pendingQty}).");
-            }
+            // Get the product_id from the first item
+            $firstItem = GoodsReceivingItem::findOrFail($ids[0]);
+            $productId = $firstItem->product_id;
 
             // Update product selling price
-            $item->product->update(['selling_price' => $sellingPrice]);
+            $firstItem->product->update(['selling_price' => $sellingPrice]);
 
             // --- SHELF RULES ---
-            
-            // 1. Check if shelf already has a DIFFERENT product
-            if ($location->current_product_id && $location->current_product_id != $item->product_id) {
-                $otherProduct = \App\Models\Product::find($location->current_product_id);
-                throw new \Exception("Shelf '{$location->name}' is reserved for '{$otherProduct->name}'. You cannot mix different products on the same shelf.");
+            if ($location->brand_id && $location->brand_id != $firstItem->product->brand_id) {
+                $shelfBrand = \App\Models\Brand::find($location->brand_id);
+                $productBrand = \App\Models\Brand::find($firstItem->product->brand_id);
+                throw new \Exception("Shelf '{$location->name}' is reserved for brand '{$shelfBrand->name}'. Product '{$firstItem->product->name}' is from brand '{$productBrand->name}'.");
             }
 
-            // 2. Check Capacity (Max 50)
+            // Check Capacity
             $currentShelfQty = \App\Models\Stock::where('stock_location_id', $location->id)->sum('quantity');
-            if (($currentShelfQty + $addQty) > $location->max_capacity) {
+            if (($currentShelfQty + $totalToAdd) > $location->max_capacity) {
                 $spaceLeft = $location->max_capacity - $currentShelfQty;
-                throw new \Exception("Shelf '{$location->name}' only has space for {$spaceLeft} more units. Total capacity is {$location->max_capacity}.");
+                throw new \Exception("Shelf '{$location->name}' only has space for {$spaceLeft} units.");
             }
 
-            // 3. Find or Create Stock record
-            $stock = \App\Models\Stock::where('product_id', $item->product_id)
+            // Distribute quantity among aggregated items
+            $remaining = $totalToAdd;
+            foreach ($ids as $id) {
+                if ($remaining <= 0) break;
+
+                $item = GoodsReceivingItem::find($id);
+                $itemPending = $item->accepted_qty - $item->stocked_qty;
+                
+                if ($itemPending <= 0) continue;
+
+                $take = min($remaining, $itemPending);
+                
+                $item->increment('stocked_qty', $take);
+                if ($item->stocked_qty >= $item->accepted_qty) {
+                    $item->update(['is_stocked' => true]);
+                }
+                
+                $remaining -= $take;
+            }
+
+            // 3. Update Stock record
+            $stock = \App\Models\Stock::where('product_id', $productId)
                                      ->where('stock_location_id', $location->id)
                                      ->first();
 
             if ($stock) {
-                $stock->increment('quantity', $addQty);
+                $stock->increment('quantity', $totalToAdd);
             } else {
                 \App\Models\Stock::create([
-                    'product_id' => $item->product_id,
+                    'product_id' => $productId,
                     'stock_location_id' => $location->id,
-                    'quantity' => $addQty,
-                    'average_cost' => PurchaseOrderItem::where('purchase_order_id', $item->goodsReceiving->purchase_order_id)
-                                                      ->where('product_id', $item->product_id)
-                                                      ->first()->unit_cost ?? 0
+                    'quantity' => $totalToAdd,
+                    'average_cost' => PurchaseOrderItem::where('product_id', $productId)->max('unit_cost') ?? 0
                 ]);
             }
 
-            // Update location to track current product
-            $location->update(['current_product_id' => $item->product_id]);
+            // Update location
+            $location->update(['current_product_id' => $productId]);
 
-            // Record Stock Movement (Ledger)
+            // Record Stock Movement
             StockMovement::create([
-                'product_id' => $item->product_id,
+                'product_id' => $productId,
                 'stock_location_id' => $location->id,
                 'type' => 'Stock In',
-                'quantity' => $addQty,
-                'balance_after' => \App\Models\Stock::where('stock_location_id', $location->id)->sum('quantity'),
-                'reference' => $item->goodsReceiving->purchaseOrder->po_number ?? 'N/A',
+                'quantity' => $totalToAdd,
+                'balance_after' => \App\Models\Stock::where('product_id', $productId)->sum('quantity'),
+                'reference' => 'AGG-STOCK-IN',
                 'user_id' => Auth::id(),
-                'notes' => $request->notes ?? 'Approved goods added to stock'
+                'notes' => $request->notes ?? 'Aggregated goods added to stock'
             ]);
-
-            // 4. Update stocked quantity and mark item as "In Stock" if full quantity moved
-            $item->increment('stocked_qty', $addQty);
-            
-            if ($item->stocked_qty >= $item->accepted_qty) {
-                $item->update(['is_stocked' => true]);
-            }
             
             DB::commit();
             return response()->json([
                 'success' => true, 
-                'message' => 'Goods successfully moved to shelf: ' . $location->name,
-                'qty' => $addQty,
-                'product_name' => $item->product->name
+                'message' => 'Stock successfully updated.',
+                'qty' => $totalToAdd,
+                'product_name' => $firstItem->product->name
             ]);
 
         } catch (\Exception $e) {

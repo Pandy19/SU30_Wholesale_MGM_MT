@@ -102,33 +102,9 @@ class supplier_ordersController extends Controller
                 'remarks' => $request->remarks
             ]);
 
-            // Logic: Deduct Supplier QTY when status moves to 'shipped'
-            if ($request->status === 'shipped' && $old_status !== 'shipped') {
+            // Logic: Revert Supplier QTY if status moves to 'cancelled'
+            if ($request->status === 'cancelled' && $old_status !== 'cancelled') {
                 foreach ($po->items as $item) {
-                    // Get the quantity the supplier said they are sending from the request
-                    $shipped_qty = isset($request->items[$item->id]['shipped_qty']) 
-                        ? (int)$request->items[$item->id]['shipped_qty'] 
-                        : $item->quantity;
-
-                    // Update the PO item with the confirmed shipped quantity for record keeping
-                    // Note: If you don't have a shipped_qty column, we'll just use it for deduction
-                    
-                    $supplierProduct = \App\Models\SupplierProduct::where('supplier_id', $supplier->id)
-                        ->where('product_id', $item->product_id)
-                        ->first();
-                    
-                    if ($supplierProduct) {
-                        // Deduct based on confirmed quantity to send
-                        $supplierProduct->decrement('available_qty', $shipped_qty);
-                    }
-                }
-            }
-            
-            // Logic: Revert Supplier QTY if status moves from 'shipped' to 'cancelled'
-            if ($request->status === 'cancelled' && $old_status === 'shipped') {
-                foreach ($po->items as $item) {
-                    // Since we don't store shipped_qty yet, we assume they sent what was ordered
-                    // or you could add a column to PO items to store the confirmed shipped_qty
                     $supplierProduct = \App\Models\SupplierProduct::where('supplier_id', $supplier->id)
                         ->where('product_id', $item->product_id)
                         ->first();

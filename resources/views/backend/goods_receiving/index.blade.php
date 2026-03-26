@@ -21,8 +21,8 @@
                     <h3 class="m-0 font-weight-bold text-dark">Goods Receiving & Approval</h3>
                     <p class="text-muted mb-0">Verify and approve shipments to update warehouse stock</p>
                 </div>
-                <div class="col-sm-6">
-                    <ol class="breadcrumb float-sm-right">
+                <div class="col-sm-6 text-right">
+                    <ol class="breadcrumb float-sm-right mt-2">
                         <li class="breadcrumb-item"><a href="#">Procurement</a></li>
                         <li class="breadcrumb-item active">Good Receiving</li>
                     </ol>
@@ -225,9 +225,10 @@
             <input type="hidden" name="remarks" id="form_remarks_{{ $item->id }}">
         </form>
     @else
-        <button class="btn btn-sm btn-outline-secondary shadow-sm"
-                onclick="printReceipt('{{ $status }}','{{ $gr->approver->name ?? 'Admin' }}','{{ $gr->received_date }}')">
-            <i class="fas fa-print"></i> Print
+        <button type="button" 
+                class="btn btn-sm btn-outline-info shadow-sm"
+                onclick="viewInvoice('{{ route('purchase_orders.confirm_payment', ['session_ids' => $item->goodsReceiving->purchase_order_id, 'no_layout' => 1]) }}')">
+            <i class="fas fa-file-invoice mr-1"></i> Invoice
         </button>
     @endif
 </td>
@@ -248,7 +249,16 @@
 
 <!-- PAGINATION -->
 <div class="card-footer clearfix bg-white">
-    <x-pagination :data="$items" />
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <button type="button" class="btn btn-success shadow-sm px-4" onclick="openExportModal()">
+                <i class="fas fa-file-excel mr-1"></i> Export Excel Data
+            </button>
+        </div>
+        <div>
+            <x-pagination :data="$items" />
+        </div>
+    </div>
 </div>
 
 </div>
@@ -258,32 +268,83 @@
 
 <!-- REJECT REASON MODAL -->
 <div class="modal fade" id="rejectReasonModal" tabindex="-1" role="dialog">
-<div class="modal-dialog">
-<div class="modal-content border-0 shadow-lg">
-
-<div class="modal-header bg-danger text-white">
-    <h5 class="modal-title font-weight-bold">
-        <i class="fas fa-exclamation-triangle mr-2"></i> Rejection Reason
-    </h5>
-    <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">&times;</button>
-</div>
-
-<div class="modal-body">
-    <p class="text-dark">You have entered a <strong>Rejected Quantity</strong>. Please provide a reason for the warehouse records.</p>
-    <div class="form-group">
-        <label class="font-weight-bold">Remarks / Rejection Notes</label>
-        <textarea id="modal_remarks" class="form-control" rows="3"
-                  placeholder="e.g., Damaged items, Wrong SKU, etc." required></textarea>
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow-lg">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title font-weight-bold">
+                    <i class="fas fa-exclamation-triangle mr-2"></i> Rejection Reason
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p class="text-dark">You have entered a <strong>Rejected Quantity</strong>. Please provide a reason for the warehouse records.</p>
+                <div class="form-group">
+                    <label class="font-weight-bold">Remarks / Rejection Notes</label>
+                    <textarea id="modal_remarks" class="form-control" rows="3" placeholder="e.g., Damaged items, Wrong SKU, etc." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0">
+                <button type="button" class="btn btn-secondary shadow-sm" data-dismiss="modal">Cancel</button>
+                <button type="button" onclick="confirmAndSubmit()" class="btn btn-danger shadow-sm font-weight-bold px-4">Confirm & Process</button>
+            </div>
+        </div>
     </div>
 </div>
 
-<div class="modal-footer bg-light border-0">
-    <button type="button" class="btn btn-secondary shadow-sm" data-dismiss="modal">Cancel</button>
-    <button type="button" onclick="confirmAndSubmit()" class="btn btn-danger shadow-sm font-weight-bold px-4">Confirm & Process</button>
+<!-- EXPORT EXCEL MODAL -->
+<div class="modal fade" id="exportExcelModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px;">
+            <div class="modal-header bg-success text-white border-0">
+                <h5 class="modal-title font-weight-bold">
+                    <i class="fas fa-file-excel mr-2"></i> Export Goods Data to Excel
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body p-4">
+                <p class="text-muted mb-4 text-center">Select a date range (day/month/year) to export the goods receiving records.</p>
+                <div class="form-group mb-4">
+                    <label class="font-weight-bold text-dark mb-2">Select Date Range</label>
+                    <div class="input-group shadow-sm">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text bg-white border-right-0"><i class="fas fa-calendar-alt text-success"></i></span>
+                        </div>
+                        <input type="text" id="export_date_range" class="form-control border-left-0 font-weight-bold" placeholder="Select dates...">
+                    </div>
+                    <small class="text-muted mt-1 d-block"><i class="fas fa-info-circle mr-1"></i> Data will be exported based on "Received Date".</small>
+                </div>
+            </div>
+            <div class="modal-footer bg-light border-0 py-3 px-4">
+                <button type="button" class="btn btn-secondary shadow-sm px-4" data-dismiss="modal">Cancel</button>
+                <button type="button" onclick="confirmExport()" class="btn btn-success shadow-sm font-weight-bold px-4">
+                    <i class="fas fa-download mr-1"></i> Download Excel
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
-</div>
-</div>
+<!-- INVOICE PREVIEW MODAL -->
+<div class="modal fade" id="invoiceModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 15px; overflow: hidden;">
+            <div class="modal-header bg-info text-white border-0">
+                <h5 class="modal-title font-weight-bold">
+                    <i class="fas fa-file-invoice mr-2"></i> Purchase Invoice Preview
+                </h5>
+                <button type="button" class="close text-white" data-dismiss="modal" aria-label="Close">&times;</button>
+            </div>
+            <div class="modal-body p-0" style="height: 80vh; background: #f4f6f9; overflow-x: hidden;">
+                <iframe id="invoiceIframe" src="" frameborder="0" style="width: 100%; height: 100%; border: none; overflow-x: hidden;"></iframe>
+            </div>
+            <div class="modal-footer bg-white border-top py-3 px-4">
+                <button type="button" class="btn btn-secondary px-4 shadow-sm" data-dismiss="modal">Close Preview</button>
+                <button type="button" class="btn btn-primary px-4 shadow-sm" onclick="printInvoiceFromModal()">
+                    <i class="fas fa-print mr-1"></i> Print Invoice
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 @endsection
@@ -302,13 +363,11 @@ function handleProcess(itemId, grId) {
     const acceptQty = parseInt(acceptInput.value) || 0;
     const rejectQty = parseInt(rejectInput.value) || 0;
 
-    // Set values in the hidden form
     document.getElementById('form_accept_' + itemId).value = acceptQty;
     document.getElementById('form_reject_' + itemId).value = rejectQty;
     
     currentActiveId = itemId;
 
-    // If there's any rejection, show the modal
     if (rejectQty > 0) {
         $('#modal_remarks').val(''); 
         $('#rejectReasonModal').modal('show');
@@ -323,14 +382,56 @@ function confirmAndSubmit() {
         alert('Please provide a reason for rejection.');
         return;
     }
-    
     document.getElementById('form_remarks_' + currentActiveId).value = remarks;
     document.getElementById('processForm_' + currentActiveId).submit();
     $('#rejectReasonModal').modal('hide');
 }
 
-function printReceipt(status, approver, date) {
-    window.print();
+function openExportModal() {
+    $('#exportExcelModal').modal('show');
+}
+
+function confirmExport() {
+    const dateRange = $('#export_date_range').val();
+    if (!dateRange) {
+        Swal.fire({ title: 'Wait!', text: 'Please select a date range first.', icon: 'warning' });
+        return;
+    }
+    
+    // Extract dates from range "YYYY-MM-DD - YYYY-MM-DD"
+    const dates = dateRange.split(' - ');
+    const start = dates[0];
+    const end = dates[1];
+
+    const params = $.param({
+        start_date: start,
+        end_date: end
+    });
+
+    $('#exportExcelModal').modal('hide');
+    
+    Swal.fire({
+        title: 'Generating Excel...',
+        text: 'Fetching records from ' + start + ' to ' + end,
+        icon: 'info',
+        timer: 2000,
+        showConfirmButton: false,
+        timerProgressBar: true
+    }).then(() => {
+        window.location.href = "{{ route('goods_receiving.export') }}?" + params;
+    });
+}
+
+function viewInvoice(url) {
+    const iframe = document.getElementById('invoiceIframe');
+    iframe.src = url;
+    $('#invoiceModal').modal('show');
+}
+
+function printInvoiceFromModal() {
+    const iframe = document.getElementById('invoiceIframe');
+    iframe.contentWindow.focus();
+    iframe.contentWindow.print();
 }
 
 $(document).ready(function() {
@@ -338,6 +439,24 @@ $(document).ready(function() {
     $('.select2').select2({
         theme: 'bootstrap4',
         width: '100%'
+    });
+
+    // Initialize DateRangePicker for Export Modal
+    $('#export_date_range').daterangepicker({
+        opens: 'left',
+        autoUpdateInput: false,
+        locale: {
+            cancelLabel: 'Clear',
+            format: 'YYYY-MM-DD'
+        }
+    });
+
+    $('#export_date_range').on('apply.daterangepicker', function(ev, picker) {
+        $(this).val(picker.startDate.format('YYYY-MM-DD') + ' - ' + picker.endDate.format('YYYY-MM-DD'));
+    });
+
+    $('#export_date_range').on('cancel.daterangepicker', function(ev, picker) {
+        $(this).val('');
     });
 
     const grSearch = $('#grSearch');
@@ -382,7 +501,6 @@ $(document).ready(function() {
             }
         });
 
-        // Show "No data found" if all rows are hidden
         if (grRows.filter(':visible').length === 0) {
             if ($('#noDataRow').length === 0) {
                 $('tbody').append('<tr id="noDataRow"><td colspan="14" class="text-center py-5 text-muted">No goods receiving items matching your filters.</td></tr>');
@@ -398,15 +516,12 @@ $(document).ready(function() {
     supplierFilter.on('change', performFilter);
     statusFilter.on('change', performFilter);
 
-    // Auto-sync quantities logic
     $(document).on('input', '.accept-input', function() {
         let id = $(this).data('id');
         let received = $(this).data('received');
         let val = parseInt($(this).val()) || 0;
-        
         if (val > received) { val = received; $(this).val(received); }
         if (val < 0) { val = 0; $(this).val(0); }
-        
         $('#reject_qty_' + id).val(received - val);
     });
 
@@ -414,10 +529,8 @@ $(document).ready(function() {
         let id = $(this).data('id');
         let received = $('#accept_qty_' + id).data('received');
         let val = parseInt($(this).val()) || 0;
-        
         if (val > received) { val = received; $(this).val(received); }
         if (val < 0) { val = 0; $(this).val(0); }
-        
         $('#accept_qty_' + id).val(received - val);
     });
 });
