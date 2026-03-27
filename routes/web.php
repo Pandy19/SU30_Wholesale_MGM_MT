@@ -182,6 +182,7 @@ Route::middleware(['auth'])->group(function () {
     Route::middleware(['role:admin,inspector'])->group(function () {
         Route::controller(goods_receivingController::class)->group(function () {
             Route::get('/goods_receiving', 'index')->name('goods_receiving.index');
+            Route::get('/goods_receiving/invoice/{id}', 'invoice')->name('goods_receiving.invoice');
             Route::get('/goods_receiving/export', 'exportExcel')->name('goods_receiving.export');
             Route::post('/goods_receiving/{id}/approve', 'approve')->name('goods_receiving.approve');
             Route::post('/goods_receiving/{id}/reject', 'reject')->name('goods_receiving.reject');

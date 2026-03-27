@@ -132,6 +132,25 @@ class goods_receivingController extends Controller
         return $response;
     }
 
+    public function invoice(Request $request, $id)
+    {
+        $gr = GoodsReceiving::with(['purchaseOrder.supplier', 'items.product', 'approver'])
+                            ->findOrFail($id);
+
+        // Calculate unit cost and line total for each item
+        foreach ($gr->items as $item) {
+            $poItem = PurchaseOrderItem::where('purchase_order_id', $gr->purchase_order_id)
+                                        ->where('product_id', $item->product_id)
+                                        ->first();
+            $item->unit_cost = $poItem ? $poItem->unit_cost : 0;
+            $item->line_total = $item->accepted_qty * $item->unit_cost;
+        }
+
+        $total_amount = $gr->items->sum('line_total');
+
+        return view('backend.goods_receiving.invoice', compact('gr', 'total_amount'));
+    }
+
     public function index(Request $request)
     {
         $brands = Brand::where('status', 'active')->get();

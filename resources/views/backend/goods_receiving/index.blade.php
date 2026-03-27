@@ -227,7 +227,7 @@
     @else
         <button type="button" 
                 class="btn btn-sm btn-outline-info shadow-sm"
-                onclick="viewInvoice('{{ route('purchase_orders.confirm_payment', ['session_ids' => $item->goodsReceiving->purchase_order_id, 'no_layout' => 1]) }}')">
+                onclick="viewInvoice('{{ route('goods_receiving.invoice', ['id' => $item->goods_receiving_id, 'no_layout' => 1]) }}')">
             <i class="fas fa-file-invoice mr-1"></i> Invoice
         </button>
     @endif
