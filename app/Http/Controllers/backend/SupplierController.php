@@ -357,15 +357,17 @@ class SupplierController extends Controller
         }
 
         // Send Approval Email
+        $emailError = null;
         if ($supplier->email) {
             try {
                 Mail::to($supplier->email)->send(new SupplierStatusMail($supplier, 'approved'));
             } catch (\Exception $e) {
+                $emailError = " However, the notification email could not be sent. " . $e->getMessage();
                 \Log::error("Failed to send approval email to " . $supplier->email . ": " . $e->getMessage());
             }
         }
 
-        return redirect()->route('suppliers.approvals')->with('success', 'Supplier ' . $supplier->company_name . ' has been approved and notified.');
+        return redirect()->route('suppliers.approvals')->with('success', 'Supplier ' . $supplier->company_name . ' has been approved.' . $emailError);
     }
 
     public function deny(Request $request, $id)
@@ -373,10 +375,12 @@ class SupplierController extends Controller
         $supplier = Supplier::findOrFail($id);
         
         // Send Denial Email BEFORE deletion
+        $emailError = null;
         if ($supplier->email) {
             try {
                 Mail::to($supplier->email)->send(new SupplierStatusMail($supplier, 'denied'));
             } catch (\Exception $e) {
+                $emailError = " Note: Notification email failed: " . $e->getMessage();
                 \Log::error("Failed to send denial email to " . $supplier->email . ": " . $e->getMessage());
             }
         }
@@ -398,6 +402,6 @@ class SupplierController extends Controller
         $companyName = $supplier->company_name;
         $supplier->delete();
 
-        return redirect()->route('suppliers.approvals')->with('success', 'Supplier ' . $companyName . ' registration has been denied and removed.');
+        return redirect()->route('suppliers.approvals')->with('success', 'Supplier ' . $companyName . ' registration has been denied and removed.' . $emailError);
     }
 }
