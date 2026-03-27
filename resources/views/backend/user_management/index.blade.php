@@ -246,7 +246,12 @@
 $(document).ready(function() {
     const currentUserRole = "{{ auth()->user()->role }}";
     
-<<<<<<< Updated upstream
+    // Custom File Input
+    $('.custom-file-input').on('change', function() {
+        let fileName = $(this).val().split('\\').pop();
+        $(this).next('.custom-file-label').addClass("selected").html(fileName);
+    });
+
     // AJAX FETCH FUNCTION
     function fetchUsers(targetUrl = null) {
         const url = targetUrl || "{{ route('user_management.index') }}";
@@ -269,23 +274,6 @@ $(document).ready(function() {
                 ajaxData.per_page = perPage;
             }
         }
-=======
-    // Custom File Input
-    $('.custom-file-input').on('change', function() {
-        let fileName = $(this).val().split('\\').pop();
-        $(this).next('.custom-file-label').addClass("selected").html(fileName);
-    });
-
-    // AJAX SEARCH
-    let searchTimer;
-    $('#userSearchInput').on('keyup', function() {
-        clearTimeout(searchTimer);
-        let query = $(this).val();
-        searchTimer = setTimeout(function() {
-            fetchUsers(1, query);
-        }, 500);
-    });
->>>>>>> Stashed changes
 
         $.ajax({
             url: url,
@@ -296,11 +284,9 @@ $(document).ready(function() {
             },
             success: function(data) {
                 $('#userTableContainer').html(data);
-                // Maintain focus or cursor position if needed, though usually not for pagination
             },
             error: function(xhr) {
                 console.error("Error fetching users:", xhr);
-                // Optionally show a toast/alert if it fails
             }
         });
     }
@@ -340,7 +326,9 @@ $(document).ready(function() {
         const avatar = $(this).data('avatar');
 
         // Set Form Action
-        $('#editUserForm').attr('action', `/user_management/${id}`);
+        let updateUrl = "{{ route('user_management.update', ':id') }}";
+        updateUrl = updateUrl.replace(':id', id);
+        $('#editUserForm').attr('action', updateUrl);
 
         // Populate Fields
         $('#edit_name').val(name);
@@ -401,7 +389,9 @@ $(document).ready(function() {
         const id = $(this).data('id');
         const name = $(this).data('name');
         
-        $('#deleteUserForm').attr('action', `/user_management/${id}`);
+        let destroyUrl = "{{ route('user_management.destroy', ':id') }}";
+        destroyUrl = destroyUrl.replace(':id', id);
+        $('#deleteUserForm').attr('action', destroyUrl);
         $('#deleteUserName').text(name);
     });
 });

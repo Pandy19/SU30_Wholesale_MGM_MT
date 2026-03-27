@@ -5,14 +5,14 @@
 <div class="{{ request()->has('no_layout') ? '' : 'content-wrapper' }}">
 <section class="content {{ request()->has('no_layout') ? 'p-0' : 'p-4' }}" style="{{ request()->has('no_layout') ? 'overflow-x: hidden;' : '' }}">
 
-    {{-- ===================== GOODS RECEIVING NOTE ===================== --}}
+    {{-- ===================== GOODS RECEIVING INVOICE (Same Design as confirm_payment) ===================== --}}
     <div class="invoice p-3 mb-4 border rounded bg-white">
 
         {{-- HEADER --}}
         <div class="row">
             <div class="col-12">
                 <h4 class="mb-0">
-                    <i class="fas fa-receipt"></i> Goods Receiving Note (GRN)
+                    <i class="fas fa-globe"></i> Your Wholesale Co.
                     <small class="float-right">Date: {{ $gr->received_date ? \Carbon\Carbon::parse($gr->received_date)->format('d/m/Y') : 'N/A' }}</small>
                 </h4>
                 <hr>
@@ -22,17 +22,17 @@
         {{-- FROM / TO / INFO --}}
         <div class="row invoice-info">
             <div class="col-sm-4 invoice-col">
-                <strong>Received By</strong>
+                <strong>From</strong>
                 <address class="mb-0">
                     <strong>Your Wholesale Co.</strong><br>
                     Phnom Penh<br>
                     Phone: 012 345 678<br>
-                    Inspector: {{ $gr->approver->name ?? 'N/A' }}
+                    Email: purchase@yourcompany.com
                 </address>
             </div>
 
             <div class="col-sm-4 invoice-col">
-                <strong>Supplier</strong>
+                <strong>To</strong>
                 <address class="mb-0">
                     <strong>{{ $gr->purchaseOrder->supplier->company_name ?? 'N/A' }}</strong><br>
                     {{ $gr->purchaseOrder->supplier->address ?? 'N/A' }}<br>
@@ -42,13 +42,11 @@
             </div>
 
             <div class="col-sm-4 invoice-col">
-                <b>GRN ID: #{{ $gr->id }}</b><br>
-                <b>PO Reference:</b> #{{ $gr->purchaseOrder->po_number ?? 'N/A' }}<br>
-                <b>Status:</b> 
-                <span class="badge {{ $gr->status == 'accepted' ? 'badge-success' : ($gr->status == 'rejected' ? 'badge-danger' : 'badge-warning') }}">
-                    {{ ucfirst($gr->status) }}
-                </span><br>
-                <b>Received Date:</b> {{ $gr->received_date ? \Carbon\Carbon::parse($gr->received_date)->format('d/m/Y H:i') : 'Pending' }}<br>
+                <b>Goods Receiving Note #{{ $gr->id }}</b><br>
+                <b>Purchase Order:</b> #{{ $gr->purchaseOrder->po_number ?? 'N/A' }}<br>
+                <b>Status:</b> <span class="badge {{ $gr->status == 'accepted' ? 'badge-success' : 'badge-warning' }}">{{ ucfirst($gr->status) }}</span><br>
+                <b>Approved By:</b> {{ $gr->approver->name ?? 'N/A' }}<br>
+                <b>Received Date:</b> {{ $gr->received_date ? \Carbon\Carbon::parse($gr->received_date)->format('d/m/Y') : '—' }}<br>
             </div>
         </div>
 
@@ -62,9 +60,7 @@
                         <th style="width: 80px;">Image</th>
                         <th>Product</th>
                         <th>SKU</th>
-                        <th class="text-center">Ordered</th>
-                        <th class="text-center">Received</th>
-                        <th class="text-center">Accepted</th>
+                        <th class="text-center">Qty Received</th>
                         <th class="text-right">Unit Cost</th>
                         <th class="text-right">Subtotal</th>
                     </tr>
@@ -84,15 +80,13 @@
                                         }
                                     }
                                 @endphp
-                                <img src="{{ $imageUrl }}" class="img-fluid rounded shadow-sm" style="max-height: 50px; width: 50px; object-fit: cover;">
+                                <img src="{{ $imageUrl }}" class="img-fluid rounded" style="max-height: 50px;">
                             </td>
-                            <td><strong>{{ $item->product->name }}</strong></td>
-                            <td><small class="text-muted font-weight-bold">{{ $item->product->sku }}</small></td>
-                            <td class="text-center">{{ $item->ordered_qty }}</td>
-                            <td class="text-center text-primary">{{ $item->received_qty }}</td>
-                            <td class="text-center text-success font-weight-bold">{{ $item->accepted_qty }}</td>
-                            <td class="text-right font-weight-bold">${{ number_format($item->unit_cost, 2) }}</td>
-                            <td class="text-right font-weight-bold text-dark">${{ number_format($item->line_total, 2) }}</td>
+                            <td>{{ $item->product->name }}</td>
+                            <td>{{ $item->product->sku }}</td>
+                            <td class="text-center">{{ $item->accepted_qty }}</td>
+                            <td class="text-right">${{ number_format($item->unit_cost, 2) }}</td>
+                            <td class="text-right">${{ number_format($item->line_total, 2) }}</td>
                         </tr>
                     @endforeach
                     </tbody>
@@ -105,52 +99,23 @@
             <div class="col-6">
                 @if($gr->remarks)
                     <p class="text-muted well well-sm shadow-none" style="margin-top: 10px;">
-                        <strong>Notes / Rejection Remarks:</strong><br>
-                        {{ $gr->remarks }}
+                        <strong>Note:</strong> {{ $gr->remarks }}
                     </p>
                 @endif
-                <div class="mt-4">
-                    <p class="text-muted small">
-                        * This document confirms that the above items have been inspected and received by our warehouse department.
-                    </p>
-                </div>
+                <p class="text-muted well well-sm shadow-none">
+                    <strong>Payment Reference:</strong> Linked to PO #{{ $gr->purchaseOrder->po_number ?? 'N/A' }}
+                </p>
             </div>
             <div class="col-6">
                 <table class="table">
-                    <tr><th style="width:50%">Accepted Items Total</th><td class="text-right font-weight-bold">${{ number_format($total_amount, 2) }}</td></tr>
-                    <tr><th>Processing Fee</th><td class="text-right">$0.00</td></tr>
-                    <tr class="border-top">
-                        <th><h5 class="mb-0">Net Received Value</h5></th>
-                        <td class="text-right text-primary"><h5 class="mb-0 font-weight-bold">${{ number_format($total_amount, 2) }}</h5></td>
-                    </tr>
+                    <tr><th style="width:50%">Subtotal</th><td class="text-right">${{ number_format($total_amount, 2) }}</td></tr>
+                    <tr><th>Tax (0%)</th><td class="text-right">$0.00</td></tr>
+                    <tr class="border-top"><th>Total</th><td class="text-right"><strong>${{ number_format($total_amount, 2) }}</strong></td></tr>
                 </table>
-                <div class="text-center mt-4 pt-4 border-top">
-                    <div style="width: 200px; border-bottom: 1px solid #ccc; margin: 0 auto;"></div>
-                    <p class="mt-1 font-weight-bold">Warehouse Inspector Signature</p>
-                </div>
             </div>
         </div>
 
     </div>
-
-  {{-- ACTIONS --}}
-  <div class="row no-print mt-3">
-      <div class="col-12">
-          @if(!request()->has('no_layout'))
-            <a href="{{ route('goods_receiving.index') }}" class="btn btn-secondary shadow-sm">
-                <i class="fas fa-arrow-left mr-1"></i> Back to List
-            </a>
-          @endif
-
-          <button class="btn btn-default ml-2 shadow-sm" onclick="window.print()">
-              <i class="fas fa-print mr-1"></i> Print Receipt
-          </button>
-
-          <button class="btn btn-primary float-right shadow-sm" onclick="window.print()">
-              <i class="fas fa-file-pdf mr-1"></i> Export PDF
-          </button>
-      </div>
-  </div>
 
 </section>
 </div>
