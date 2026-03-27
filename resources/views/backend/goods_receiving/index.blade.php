@@ -80,6 +80,7 @@
                 <option value="">All Status</option>
                 <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
                 <option value="accepted" {{ request('status') == 'accepted' ? 'selected' : '' }}>Accepted</option>
+                <option value="partially_accepted" {{ request('status') == 'partially_accepted' ? 'selected' : '' }}>Partially Approved</option>
                 <option value="rejected" {{ request('status') == 'rejected' ? 'selected' : '' }}>Rejected</option>
             </select>
         </div>
@@ -122,12 +123,34 @@
     $brand_id = $product->brand_id ?? '';
     $supplier_id = $gr->purchaseOrder->supplier_id ?? '';
     $po_number = $gr->purchaseOrder->po_number ?? '';
+
+    $itemProcessed = ($item->accepted_qty > 0 || $item->rejected_qty > 0);
+    
+    if (!$itemProcessed) {
+        $displayStatus = 'pending';
+        $badgeClass = 'badge-info';
+        $statusLabel = 'Pending';
+    } else {
+        if ($item->rejected_qty > 0 && $item->accepted_qty == 0) {
+            $displayStatus = 'rejected';
+            $badgeClass = 'badge-danger';
+            $statusLabel = 'Rejected';
+        } elseif ($item->accepted_qty > 0 && $item->rejected_qty == 0) {
+            $displayStatus = 'accepted';
+            $badgeClass = 'badge-success';
+            $statusLabel = 'Approved goods received';
+        } else {
+            $displayStatus = 'partially_accepted';
+            $badgeClass = 'badge-warning';
+            $statusLabel = 'Partially Approved';
+        }
+    }
 @endphp
 <tr class="gr-item-row" 
     data-category="{{ $category_id }}" 
     data-brand="{{ $brand_id }}" 
     data-supplier="{{ $supplier_id }}" 
-    data-status="{{ $status }}"
+    data-status="{{ $displayStatus }}"
     data-po="{{ $po_number }}">
     <td class="text-center">
         @php
@@ -178,27 +201,6 @@
 
     <td>
         @php
-            $itemProcessed = ($item->accepted_qty > 0 || $item->rejected_qty > 0);
-            
-            if (!$itemProcessed) {
-                $displayStatus = 'pending';
-                $badgeClass = 'badge-info';
-                $statusLabel = 'Pending';
-            } else {
-                if ($item->rejected_qty > 0 && $item->accepted_qty == 0) {
-                    $displayStatus = 'rejected';
-                    $badgeClass = 'badge-danger';
-                    $statusLabel = 'Rejected';
-                } elseif ($item->accepted_qty > 0 && $item->rejected_qty == 0) {
-                    $displayStatus = 'accepted';
-                    $badgeClass = 'badge-success';
-                    $statusLabel = 'Approved goods received';
-                } else {
-                    $displayStatus = 'partially_accepted';
-                    $badgeClass = 'badge-warning';
-                    $statusLabel = 'Partially Approved';
-                }
-            }
         @endphp
         <span class="badge {{ $badgeClass }} px-2 py-1 shadow-sm">{{ $statusLabel }}</span>
     </td>

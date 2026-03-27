@@ -50,6 +50,10 @@ class supplier_returnsController extends Controller
             });
         }
 
+        if ($request->filled('status')) {
+            $query->where('resolution_status', $request->status);
+        }
+
         $items = $query->orderBy('id', 'desc')->paginate(10);
 
         // Calculate total value for each rejected item

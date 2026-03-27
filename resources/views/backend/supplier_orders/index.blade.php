@@ -38,7 +38,7 @@
 <!-- SUMMARY CARDS -->
 <!-- ===================================================== -->
 <div class="row mb-4">
-    <div class="col-md-3">
+    <div class="col">
         <div class="info-box">
             <span class="info-box-icon bg-info">
                 <i class="fas fa-file-invoice"></i>
@@ -50,7 +50,7 @@
         </div>
     </div>
 
-    <div class="col-md-3">
+    <div class="col">
         <div class="info-box">
             <span class="info-box-icon bg-success">
                 <i class="fas fa-dollar-sign"></i>
@@ -62,7 +62,7 @@
         </div>
     </div>
 
-    <div class="col-md-3">
+    <div class="col">
         <div class="info-box">
             <span class="info-box-icon bg-success">
                 <i class="fas fa-check-circle"></i>
@@ -74,7 +74,19 @@
         </div>
     </div>
 
-    <div class="col-md-3">
+    <div class="col">
+        <div class="info-box">
+            <span class="info-box-icon bg-info">
+                <i class="fas fa-hourglass-half"></i>
+            </span>
+            <div class="info-box-content">
+                <span class="info-box-text">Partial Orders</span>
+                <span class="info-box-number">{{ $summary['partial_orders'] }}</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="col">
         <div class="info-box">
             <span class="info-box-icon bg-warning">
                 <i class="fas fa-clock"></i>
@@ -113,6 +125,7 @@
             <select id="paymentFilter" class="form-control shadow-xs">
                 <option value="">All Payment Status</option>
                 <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                <option value="partial" {{ request('payment_status') == 'partial' ? 'selected' : '' }}>Partial</option>
                 <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>Unpaid</option>
             </select>
         </div>
