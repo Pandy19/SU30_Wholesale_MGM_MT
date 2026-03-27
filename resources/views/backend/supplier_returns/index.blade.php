@@ -91,11 +91,11 @@
 <div class="card-body">
 <form action="{{ route('supplier_returns.index') }}" method="GET">
 <div class="row">
-    <div class="col-md-4">
+    <div class="col-md-3">
         <input type="text" id="returnSearch" name="search" class="form-control"
                placeholder="Search PO / Product / SKU" value="{{ request('search') }}">
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <select id="categoryFilter" name="category_id" class="form-control select2">
             <option value="">All Categories</option>
             @foreach($categories as $category)
@@ -105,7 +105,7 @@
             @endforeach
         </select>
     </div>
-    <div class="col-md-4">
+    <div class="col-md-3">
         <select id="brandFilter" name="brand_id" class="form-control select2">
             <option value="">All Brands</option>
             @foreach($brands as $brand)
@@ -113,6 +113,16 @@
                     {{ $brand->name }}
                 </option>
             @endforeach
+        </select>
+    </div>
+    <div class="col-md-3">
+        <select id="statusFilter" name="status" class="form-control shadow-xs">
+            <option value="">All Status</option>
+            <option value="Pending" {{ request('status') == 'Pending' ? 'selected' : '' }}>Pending</option>
+            <option value="Returned to Supplier" {{ request('status') == 'Returned to Supplier' ? 'selected' : '' }}>Returned to Supplier</option>
+            <option value="Replaced by Supplier" {{ request('status') == 'Replaced by Supplier' ? 'selected' : '' }}>Replaced by Supplier</option>
+            <option value="Refunded" {{ request('status') == 'Refunded' ? 'selected' : '' }}>Refunded</option>
+            <option value="Closed (Loss)" {{ request('status') == 'Closed (Loss)' ? 'selected' : '' }}>Closed (Loss)</option>
         </select>
     </div>
 </div>
@@ -175,7 +185,7 @@
         $imageUrl = asset('assets/dist/img/default-150x150.png');
     }
 @endphp
-<tr class="return-row" data-category="{{ $category_id }}" data-brand="{{ $brand_id }}">
+<tr class="return-row" data-category="{{ $category_id }}" data-brand="{{ $brand_id }}" data-status="{{ $status }}">
     <td><small class="text-muted font-weight-bold">DSP-{{ str_pad($item->id, 4, '0', STR_PAD_LEFT) }}</small></td>
     <td><strong>{{ $po->po_number ?? 'N/A' }}</strong></td>
     <td>{{ $product->name ?? 'N/A' }}</td>
@@ -299,24 +309,28 @@ $(document).ready(function() {
     const returnSearch = $('#returnSearch');
     const categoryFilter = $('#categoryFilter');
     const brandFilter = $('#brandFilter');
+    const statusFilter = $('#statusFilter');
     const returnRows = $('.return-row');
 
     function performFilter() {
         const searchText = returnSearch.val().toLowerCase();
         const selectedCat = categoryFilter.val();
         const selectedBrand = brandFilter.val();
+        const selectedStatus = statusFilter.val();
 
         returnRows.each(function() {
             const row = $(this);
             const rowText = row.text().toLowerCase();
             const catId = row.data('category').toString();
             const brandId = row.data('brand').toString();
+            const status = row.data('status').toString();
 
             const matchesSearch = searchText === '' || rowText.includes(searchText);
             const matchesCat = selectedCat === '' || catId === selectedCat;
             const matchesBrand = selectedBrand === '' || brandId === selectedBrand;
+            const matchesStatus = selectedStatus === '' || status === selectedStatus;
 
-            if (matchesSearch && matchesCat && matchesBrand) {
+            if (matchesSearch && matchesCat && matchesBrand && matchesStatus) {
                 row.show();
             } else {
                 row.hide();
@@ -337,6 +351,7 @@ $(document).ready(function() {
     returnSearch.on('keyup', performFilter);
     categoryFilter.on('change', performFilter);
     brandFilter.on('change', performFilter);
+    statusFilter.on('change', performFilter);
 });
 
 function viewDispute(id, product, qty, reason, status, notes, imageUrl, inspector, rejectDate, resolveDate) {

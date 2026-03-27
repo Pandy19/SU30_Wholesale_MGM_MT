@@ -60,9 +60,16 @@ class goods_receivingController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->whereHas('goodsReceiving', function ($q) use ($request) {
-                $q->where('status', $request->status);
-            });
+            $status = $request->status;
+            if ($status === 'pending') {
+                $query->where('accepted_qty', 0)->where('rejected_qty', 0);
+            } elseif ($status === 'accepted') {
+                $query->where('accepted_qty', '>', 0)->where('rejected_qty', 0);
+            } elseif ($status === 'rejected') {
+                $query->where('accepted_qty', 0)->where('rejected_qty', '>', 0);
+            } elseif ($status === 'partially_accepted') {
+                $query->where('accepted_qty', '>', 0)->where('rejected_qty', '>', 0);
+            }
         }
 
         $items = $query->orderBy('id', 'desc')->get();
@@ -194,9 +201,16 @@ class goods_receivingController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->whereHas('goodsReceiving', function ($q) use ($request) {
-                $q->where('status', $request->status);
-            });
+            $status = $request->status;
+            if ($status === 'pending') {
+                $query->where('accepted_qty', 0)->where('rejected_qty', 0);
+            } elseif ($status === 'accepted') {
+                $query->where('accepted_qty', '>', 0)->where('rejected_qty', 0);
+            } elseif ($status === 'rejected') {
+                $query->where('accepted_qty', 0)->where('rejected_qty', '>', 0);
+            } elseif ($status === 'partially_accepted') {
+                $query->where('accepted_qty', '>', 0)->where('rejected_qty', '>', 0);
+            }
         }
 
         $perPage = $request->input('per_page', 10);

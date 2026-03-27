@@ -43,6 +43,7 @@ class supplier_ordersController extends Controller
             'total_amount' => $all_pos->sum('total_amount'),
             'paid_orders' => $all_pos->where('payment_status', 'paid')->count(),
             'unpaid_orders' => $all_pos->where('payment_status', 'unpaid')->count(),
+            'partial_orders' => $all_pos->where('payment_status', 'partial')->count(),
         ];
 
         $suppliers = Supplier::where('status', 'active')->get();
